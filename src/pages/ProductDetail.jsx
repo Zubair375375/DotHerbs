@@ -54,9 +54,8 @@ const ProductDetail = () => {
 
     dispatch(
       addToCart({
-        productId: product._id,
+        product,
         quantity,
-        price: product.price,
       }),
     );
 
