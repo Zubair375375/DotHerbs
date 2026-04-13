@@ -443,7 +443,7 @@ const Profile = () => {
                       </div>
 
                       <div className="space-y-2 mb-4">
-                        {order.items.map((item, index) => (
+                        {order.orderItems.map((item, index) => (
                           <div
                             key={index}
                             className="flex items-center space-x-4"
@@ -475,7 +475,7 @@ const Profile = () => {
                       <div className="border-t pt-4 flex justify-between items-center">
                         <div>
                           <p className="text-sm text-gray-600">
-                            Total: ${order.total?.toFixed(2)}
+                            Total: ${order.totalPrice?.toFixed(2)}
                           </p>
                           <p className="text-sm text-gray-600">
                             Payment: {order.paymentMethod}

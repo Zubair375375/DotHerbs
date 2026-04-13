@@ -1,5 +1,8 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
+import { useSelector, useDispatch } from "react-redux";
+import { selectAuthUser, logoutUser } from "../store/slices/authSlice";
+import { selectCartItemCount } from "../store/slices/cartSlice";
 import {
   MdShoppingCart,
   MdPerson,
@@ -11,19 +14,18 @@ import {
 
 const Header = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-
-  const user = null; // replace later with auth
-  const cartItemCount = 0;
+  const dispatch = useDispatch();
+  const user = useSelector(selectAuthUser);
+  const cartItemCount = useSelector(selectCartItemCount);
 
   const handleLogout = () => {
-    console.log("logout clicked");
+    dispatch(logoutUser());
   };
 
   return (
     <header className="bg-white shadow-md border-b">
       <div className="max-w-7xl mx-auto px-4">
         <div className="flex justify-between items-center h-16">
-
           {/* Logo */}
           <Link to="/" className="font-bold text-xl text-green-600">
             Dot-Herbs
@@ -33,14 +35,11 @@ const Header = () => {
           <nav className="hidden md:flex space-x-6">
             <Link to="/products">Products</Link>
 
-            {user?.role === "admin" && (
-              <Link to="/admin">Admin</Link>
-            )}
+            {user?.role === "admin" && <Link to="/admin">Admin</Link>}
           </nav>
 
           {/* Right */}
           <div className="flex items-center space-x-4">
-
             {/* Cart */}
             <Link to="/cart" className="relative">
               <MdShoppingCart className="text-xl" />
@@ -61,7 +60,6 @@ const Header = () => {
                 {isMenuOpen && (
                   <div className="absolute right-0 bg-white shadow-md mt-2 p-2">
                     <Link to="/profile">Profile</Link>
-                    <Link to="/orders">Orders</Link>
                     <button onClick={handleLogout}>Logout</button>
                   </div>
                 )}
