@@ -38,6 +38,7 @@ const Header = () => {
           {/* Desktop Nav */}
           <nav className="hidden md:flex space-x-6">
             <Link to="/products">All Products</Link>
+            <Link to="/contact">Contact</Link>
 
             {user?.role === "admin" && <Link to="/admin">Admin</Link>}
           </nav>
@@ -99,8 +100,9 @@ const Header = () => {
 
         {/* Mobile Menu */}
         {isMenuOpen && (
-          <div className="md:hidden mt-2">
+          <div className="md:hidden mt-2 space-y-2">
             <Link to="/products">Products</Link>
+            <Link to="/contact">Contact</Link>
             {user?.role === "admin" && <Link to="/admin">Admin</Link>}
           </div>
         )}

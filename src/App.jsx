@@ -8,6 +8,7 @@ import Checkout from "./pages/Checkout";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
 import Profile from "./pages/Profile";
+import Contact from "./pages/Contact";
 import AdminDashboard from "./pages/AdminDashboard";
 import EditProduct from "./pages/admin/EditProduct";
 import UserDetail from "./pages/admin/UserDetail";
@@ -24,6 +25,7 @@ function App() {
         <Route path="login" element={<Login />} />
         <Route path="register" element={<Register />} />
         <Route path="profile" element={<Profile />} />
+        <Route path="contact" element={<Contact />} />
         <Route path="admin" element={<AdminDashboard />} />
         <Route path="admin/products/:id" element={<EditProduct />} />
         <Route path="admin/users/:id" element={<UserDetail />} />
