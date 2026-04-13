@@ -13,7 +13,8 @@ import {
 } from "react-icons/md";
 
 const Header = () => {
-  const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [isProfileMenuOpen, setIsProfileMenuOpen] = useState(false);
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const dispatch = useDispatch();
   const user = useSelector(selectAuthUser);
   const cartItemCount = useSelector(selectCartItemCount);
@@ -58,26 +59,35 @@ const Header = () => {
             {/* User */}
             {user ? (
               <div className="relative">
-                <button onClick={() => setIsMenuOpen(!isMenuOpen)}>
-                  <MdPerson />
+                <button
+                  type="button"
+                  onClick={() => {
+                    setIsProfileMenuOpen(!isProfileMenuOpen);
+                    setIsMobileMenuOpen(false);
+                  }}
+                  className="rounded-full p-2 hover:bg-gray-100"
+                >
+                  <MdPerson className="text-xl" />
                 </button>
 
-                {isMenuOpen && (
-                  <div className="absolute right-0 bg-white shadow-md mt-2 p-2">
-                    <Link to="/profile" className="block text-center">
+                {isProfileMenuOpen && (
+                  <div className="absolute right-0 z-50 mt-2 min-w-[160px] overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-lg">
+                    <Link
+                      to="/profile"
+                      className="block px-4 py-3 text-sm text-gray-700 hover:bg-gray-50"
+                    >
                       Profile
                     </Link>
-                    {/* <button onClick={handleLogout}>Logout</button> */}
-                    <Link
-                      to="/"
-                      onClick={(e) => {
-                        e.preventDefault();
+                    <button
+                      type="button"
+                      onClick={() => {
                         handleLogout();
+                        setIsProfileMenuOpen(false);
                       }}
-                      className="block text-center py-1 hover:bg-gray-100 rounded"
+                      className="w-full px-4 py-3 text-left text-sm text-gray-700 hover:bg-gray-50"
                     >
                       Logout
-                    </Link>
+                    </button>
                   </div>
                 )}
               </div>
@@ -90,20 +100,32 @@ const Header = () => {
 
             {/* Mobile */}
             <button
+              type="button"
               className="md:hidden"
-              onClick={() => setIsMenuOpen(!isMenuOpen)}
+              onClick={() => {
+                setIsMobileMenuOpen(!isMobileMenuOpen);
+                setIsProfileMenuOpen(false);
+              }}
             >
-              {isMenuOpen ? <MdClose /> : <MdMenu />}
+              {isMobileMenuOpen ? <MdClose /> : <MdMenu />}
             </button>
           </div>
         </div>
 
         {/* Mobile Menu */}
-        {isMenuOpen && (
-          <div className="md:hidden mt-2 space-y-2">
-            <Link to="/products">Products</Link>
-            <Link to="/contact">Contact</Link>
-            {user?.role === "admin" && <Link to="/admin">Admin</Link>}
+        {isMobileMenuOpen && (
+          <div className="md:hidden mt-2 space-y-2 rounded-2xl border border-gray-200 bg-white p-4 shadow-sm">
+            <Link to="/products" className="block text-gray-700 hover:text-herbs-600">
+              Products
+            </Link>
+            <Link to="/contact" className="block text-gray-700 hover:text-herbs-600">
+              Contact
+            </Link>
+            {user?.role === "admin" && (
+              <Link to="/admin" className="block text-gray-700 hover:text-herbs-600">
+                Admin
+              </Link>
+            )}
           </div>
         )}
       </div>
