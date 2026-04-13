@@ -365,7 +365,7 @@ const CreateProduct = ({ onClose, onSuccess }) => {
           <button
             type="submit"
             disabled={isLoading || uploading}
-            className="inline-flex items-center px-6 py-2 rounded-md bg-green-600 text-white text-sm font-medium hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed"
+            className="inline-flex items-center px-6 py-2 rounded-md bg-[#68a300] text-white text-sm font-medium hover:bg-[#5f9600] disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {uploading
               ? "Uploading..."

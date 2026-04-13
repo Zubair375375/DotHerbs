@@ -9,10 +9,13 @@ const Footer = () => {
           {/* Company Info */}
           <div className="col-span-1 md:col-span-2">
             <div className="flex items-center space-x-2 mb-4">
-              <div className="w-8 h-8 bg-primary-500 rounded-full flex items-center justify-center">
-                <span className="text-white font-bold text-sm">DH</span>
-              </div>
-              <span className="text-xl font-bold">Dot-Herbs</span>
+              <Link to="/" className="flex items-center">
+                <img
+                  src="/assets/logos/Logo_White.png"
+                  alt="Dot-Herbs"
+                  className="h-6 w-auto"
+                />
+              </Link>
             </div>
             <p className="text-secondary-300 mb-4 max-w-md">
               Natural herbal products for a healthier life. We provide

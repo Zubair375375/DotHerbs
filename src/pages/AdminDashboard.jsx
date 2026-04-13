@@ -321,7 +321,7 @@ const AdminDashboard = () => {
               <h2 className="text-2xl font-semibold">Product Management</h2>
               <button
                 onClick={() => setShowAddProductModal(true)}
-                className="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700 flex items-center space-x-2"
+                className="bg-[#68a300] text-white px-4 py-2 rounded hover:bg-[#5f9600] flex items-center space-x-2"
               >
                 <FaPlus />
                 <span>Add Product</span>

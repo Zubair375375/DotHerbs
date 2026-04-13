@@ -39,7 +39,8 @@ const Home = () => {
       <section className="bg-gradient-to-br from-green-50 to-blue-50 py-20">
         <div className="text-center max-w-5xl mx-auto px-4">
           <h1 className="text-5xl font-bold mb-6">
-            Natural Healing <span className="text-green-600">Starts Here</span>
+            Natural Healing{" "}
+            <span className="text-[#68a300]">Starts Here</span>
           </h1>
 
           <p className="text-gray-600 mb-8">
@@ -48,7 +49,7 @@ const Home = () => {
 
           <Link
             to="/products"
-            className="bg-green-600 text-white px-6 py-3 rounded-lg"
+            className="bg-[#68a300] text-white px-6 py-3 rounded-lg"
           >
             Shop Now
           </Link>
@@ -58,22 +59,22 @@ const Home = () => {
       {/* Features */}
       <section className="py-16 bg-white grid grid-cols-1 md:grid-cols-4 gap-8 text-center px-6">
         <div>
-          <MdEco className="text-3xl mx-auto text-green-600" />
+          <MdEco className="text-3xl mx-auto text-[#68a300]" />
           <h3>100% Organic</h3>
         </div>
 
         <div>
-          <MdShield className="text-3xl mx-auto text-green-600" />
+          <MdShield className="text-3xl mx-auto text-[#68a300]" />
           <h3>Quality Assured</h3>
         </div>
 
         <div>
-          <MdLocalShipping className="text-3xl mx-auto text-green-600" />
+          <MdLocalShipping className="text-3xl mx-auto text-[#68a300]" />
           <h3>Fast Shipping</h3>
         </div>
 
         <div>
-          <MdFavorite className="text-3xl mx-auto text-green-600" />
+          <MdFavorite className="text-3xl mx-auto text-[#68a300]" />
           <h3>Customer Care</h3>
         </div>
       </section>
@@ -96,7 +97,7 @@ const Home = () => {
 
               <Link
                 to={`/products/${p._id}`}
-                className="text-green-600 mt-2 block"
+                className="text-[#68a300] mt-2 block"
               >
                 View Details
               </Link>

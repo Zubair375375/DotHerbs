@@ -130,7 +130,7 @@ const ProductDetail = () => {
           <p className="text-gray-500 text-lg">Product not found</p>
           <button
             onClick={() => navigate("/products")}
-            className="mt-4 bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700"
+            className="mt-4 bg-[#68a300] text-white px-4 py-2 rounded hover:bg-[#5f9600]"
           >
             Back to Products
           </button>

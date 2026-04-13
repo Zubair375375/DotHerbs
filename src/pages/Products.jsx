@@ -193,7 +193,7 @@ const Products = () => {
                   sortBy: "name",
                 })
               }
-              className="mt-4 bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700"
+              className="mt-4 bg-[#68a300] text-white px-4 py-2 rounded hover:bg-[#5f9600]"
             >
               Clear Filters
             </button>

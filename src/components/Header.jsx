@@ -37,7 +37,7 @@ const Header = () => {
 
           {/* Desktop Nav */}
           <nav className="hidden md:flex space-x-6">
-            <Link to="/products">Products</Link>
+            <Link to="/products">All Products</Link>
 
             {user?.role === "admin" && <Link to="/admin">Admin</Link>}
           </nav>
@@ -46,7 +46,7 @@ const Header = () => {
           <div className="flex items-center space-x-4">
             {/* Cart */}
             <Link to="/cart" className="relative">
-              <MdShoppingCart className="text-xl" />
+              <MdShoppingCart className="text-xl text-[#68a300]" />
               {cartItemCount > 0 && (
                 <span className="absolute -top-2 -right-2 bg-red-500 text-white text-xs w-5 h-5 flex items-center justify-center rounded-full">
                   {cartItemCount}

@@ -67,17 +67,19 @@ const ProductCard = ({ product }) => {
         </p>
 
         <div className="flex items-center justify-between">
-          <span className="text-lg font-bold text-primary-600">
-            ${product.price.toFixed(2)}
+          <span className="text-lg">
+            <span className="text-xs align-super mr-1 text-black-100">PKR</span>
+            {product.price.toFixed(2)}
           </span>
 
           <button
             onClick={handleAddToCart}
             disabled={product.stock === 0}
-            className="bg-primary-600 text-white p-2 rounded-md hover:bg-primary-700 disabled:bg-secondary-300 disabled:cursor-not-allowed transition-colors"
+            className="flex items-center gap-2 bg-[#68a300] text-white py-1 px-3 rounded-full hover:bg-[#5c8f00] disabled:cursor-not-allowed transition-colors border-0"
             aria-label="Add to cart"
           >
-            <MdShoppingCart className="w-4 h-4" />
+            Add To Cart
+            {/* <MdShoppingCart className="w-4 h-4" /> */}
           </button>
         </div>
 

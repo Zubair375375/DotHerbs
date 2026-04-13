@@ -219,7 +219,7 @@ const Cart = () => {
                 />
                 <button
                   onClick={handleApplyPromoCode}
-                  className="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700"
+                  className="bg-[#68a300] text-white px-4 py-2 rounded hover:bg-green-700"
                 >
                   Apply
                 </button>
@@ -268,7 +268,7 @@ const Cart = () => {
 
               <button
                 onClick={handleCheckout}
-                className="w-full bg-green-600 text-white py-3 rounded-lg hover:bg-green-700 mt-6 font-semibold"
+                className="w-full bg-[#ffce12] text-black py-3 rounded-lg hover:bg-[##f8bd19] mt-6 font-semibold"
               >
                 Proceed to Checkout
               </button>
