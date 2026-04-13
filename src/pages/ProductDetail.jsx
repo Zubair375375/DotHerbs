@@ -194,7 +194,7 @@ const ProductDetail = () => {
               </span>
             </div>
 
-            <div className="text-3xl font-bold text-green-600 mb-4">
+            <div className="text-3xl mb-4">
               ${product.price?.toFixed(2)}
             </div>
 
@@ -251,7 +251,7 @@ const ProductDetail = () => {
             <button
               onClick={handleAddToCart}
               disabled={product.stock === 0}
-              className="flex-1 bg-green-600 text-white px-6 py-3 rounded-lg hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center space-x-2"
+              className="flex-1 bg-[#68a300] text-white px-6 py-3 rounded-lg hover:bg-[#5f9600] disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center space-x-2"
             >
               <FaShoppingCart />
               <span>Add to Cart</span>

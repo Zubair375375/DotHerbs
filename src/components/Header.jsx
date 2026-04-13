@@ -63,8 +63,20 @@ const Header = () => {
 
                 {isMenuOpen && (
                   <div className="absolute right-0 bg-white shadow-md mt-2 p-2">
-                    <Link to="/profile">Profile</Link>
-                    <button onClick={handleLogout}>Logout</button>
+                    <Link to="/profile" className="block text-center">
+                      Profile
+                    </Link>
+                    {/* <button onClick={handleLogout}>Logout</button> */}
+                    <Link
+                      to="/"
+                      onClick={(e) => {
+                        e.preventDefault();
+                        handleLogout();
+                      }}
+                      className="block text-center py-1 hover:bg-gray-100 rounded"
+                    >
+                      Logout
+                    </Link>
                   </div>
                 )}
               </div>
