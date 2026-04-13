@@ -36,14 +36,20 @@ const Home = () => {
   return (
     <div className="min-h-screen">
       {/* Hero */}
-      <section className="bg-gradient-to-br from-green-50 to-blue-50 py-20">
-        <div className="text-center max-w-5xl mx-auto px-4">
+      <section
+        className="relative h-[550px] bg-cover bg-center flex items-center"
+        style={{
+          backgroundImage: "url('/images/banners/hero_banner1.jpg')",
+        }}
+      >
+        <div className="absolute inset-0 bg-black/70"></div>
+
+        <div className="relative text-center max-w-5xl mx-auto px-4 text-white">
           <h1 className="text-5xl font-bold mb-6">
-            Natural Healing{" "}
-            <span className="text-[#68a300]">Starts Here</span>
+            Pure Health <span className="text-[#68a300]">Pure Life</span>
           </h1>
 
-          <p className="text-gray-600 mb-8">
+          <p className="mb-8">
             Premium herbal products for a healthier lifestyle.
           </p>
 
