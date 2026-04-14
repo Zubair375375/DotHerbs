@@ -77,7 +77,7 @@ const ProductCard = ({ product }) => {
           <button
             onClick={handleAddToCart}
             disabled={product.stock === 0}
-            className="flex items-center gap-2 bg-[#68a300] text-white py-1 px-3 rounded-full hover:bg-[#5c8f00] disabled:cursor-not-allowed transition-colors border-0"
+            className="flex items-center gap-2 bg-white text-[#68a300] py-1 px-3 rounded-sm border border-[#68a300] hover:border-[#68a300] hover:bg-[#68a300] hover:text-white transition-colors disabled:cursor-not-allowed disabled:opacity-50"
             aria-label="Add to cart"
           >
             Add To Cart

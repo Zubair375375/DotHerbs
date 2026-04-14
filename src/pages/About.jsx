@@ -67,7 +67,10 @@ const team = [
 const certifications = [
   { icon: <MdVerified className="w-6 h-6" />, label: "ISO 22000 Certified" },
   { icon: <MdEco className="w-6 h-6" />, label: "Organic Certified" },
-  { icon: <FaAward className="w-6 h-6" />, label: "Good Manufacturing Practice" },
+  {
+    icon: <FaAward className="w-6 h-6" />,
+    label: "Good Manufacturing Practice",
+  },
   { icon: <MdNaturePeople className="w-6 h-6" />, label: "Fair Trade Partner" },
 ];
 
@@ -168,7 +171,9 @@ const About = () => {
             <span className="inline-block bg-[#68a300]/10 text-[#4a7a00] text-sm font-semibold px-4 py-1.5 rounded-full mb-4">
               What We Stand For
             </span>
-            <h2 className="text-4xl font-bold text-gray-900">Our Core Values</h2>
+            <h2 className="text-4xl font-bold text-gray-900">
+              Our Core Values
+            </h2>
           </div>
           <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-8">
             {values.map((v) => (
@@ -179,8 +184,12 @@ const About = () => {
                 <div className="w-14 h-14 bg-[#68a300]/10 text-[#68a300] rounded-xl flex items-center justify-center mb-5 group-hover:bg-[#68a300] group-hover:text-white transition-colors">
                   {v.icon}
                 </div>
-                <h3 className="text-lg font-bold text-gray-900 mb-3">{v.title}</h3>
-                <p className="text-gray-500 leading-relaxed text-sm">{v.description}</p>
+                <h3 className="text-lg font-bold text-gray-900 mb-3">
+                  {v.title}
+                </h3>
+                <p className="text-gray-500 leading-relaxed text-sm">
+                  {v.description}
+                </p>
               </div>
             ))}
           </div>
@@ -197,16 +206,19 @@ const About = () => {
         </div>
         <div className="grid md:grid-cols-3 gap-10">
           {team.map((member) => (
-            <div
-              key={member.name}
-              className="text-center group"
-            >
+            <div key={member.name} className="text-center group">
               <div className="w-24 h-24 bg-gradient-to-br from-[#68a300] to-[#4a7a00] rounded-full flex items-center justify-center mx-auto mb-5 shadow-medium">
-                <span className="text-white text-2xl font-bold">{member.avatar}</span>
+                <span className="text-white text-2xl font-bold">
+                  {member.avatar}
+                </span>
               </div>
               <h3 className="text-xl font-bold text-gray-900">{member.name}</h3>
-              <p className="text-[#68a300] font-semibold text-sm mb-3">{member.role}</p>
-              <p className="text-gray-500 leading-relaxed text-sm">{member.bio}</p>
+              <p className="text-[#68a300] font-semibold text-sm mb-3">
+                {member.role}
+              </p>
+              <p className="text-gray-500 leading-relaxed text-sm">
+                {member.bio}
+              </p>
             </div>
           ))}
         </div>

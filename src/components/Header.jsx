@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, NavLink } from "react-router-dom";
 import { useSelector, useDispatch } from "react-redux";
 import { selectAuthUser, logoutUser } from "../store/slices/authSlice";
 import { selectCartItemCount } from "../store/slices/cartSlice";
@@ -38,11 +38,39 @@ const Header = () => {
 
           {/* Desktop Nav */}
           <nav className="hidden md:flex space-x-6">
-            <Link to="/products">All Products</Link>
-            <Link to="/about">About Us</Link>
-            <Link to="/contact">Contact</Link>
-
-            {user?.role === "admin" && <Link to="/admin">Admin</Link>}
+            {[
+              { to: "/products", label: "All Products" },
+              { to: "/about", label: "About Us" },
+              { to: "/contact", label: "Contact" },
+            ].map(({ to, label }) => (
+              <NavLink
+                key={to}
+                to={to}
+                className={({ isActive }) =>
+                  `pb-1 transition-colors font-medium ${
+                    isActive
+                      ? "text-[#68a300] border-b-2 border-[#68a300]"
+                      : "text-gray-700 hover:text-[#68a300]"
+                  }`
+                }
+              >
+                {label}
+              </NavLink>
+            ))}
+            {user?.role === "admin" && (
+              <NavLink
+                to="/admin"
+                className={({ isActive }) =>
+                  `pb-1 transition-colors font-medium ${
+                    isActive
+                      ? "text-[#68a300] border-b-2 border-[#68a300]"
+                      : "text-gray-700 hover:text-[#68a300]"
+                  }`
+                }
+              >
+                Admin
+              </NavLink>
+            )}
           </nav>
 
           {/* Right */}
@@ -116,25 +144,40 @@ const Header = () => {
         {/* Mobile Menu */}
         {isMobileMenuOpen && (
           <div className="md:hidden mt-2 space-y-2 rounded-2xl border border-gray-200 bg-white p-4 shadow-sm">
-            <Link
-              to="/products"
-              className="block text-gray-700 hover:text-herbs-600"
-            >
-              Products
-            </Link>
-            <Link
-              to="/contact"
-              className="block text-gray-700 hover:text-herbs-600"
-            >
-              Contact
-            </Link>
+            {[
+              { to: "/products", label: "Products" },
+              { to: "/about", label: "About Us" },
+              { to: "/contact", label: "Contact" },
+            ].map(({ to, label }) => (
+              <NavLink
+                key={to}
+                to={to}
+                onClick={() => setIsMobileMenuOpen(false)}
+                className={({ isActive }) =>
+                  `block py-1 font-medium transition-colors ${
+                    isActive
+                      ? "text-[#68a300]"
+                      : "text-gray-700 hover:text-[#68a300]"
+                  }`
+                }
+              >
+                {label}
+              </NavLink>
+            ))}
             {user?.role === "admin" && (
-              <Link
+              <NavLink
                 to="/admin"
-                className="block text-gray-700 hover:text-herbs-600"
+                onClick={() => setIsMobileMenuOpen(false)}
+                className={({ isActive }) =>
+                  `block py-1 font-medium transition-colors ${
+                    isActive
+                      ? "text-[#68a300]"
+                      : "text-gray-700 hover:text-[#68a300]"
+                  }`
+                }
               >
                 Admin
-              </Link>
+              </NavLink>
             )}
           </div>
         )}
