@@ -15,6 +15,7 @@ import Contact from "./pages/Contact";
 import AdminDashboard from "./pages/AdminDashboard";
 import EditProduct from "./pages/admin/EditProduct";
 import UserDetail from "./pages/admin/UserDetail";
+import About from "./pages/About";
 
 function App() {
   const dispatch = useDispatch();
@@ -38,6 +39,7 @@ function App() {
         <Route path="register" element={<Register />} />
         <Route path="profile" element={<Profile />} />
         <Route path="contact" element={<Contact />} />
+        <Route path="about" element={<About />} />
         <Route path="admin" element={<AdminDashboard />} />
         <Route path="admin/products/:id" element={<EditProduct />} />
         <Route path="admin/users/:id" element={<UserDetail />} />

@@ -157,9 +157,12 @@ const EditProduct = ({ onClose, onSuccess, product: productProp }) => {
           finalImages = [imageData];
         } catch (uploadError) {
           console.error("Image upload failed:", uploadError);
-          toast.error("Image upload failed, product will be updated without new image", {
-            id: "upload",
-          });
+          toast.error(
+            "Image upload failed, product will be updated without new image",
+            {
+              id: "upload",
+            },
+          );
         } finally {
           setUploading(false);
         }

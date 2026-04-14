@@ -39,6 +39,7 @@ const Header = () => {
           {/* Desktop Nav */}
           <nav className="hidden md:flex space-x-6">
             <Link to="/products">All Products</Link>
+            <Link to="/about">About Us</Link>
             <Link to="/contact">Contact</Link>
 
             {user?.role === "admin" && <Link to="/admin">Admin</Link>}

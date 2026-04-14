@@ -196,9 +196,7 @@ const ProductDetail = () => {
               </span>
             </div>
 
-            <div className="text-3xl mb-4">
-              ${product.price?.toFixed(2)}
-            </div>
+            <div className="text-3xl mb-4">${product.price?.toFixed(2)}</div>
 
             <p className="text-gray-600 mb-6">{product.description}</p>
           </div>

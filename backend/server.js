@@ -55,10 +55,14 @@ app.use(express.json({ limit: "10mb" }));
 app.use(express.urlencoded({ extended: true, limit: "10mb" }));
 
 // Serve uploaded product images (allow cross-origin loading from frontend)
-app.use("/uploads", (req, res, next) => {
-  res.setHeader("Cross-Origin-Resource-Policy", "cross-origin");
-  next();
-}, express.static(path.join(__dirname, "uploads")));
+app.use(
+  "/uploads",
+  (req, res, next) => {
+    res.setHeader("Cross-Origin-Resource-Policy", "cross-origin");
+    next();
+  },
+  express.static(path.join(__dirname, "uploads")),
+);
 
 // Routes
 app.use("/api/auth", authRoutes);
