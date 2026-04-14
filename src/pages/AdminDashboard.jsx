@@ -32,7 +32,15 @@ import {
   FaPlus,
   FaCheck,
   FaTimes,
+  FaBullhorn,
 } from "react-icons/fa";
+import {
+  fetchAllAnnouncements,
+  createAnnouncement,
+  updateAnnouncement,
+  deleteAnnouncement,
+  selectAllAnnouncements,
+} from "../store/slices/announcementSlice";
 
 const AdminDashboard = () => {
   const dispatch = useDispatch();
@@ -48,6 +56,17 @@ const AdminDashboard = () => {
   const [showAddProductModal, setShowAddProductModal] = useState(false);
   const [showEditProductModal, setShowEditProductModal] = useState(false);
   const [editingProduct, setEditingProduct] = useState(null);
+  const [showAnnouncementModal, setShowAnnouncementModal] = useState(false);
+  const [editingAnnouncement, setEditingAnnouncement] = useState(null);
+  const [announcementForm, setAnnouncementForm] = useState({
+    title: "",
+    message: "",
+    type: "info",
+    isActive: true,
+    startDate: "",
+    endDate: "",
+  });
+  const announcements = useSelector(selectAllAnnouncements);
 
   useEffect(() => {
     if (!isAuthenticated) {
@@ -68,6 +87,8 @@ const AdminDashboard = () => {
       dispatch(getOrders());
     } else if (activeTab === "users") {
       dispatch(getUsers());
+    } else if (activeTab === "announcements") {
+      dispatch(fetchAllAnnouncements());
     }
   }, [isAuthenticated, navigate, user, activeTab, dispatch]);
 
@@ -237,6 +258,16 @@ const AdminDashboard = () => {
               }`}
             >
               Users
+            </button>
+            <button
+              onClick={() => setActiveTab("announcements")}
+              className={`py-4 px-1 border-b-2 font-medium text-sm ${
+                activeTab === "announcements"
+                  ? "border-green-500 text-green-600"
+                  : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
+              }`}
+            >
+              Announcements
             </button>
           </nav>
         </div>
@@ -554,7 +585,321 @@ const AdminDashboard = () => {
             </div>
           </div>
         )}
+
+        {/* Announcements Tab */}
+        {activeTab === "announcements" && (
+          <div className="p-6">
+            <div className="flex items-center justify-between mb-6">
+              <h2 className="text-2xl font-semibold">Announcements</h2>
+              <button
+                onClick={() => {
+                  setEditingAnnouncement(null);
+                  setAnnouncementForm({
+                    title: "",
+                    message: "",
+                    type: "info",
+                    isActive: true,
+                    startDate: "",
+                    endDate: "",
+                  });
+                  setShowAnnouncementModal(true);
+                }}
+                className="bg-[#68a300] text-white px-4 py-2 rounded hover:bg-[#5f9600] flex items-center space-x-2"
+              >
+                <FaPlus />
+                <span>New Announcement</span>
+              </button>
+            </div>
+            <div className="overflow-x-auto">
+              <table className="min-w-full table-auto">
+                <thead>
+                  <tr className="bg-gray-50">
+                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+                      Title
+                    </th>
+                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+                      Message
+                    </th>
+                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+                      Type
+                    </th>
+                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+                      Status
+                    </th>
+                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+                      Expires
+                    </th>
+                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+                      Actions
+                    </th>
+                  </tr>
+                </thead>
+                <tbody className="bg-white divide-y divide-gray-200">
+                  {announcements.map((ann) => (
+                    <tr key={ann._id}>
+                      <td className="px-4 py-4 text-sm font-medium text-gray-900">
+                        {ann.title}
+                      </td>
+                      <td className="px-4 py-4 text-sm text-gray-500 max-w-xs truncate">
+                        {ann.message}
+                      </td>
+                      <td className="px-4 py-4">
+                        <span
+                          className={`px-2 py-1 text-xs rounded capitalize ${
+                            ann.type === "promo"
+                              ? "bg-green-100 text-green-800"
+                              : ann.type === "warning"
+                                ? "bg-yellow-100 text-yellow-800"
+                                : ann.type === "success"
+                                  ? "bg-emerald-100 text-emerald-800"
+                                  : "bg-blue-100 text-blue-800"
+                          }`}
+                        >
+                          {ann.type}
+                        </span>
+                      </td>
+                      <td className="px-4 py-4">
+                        <span
+                          className={`px-2 py-1 text-xs rounded ${ann.isActive ? "bg-green-100 text-green-800" : "bg-gray-100 text-gray-800"}`}
+                        >
+                          {ann.isActive ? "Active" : "Inactive"}
+                        </span>
+                      </td>
+                      <td className="px-4 py-4 text-sm text-gray-500">
+                        {ann.endDate
+                          ? new Date(ann.endDate).toLocaleDateString()
+                          : "Never"}
+                      </td>
+                      <td className="px-4 py-4 text-sm font-medium space-x-3">
+                        <button
+                          onClick={() => {
+                            setEditingAnnouncement(ann);
+                            setAnnouncementForm({
+                              title: ann.title,
+                              message: ann.message,
+                              type: ann.type,
+                              isActive: ann.isActive,
+                              startDate: ann.startDate
+                                ? ann.startDate.slice(0, 10)
+                                : "",
+                              endDate: ann.endDate
+                                ? ann.endDate.slice(0, 10)
+                                : "",
+                            });
+                            setShowAnnouncementModal(true);
+                          }}
+                          className="text-blue-600 hover:text-blue-900"
+                        >
+                          <FaEdit />
+                        </button>
+                        <button
+                          onClick={async () => {
+                            if (window.confirm("Delete this announcement?")) {
+                              try {
+                                await dispatch(
+                                  deleteAnnouncement(ann._id),
+                                ).unwrap();
+                                toast.success("Announcement deleted");
+                              } catch {
+                                toast.error("Failed to delete announcement");
+                              }
+                            }
+                          }}
+                          className="text-red-600 hover:text-red-900"
+                        >
+                          <FaTrash />
+                        </button>
+                      </td>
+                    </tr>
+                  ))}
+                  {announcements.length === 0 && (
+                    <tr>
+                      <td
+                        colSpan={6}
+                        className="px-4 py-8 text-center text-gray-400"
+                      >
+                        No announcements yet.
+                      </td>
+                    </tr>
+                  )}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        )}
       </div>
+
+      {/* Announcement Modal */}
+      {showAnnouncementModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-lg shadow-xl w-full max-w-lg">
+            <div className="flex items-center justify-between p-6 border-b">
+              <h2 className="text-xl font-semibold text-gray-900">
+                {editingAnnouncement ? "Edit Announcement" : "New Announcement"}
+              </h2>
+              <button
+                onClick={() => setShowAnnouncementModal(false)}
+                className="text-gray-400 hover:text-gray-600"
+              >
+                <FaTimes />
+              </button>
+            </div>
+            <form
+              className="p-6 space-y-4"
+              onSubmit={async (e) => {
+                e.preventDefault();
+                try {
+                  const payload = {
+                    ...announcementForm,
+                    startDate: announcementForm.startDate || undefined,
+                    endDate: announcementForm.endDate || null,
+                  };
+                  if (editingAnnouncement) {
+                    await dispatch(
+                      updateAnnouncement({
+                        id: editingAnnouncement._id,
+                        data: payload,
+                      }),
+                    ).unwrap();
+                    toast.success("Announcement updated");
+                  } else {
+                    await dispatch(createAnnouncement(payload)).unwrap();
+                    toast.success("Announcement created");
+                  }
+                  setShowAnnouncementModal(false);
+                  dispatch(fetchAllAnnouncements());
+                } catch {
+                  toast.error("Failed to save announcement");
+                }
+              }}
+            >
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Title
+                </label>
+                <input
+                  type="text"
+                  required
+                  value={announcementForm.title}
+                  onChange={(e) =>
+                    setAnnouncementForm((f) => ({
+                      ...f,
+                      title: e.target.value,
+                    }))
+                  }
+                  className="w-full border rounded px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#68a300]"
+                  maxLength={100}
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Message
+                </label>
+                <textarea
+                  required
+                  value={announcementForm.message}
+                  onChange={(e) =>
+                    setAnnouncementForm((f) => ({
+                      ...f,
+                      message: e.target.value,
+                    }))
+                  }
+                  className="w-full border rounded px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#68a300]"
+                  rows={3}
+                  maxLength={500}
+                />
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Type
+                  </label>
+                  <select
+                    value={announcementForm.type}
+                    onChange={(e) =>
+                      setAnnouncementForm((f) => ({
+                        ...f,
+                        type: e.target.value,
+                      }))
+                    }
+                    className="w-full border rounded px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#68a300]"
+                  >
+                    <option value="info">Info</option>
+                    <option value="success">Success</option>
+                    <option value="warning">Warning</option>
+                    <option value="promo">Promo</option>
+                  </select>
+                </div>
+                <div className="flex items-end pb-1">
+                  <label className="flex items-center gap-2 text-sm font-medium text-gray-700 cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={announcementForm.isActive}
+                      onChange={(e) =>
+                        setAnnouncementForm((f) => ({
+                          ...f,
+                          isActive: e.target.checked,
+                        }))
+                      }
+                      className="w-4 h-4 accent-[#68a300]"
+                    />
+                    Active
+                  </label>
+                </div>
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Start Date
+                  </label>
+                  <input
+                    type="date"
+                    value={announcementForm.startDate}
+                    onChange={(e) =>
+                      setAnnouncementForm((f) => ({
+                        ...f,
+                        startDate: e.target.value,
+                      }))
+                    }
+                    className="w-full border rounded px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#68a300]"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    End Date
+                  </label>
+                  <input
+                    type="date"
+                    value={announcementForm.endDate}
+                    onChange={(e) =>
+                      setAnnouncementForm((f) => ({
+                        ...f,
+                        endDate: e.target.value,
+                      }))
+                    }
+                    className="w-full border rounded px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#68a300]"
+                  />
+                </div>
+              </div>
+              <div className="flex justify-end gap-3 pt-2">
+                <button
+                  type="button"
+                  onClick={() => setShowAnnouncementModal(false)}
+                  className="px-4 py-2 text-sm border rounded hover:bg-gray-50"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  className="px-4 py-2 text-sm bg-[#68a300] text-white rounded hover:bg-[#5f9600]"
+                >
+                  {editingAnnouncement ? "Save Changes" : "Create"}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
 
       {/* Add Product Modal */}
       {showAddProductModal && (

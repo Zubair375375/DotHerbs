@@ -115,14 +115,23 @@ const Header = () => {
         {/* Mobile Menu */}
         {isMobileMenuOpen && (
           <div className="md:hidden mt-2 space-y-2 rounded-2xl border border-gray-200 bg-white p-4 shadow-sm">
-            <Link to="/products" className="block text-gray-700 hover:text-herbs-600">
+            <Link
+              to="/products"
+              className="block text-gray-700 hover:text-herbs-600"
+            >
               Products
             </Link>
-            <Link to="/contact" className="block text-gray-700 hover:text-herbs-600">
+            <Link
+              to="/contact"
+              className="block text-gray-700 hover:text-herbs-600"
+            >
               Contact
             </Link>
             {user?.role === "admin" && (
-              <Link to="/admin" className="block text-gray-700 hover:text-herbs-600">
+              <Link
+                to="/admin"
+                className="block text-gray-700 hover:text-herbs-600"
+              >
                 Admin
               </Link>
             )}

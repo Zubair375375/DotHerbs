@@ -9,6 +9,7 @@ import userRoutes from "./routes/users.js";
 import productRoutes from "./routes/products.js";
 import orderRoutes from "./routes/orders.js";
 import uploadRoutes from "./routes/upload.js";
+import announcementRoutes from "./routes/announcements.js";
 import { errorHandler } from "./middleware/errorHandler.js";
 
 dotenv.config();
@@ -54,6 +55,7 @@ app.use("/api/users", userRoutes);
 app.use("/api/products", productRoutes);
 app.use("/api/orders", orderRoutes);
 app.use("/api/upload", uploadRoutes);
+app.use("/api/announcements", announcementRoutes);
 
 // Health check
 app.get("/api/health", (req, res) => {
