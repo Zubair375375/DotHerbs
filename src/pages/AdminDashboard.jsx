@@ -221,7 +221,7 @@ const AdminDashboard = () => {
           <nav className="flex space-x-8 px-6">
             <button
               onClick={() => setActiveTab("overview")}
-              className={`py-4 px-1 border-b-2 font-medium text-sm ${
+              className={`py-4 px-1 border-b-2 border-t-0 border-l-0 border-r-0 font-medium text-sm ${
                 activeTab === "overview"
                   ? "border-green-500 text-green-600"
                   : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
@@ -231,7 +231,7 @@ const AdminDashboard = () => {
             </button>
             <button
               onClick={() => setActiveTab("products")}
-              className={`py-4 px-1 border-b-2 font-medium text-sm ${
+              className={`py-4 px-1 border-b-2 border-t-0 border-l-0 border-r-0 font-medium text-sm ${
                 activeTab === "products"
                   ? "border-green-500 text-green-600"
                   : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
@@ -241,7 +241,7 @@ const AdminDashboard = () => {
             </button>
             <button
               onClick={() => setActiveTab("orders")}
-              className={`py-4 px-1 border-b-2 font-medium text-sm ${
+              className={`py-4 px-1 border-b-2 border-t-0 border-l-0 border-r-0 font-medium text-sm ${
                 activeTab === "orders"
                   ? "border-green-500 text-green-600"
                   : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
@@ -251,7 +251,7 @@ const AdminDashboard = () => {
             </button>
             <button
               onClick={() => setActiveTab("users")}
-              className={`py-4 px-1 border-b-2 font-medium text-sm ${
+              className={`py-4 px-1 border-b-2 border-t-0 border-l-0 border-r-0 font-medium text-sm ${
                 activeTab === "users"
                   ? "border-green-500 text-green-600"
                   : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
@@ -261,7 +261,7 @@ const AdminDashboard = () => {
             </button>
             <button
               onClick={() => setActiveTab("announcements")}
-              className={`py-4 px-1 border-b-2 font-medium text-sm ${
+              className={`py-4 px-1 border-b-2 border-t-0 border-l-0 border-r-0 font-medium text-sm ${
                 activeTab === "announcements"
                   ? "border-green-500 text-green-600"
                   : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
