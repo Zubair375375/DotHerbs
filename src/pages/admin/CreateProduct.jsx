@@ -78,22 +78,23 @@ const CreateProduct = ({ onClose, onSuccess }) => {
     const formDataUpload = new FormData();
     formDataUpload.append("image", file);
 
-    const token = localStorage.getItem("accessToken");
+    // Token is stored JSON-stringified, so parse it before use
+    const rawToken = localStorage.getItem("accessToken");
+    const token = rawToken ? JSON.parse(rawToken) : null;
 
-    const response = await fetch("http://localhost:5000/api/upload", {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${token}`,
+    const response = await fetch(
+      `${import.meta.env.VITE_API_URL || "http://localhost:5000/api"}/upload`,
+      {
+        method: "POST",
+        headers: { Authorization: `Bearer ${token}` },
+        body: formDataUpload,
       },
-      body: formDataUpload,
-    });
+    );
 
-    if (!response.ok) {
-      throw new Error("Failed to upload image");
-    }
+    if (!response.ok) throw new Error("Failed to upload image");
 
     const result = await response.json();
-    return result.data;
+    return result.data; // { url: "/uploads/filename", public_id: "filename" }
   };
 
   const handleSubmit = async (e) => {
@@ -140,34 +141,14 @@ const CreateProduct = ({ onClose, onSuccess }) => {
     console.log("Validation passed, proceeding with product creation");
 
     try {
-      // Temporarily skip image upload for testing
-      // let imageData = null;
-
-      // // Upload image if provided
-      // if (image) {
-      //   setUploading(true);
-      //   toast.loading("Uploading image...", { id: "upload" });
-      //   try {
-      //     imageData = await uploadImage(image);
-      //     console.log("Image uploaded successfully:", imageData);
-      //     toast.success("Image uploaded successfully", { id: "upload" });
-      //   } catch (uploadError) {
-      //     console.error("Image upload failed:", uploadError);
-      //     toast.error(
-      //       "Image upload failed, but product will be created without image",
-      //       { id: "upload" },
-      //     );
-      //     // Continue with product creation even if image upload fails
-      //   }
-      //   setUploading(false);
-      // }
-
       const productData = {
         name: name.trim(),
         description: description.trim(),
         price: Number(price),
         category,
         stock: Number(stock),
+        isActive,
+        image: "",
         images: [],
       };
 
@@ -176,20 +157,19 @@ const CreateProduct = ({ onClose, onSuccess }) => {
         toast.loading("Uploading image...", { id: "upload" });
         try {
           const imageData = await uploadImage(image);
+          productData.image = imageData.url; // e.g. "/uploads/abc.jpg"
           productData.images = [imageData];
-          toast.success("Image uploaded successfully", { id: "upload" });
+          toast.success("Image uploaded", { id: "upload" });
         } catch (uploadError) {
           console.error("Image upload failed:", uploadError);
-          toast.error(
-            "Image upload failed, product will be created without image",
-            { id: "upload" },
-          );
+          toast.error("Image upload failed, product saved without image", {
+            id: "upload",
+          });
         } finally {
           setUploading(false);
         }
       }
 
-      console.log("Creating product with data:", productData);
       await dispatch(createProduct(productData)).unwrap();
       toast.success("Product created successfully.");
       onSuccess();

@@ -41,9 +41,11 @@ const ProductCard = ({ product }) => {
       <div className="aspect-square overflow-hidden">
         <img
           src={
-            product.images?.[0]?.url ||
-            product.images?.[0] ||
-            "/placeholder-product.jpg"
+            product.image
+              ? `http://localhost:5000${product.image}`
+              : product.images?.[0]?.url ||
+                product.images?.[0] ||
+                "/placeholder-product.jpg"
           }
           alt={product.name}
           className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"

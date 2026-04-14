@@ -323,9 +323,11 @@ const AdminDashboard = () => {
                         <div className="flex items-center space-x-3">
                           <img
                             src={
-                              product.images?.[0]?.url ||
-                              product.images?.[0] ||
-                              "/placeholder-product.jpg"
+                              product.image
+                                ? `http://localhost:5000${product.image}`
+                                : product.images?.[0]?.url ||
+                                  product.images?.[0] ||
+                                  "/placeholder-product.jpg"
                             }
                             alt={product.name}
                             className="w-10 h-10 object-cover rounded"
@@ -387,9 +389,11 @@ const AdminDashboard = () => {
                         <div className="flex items-center">
                           <img
                             src={
-                              product.images?.[0]?.url ||
-                              product.images?.[0] ||
-                              "/placeholder-product.jpg"
+                              product.image
+                                ? `http://localhost:5000${product.image}`
+                                : product.images?.[0]?.url ||
+                                  product.images?.[0] ||
+                                  "/placeholder-product.jpg"
                             }
                             alt={product.name}
                             className="w-10 h-10 object-cover rounded"

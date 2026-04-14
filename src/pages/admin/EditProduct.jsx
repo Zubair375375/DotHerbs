@@ -114,22 +114,22 @@ const EditProduct = ({ onClose, onSuccess, product: productProp }) => {
     const formDataUpload = new FormData();
     formDataUpload.append("image", file);
 
-    const token = localStorage.getItem("accessToken");
+    const rawToken = localStorage.getItem("accessToken");
+    const token = rawToken ? JSON.parse(rawToken) : null;
 
-    const response = await fetch("http://localhost:5000/api/upload", {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${token}`,
+    const response = await fetch(
+      `${import.meta.env.VITE_API_URL || "http://localhost:5000/api"}/upload`,
+      {
+        method: "POST",
+        headers: { Authorization: `Bearer ${token}` },
+        body: formDataUpload,
       },
-      body: formDataUpload,
-    });
+    );
 
-    if (!response.ok) {
-      throw new Error("Failed to upload image");
-    }
+    if (!response.ok) throw new Error("Failed to upload image");
 
     const result = await response.json();
-    return result.data;
+    return result.data; // { url: "/uploads/filename", public_id: "filename" }
   };
 
   const handleSubmit = async (e) => {
@@ -144,26 +144,25 @@ const EditProduct = ({ onClose, onSuccess, product: productProp }) => {
     }
 
     try {
-      let imageData = null;
       let finalImages = product?.images || [];
+      let finalImage = product?.image || "";
 
-      // Upload new image if provided
       if (image) {
         setUploading(true);
         toast.loading("Uploading image...", { id: "upload" });
         try {
-          imageData = await uploadImage(image);
+          const imageData = await uploadImage(image);
           toast.success("Image uploaded successfully", { id: "upload" });
-          // Replace the first image or add as first image
+          finalImage = imageData.url;
           finalImages = [imageData];
         } catch (uploadError) {
           console.error("Image upload failed:", uploadError);
-          toast.error("Image upload failed, but product will be updated", {
+          toast.error("Image upload failed, product will be updated without new image", {
             id: "upload",
           });
-          // Continue with product update even if image upload fails
+        } finally {
+          setUploading(false);
         }
-        setUploading(false);
       }
 
       const productData = {
@@ -173,6 +172,7 @@ const EditProduct = ({ onClose, onSuccess, product: productProp }) => {
         category,
         stock: Number(stock),
         isActive,
+        image: finalImage,
         images: finalImages,
       };
 

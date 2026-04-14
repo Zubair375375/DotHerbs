@@ -147,8 +147,10 @@ const ProductDetail = () => {
           <div className="aspect-square bg-gray-100 rounded-lg overflow-hidden">
             <img
               src={
-                product.images?.[selectedImage]?.url ||
-                "/placeholder-product.jpg"
+                product.image
+                  ? `http://localhost:5000${product.image}`
+                  : product.images?.[selectedImage]?.url ||
+                    "/placeholder-product.jpg"
               }
               alt={product.name}
               className="w-full h-full object-cover"
