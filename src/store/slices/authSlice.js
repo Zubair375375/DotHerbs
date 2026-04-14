@@ -6,12 +6,14 @@ const API_URL = import.meta.env.VITE_API_URL || "http://localhost:5000/api";
 // Get token from localStorage
 const getTokenFromStorage = () => {
   const token = localStorage.getItem("accessToken");
-  return token ? token : null;
+  if (!token) return null;
+  try { return JSON.parse(token); } catch { return token; }
 };
 
 const getRefreshTokenFromStorage = () => {
   const token = localStorage.getItem("refreshToken");
-  return token ? token : null;
+  if (!token) return null;
+  try { return JSON.parse(token); } catch { return token; }
 };
 
 // Set token in localStorage

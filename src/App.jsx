@@ -1,4 +1,7 @@
+import { useEffect } from "react";
 import { Routes, Route } from "react-router-dom";
+import { useDispatch, useSelector } from "react-redux";
+import { getCurrentUser } from "./store/slices/authSlice";
 import Layout from "./components/Layout";
 import Home from "./pages/Home";
 import Products from "./pages/Products";
@@ -14,6 +17,15 @@ import EditProduct from "./pages/admin/EditProduct";
 import UserDetail from "./pages/admin/UserDetail";
 
 function App() {
+  const dispatch = useDispatch();
+  const accessToken = useSelector((state) => state.auth.accessToken);
+
+  useEffect(() => {
+    if (accessToken) {
+      dispatch(getCurrentUser());
+    }
+  }, []);
+
   return (
     <Routes>
       <Route path="/" element={<Layout />}>
