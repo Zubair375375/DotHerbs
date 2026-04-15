@@ -9,7 +9,7 @@ import {
   fetchProduct,
 } from "../store/slices/productSlice";
 import { addToCart } from "../store/slices/cartSlice";
-import { selectIsAuthenticated } from "../store/slices/authSlice";
+import { selectAuthUser, selectIsAuthenticated } from "../store/slices/authSlice";
 import Loader from "../components/Loader";
 import toast from "react-hot-toast";
 import {
@@ -28,6 +28,8 @@ const ProductDetail = () => {
   const status = useSelector(selectProductsStatus);
   const error = useSelector(selectProductsError);
   const isAuthenticated = useSelector(selectIsAuthenticated);
+  const user = useSelector(selectAuthUser);
+  const isAdmin = user?.role === "admin";
 
   const [selectedImage, setSelectedImage] = useState(0);
   const [quantity, setQuantity] = useState(1);
@@ -46,6 +48,11 @@ const ProductDetail = () => {
   }, [product]);
 
   const handleAddToCart = () => {
+    if (isAdmin) {
+      toast.error("Admin accounts cannot add products to cart");
+      return;
+    }
+
     if (!isAuthenticated) {
       toast.error("Please login to add items to cart");
       navigate("/login");
@@ -250,7 +257,7 @@ const ProductDetail = () => {
           <div className="flex space-x-4">
             <button
               onClick={handleAddToCart}
-              disabled={product.stock === 0}
+              disabled={product.stock === 0 || isAdmin}
               className="flex-1 bg-[#68a300] text-white px-6 py-3 rounded-lg hover:bg-[#5f9600] disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center space-x-2"
             >
               <FaShoppingCart />

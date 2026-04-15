@@ -1,15 +1,23 @@
 import { Link } from "react-router-dom";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { addToCart } from "../store/slices/cartSlice";
+import { selectAuthUser } from "../store/slices/authSlice";
 import toast from "react-hot-toast";
 import { MdStar, MdShoppingCart } from "react-icons/md";
 
 const ProductCard = ({ product }) => {
   const dispatch = useDispatch();
+  const user = useSelector(selectAuthUser);
+  const isAdmin = user?.role === "admin";
 
   const handleAddToCart = (e) => {
     e.preventDefault();
     e.stopPropagation();
+
+    if (isAdmin) {
+      toast.error("Admin accounts cannot add products to cart");
+      return;
+    }
 
     if (product.stock === 0) {
       toast.error("Product is out of stock");
@@ -76,7 +84,7 @@ const ProductCard = ({ product }) => {
 
           <button
             onClick={handleAddToCart}
-            disabled={product.stock === 0}
+            disabled={product.stock === 0 || isAdmin}
             className="flex items-center gap-2 bg-white text-[#68a300] py-1 px-3 rounded-sm border border-[#68a300] hover:border-[#68a300] hover:bg-[#68a300] hover:text-white transition-colors disabled:cursor-not-allowed disabled:opacity-50"
             aria-label="Add to cart"
           >

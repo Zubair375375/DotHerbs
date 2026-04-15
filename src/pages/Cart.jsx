@@ -117,7 +117,7 @@ const Cart = () => {
           </p>
           <button
             onClick={() => navigate("/products")}
-            className="bg-green-600 text-white px-6 py-3 rounded-lg hover:bg-green-700"
+            className="bg-[#68a300] text-white px-6 py-3 rounded-lg hover:bg-[#5f9600]"
           >
             Continue Shopping
           </button>
