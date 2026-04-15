@@ -134,9 +134,11 @@ const Cart = () => {
                 <div className="flex space-x-4">
                   <img
                     src={
-                      item.product.images?.[0]?.url ||
-                      item.product.images?.[0] ||
-                      "/placeholder-product.jpg"
+                      item.product.image
+                        ? `http://localhost:5000${item.product.image}`
+                        : item.product.images?.[0]?.url ||
+                          item.product.images?.[0] ||
+                          "/placeholder-product.jpg"
                     }
                     alt={item.product.name}
                     className="w-24 h-24 object-cover rounded"
