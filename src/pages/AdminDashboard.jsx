@@ -50,6 +50,9 @@ const AdminDashboard = () => {
   const products = useSelector(selectProducts);
   const orders = useSelector(selectOrders);
   const users = useSelector(selectAllUsers);
+  const productPagination = useSelector((state) => state.products.pagination);
+  const orderPagination = useSelector((state) => state.orders.pagination);
+  const userPagination = useSelector((state) => state.users.pagination);
 
   const [activeTab, setActiveTab] = useState("overview");
   const [loading, setLoading] = useState(false);
@@ -79,18 +82,31 @@ const AdminDashboard = () => {
       toast.error("Access denied. Admin privileges required.");
       return;
     }
+  }, [isAuthenticated, navigate, user]);
 
-    // Fetch data based on active tab
+  useEffect(() => {
+    if (isAuthenticated && user?.role === "admin") {
+      // Prefetch core dashboard datasets so overview and stat cards are accurate immediately.
+      dispatch(fetchProducts({ page: 1, limit: 200 }));
+      dispatch(getOrders({ page: 1, limit: 200 }));
+      dispatch(getUsers({ page: 1, limit: 200 }));
+      dispatch(fetchAllAnnouncements());
+    }
+  }, [dispatch, isAuthenticated, user]);
+
+  useEffect(() => {
+    if (!(isAuthenticated && user?.role === "admin")) return;
+
     if (activeTab === "products") {
-      dispatch(fetchProducts());
+      dispatch(fetchProducts({ page: 1, limit: 200 }));
     } else if (activeTab === "orders") {
-      dispatch(getOrders());
+      dispatch(getOrders({ page: 1, limit: 200 }));
     } else if (activeTab === "users") {
-      dispatch(getUsers());
+      dispatch(getUsers({ page: 1, limit: 200 }));
     } else if (activeTab === "announcements") {
       dispatch(fetchAllAnnouncements());
     }
-  }, [isAuthenticated, navigate, user, activeTab, dispatch]);
+  }, [activeTab, dispatch, isAuthenticated, user]);
 
   const handleDeleteProduct = async (productId) => {
     if (window.confirm("Are you sure you want to delete this product?")) {
@@ -111,7 +127,7 @@ const AdminDashboard = () => {
   const handleUpdateOrderStatus = async (orderId, newStatus) => {
     try {
       await dispatch(
-        updateOrderStatus({ orderId, status: newStatus }),
+        updateOrderStatus({ id: orderId, status: newStatus }),
       ).unwrap();
       toast.success("Order status updated");
     } catch (error) {
@@ -141,9 +157,9 @@ const AdminDashboard = () => {
     (sum, order) => sum + (order.total || 0),
     0,
   );
-  const totalOrders = orders?.length || 0;
-  const totalProducts = products?.length || 0;
-  const totalUsers = users?.length || 0;
+  const totalOrders = orderPagination?.total || orders?.length || 0;
+  const totalProducts = productPagination?.total || products?.length || 0;
+  const totalUsers = userPagination?.total || users?.length || 0;
 
   if (!isAuthenticated || user?.role !== "admin") {
     return <Loader />;
