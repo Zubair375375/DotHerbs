@@ -117,7 +117,7 @@ const Home = () => {
             </h2>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-5">
+          <div className="grid grid-cols-[repeat(auto-fit,minmax(220px,220px))] justify-center gap-5">
             {categories.map((category) => {
               const meta = categoryMeta[category.value] || {
                 icon: <FaSeedling className="text-3xl text-[#68a300]" />,
@@ -131,12 +131,12 @@ const Home = () => {
                   to={`/products?category=${category.value}`}
                   className="group rounded-2xl border border-gray-200 bg-[#f9fcf3] p-6 text-center shadow-sm transition-all duration-300 hover:-translate-y-1 hover:border-[#68a300] hover:shadow-md"
                 >
-                  <div className="mx-auto mb-4 flex w-26 h-26 items-center justify-center rounded-full bg-white shadow-sm ring-2 ring-[#68a300]/20 transition-all group-hover:ring-[#68a300]/50 overflow-hidden">
+                  <div className="mx-auto mb-4 flex h-24 w-24 shrink-0 items-center justify-center overflow-hidden rounded-full bg-white shadow-sm ring-2 ring-[#68a300]/20 transition-all group-hover:ring-[#68a300]/50">
                     {category.image ? (
                       <img
                         src={`http://localhost:5000${category.image}`}
                         alt={category.name}
-                        className="w-full h-full object-cover"
+                        className="h-full w-full rounded-full object-cover"
                       />
                     ) : (
                       meta.icon
