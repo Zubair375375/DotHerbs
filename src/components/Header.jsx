@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Link, NavLink } from "react-router-dom";
 import { useSelector, useDispatch } from "react-redux";
 import { selectAuthUser, logoutUser } from "../store/slices/authSlice";
-import { selectCartItemCount } from "../store/slices/cartSlice";
+import { selectCartItemCount, resetCart } from "../store/slices/cartSlice";
 import {
   MdShoppingCart,
   MdPerson,
@@ -21,6 +21,7 @@ const Header = () => {
 
   const handleLogout = () => {
     dispatch(logoutUser());
+    dispatch(resetCart());
   };
 
   return (

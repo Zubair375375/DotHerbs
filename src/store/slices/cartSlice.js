@@ -1,17 +1,33 @@
 import { createSlice } from "@reduxjs/toolkit";
 
+// Get user-scoped cart key from current access token
+const getUserCartKey = () => {
+  try {
+    const token = localStorage.getItem("accessToken");
+    if (token) {
+      const parsed = JSON.parse(token);
+      // Use first 20 chars of token as unique session identifier
+      return `cart_${parsed.substring(0, 20)}`;
+    }
+  } catch (e) {
+    // fallback if token parsing fails
+  }
+  return "cart_anonymous";
+};
+
 // Get cart from localStorage
 const getCartFromStorage = () => {
-  const cart = localStorage.getItem("cart");
+  const key = getUserCartKey();
+  const cart = localStorage.getItem(key);
   return cart ? JSON.parse(cart) : { items: [], total: 0 };
 };
 
 // Save cart to localStorage
 const saveCartToStorage = (cart) => {
-  localStorage.setItem("cart", JSON.stringify(cart));
+  const key = getUserCartKey();
+  localStorage.setItem(key, JSON.stringify(cart));
 };
-
-// Initial state
+ // Initial state
 const initialState = {
   ...getCartFromStorage(),
   isLoading: false,
@@ -82,6 +98,17 @@ const cartSlice = createSlice({
       state.total = 0;
       saveCartToStorage(state);
     },
+    resetCart: (state) => {
+      // Clear cart completely when user logs out
+      state.items = [];
+      state.total = 0;
+      // Clean up all user-scoped carts from localStorage
+      Object.keys(localStorage).forEach((key) => {
+        if (key.startsWith("cart_")) {
+          localStorage.removeItem(key);
+        }
+      });
+    },
     clearError: (state) => {
       state.error = null;
     },
@@ -93,6 +120,7 @@ export const {
   removeFromCart,
   updateQuantity,
   clearCart,
+  resetCart,
   clearError,
 } = cartSlice.actions;
 
