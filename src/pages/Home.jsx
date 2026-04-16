@@ -25,6 +25,7 @@ const Home = () => {
   const categories = useSelector(selectCategories);
   const heroSlides = useSelector(selectHeroSlides);
   const [currentSlide, setCurrentSlide] = useState(0);
+  const [isTransitionEnabled, setIsTransitionEnabled] = useState(true);
 
   useEffect(() => {
     dispatch(fetchCategories({ force: true }));
@@ -52,8 +53,17 @@ const Home = () => {
     ];
   }, [heroSlides]);
 
+  const loopedSlides = useMemo(() => {
+    if (slides.length <= 1) {
+      return slides;
+    }
+
+    return [...slides, slides[0]];
+  }, [slides]);
+
   useEffect(() => {
     setCurrentSlide(0);
+    setIsTransitionEnabled(true);
   }, [slides.length]);
 
   useEffect(() => {
@@ -62,7 +72,7 @@ const Home = () => {
     }
 
     const intervalId = window.setInterval(() => {
-      setCurrentSlide((prev) => (prev + 1) % slides.length);
+      setCurrentSlide((prev) => prev + 1);
     }, 3000);
 
     return () => window.clearInterval(intervalId);
@@ -73,8 +83,31 @@ const Home = () => {
   };
 
   const handleNextSlide = () => {
-    setCurrentSlide((prev) => (prev + 1) % slides.length);
+    setCurrentSlide((prev) => prev + 1);
   };
+
+  const handleHeroTransitionEnd = () => {
+    if (slides.length <= 1) {
+      return;
+    }
+
+    if (currentSlide === slides.length) {
+      setIsTransitionEnabled(false);
+      setCurrentSlide(0);
+    }
+  };
+
+  useEffect(() => {
+    if (isTransitionEnabled) {
+      return undefined;
+    }
+
+    const frameId = window.requestAnimationFrame(() => {
+      setIsTransitionEnabled(true);
+    });
+
+    return () => window.cancelAnimationFrame(frameId);
+  }, [isTransitionEnabled]);
 
   const categoryMeta = {
     herbs: {
@@ -136,10 +169,11 @@ const Home = () => {
       <section className="relative overflow-hidden">
         <div className="relative h-[320px] sm:h-[420px] lg:h-[560px]">
           <div
-            className="flex h-full transition-transform duration-700 ease-in-out"
+            className={`flex h-full ${isTransitionEnabled ? "transition-transform duration-700 ease-in-out" : ""}`}
             style={{ transform: `translateX(-${currentSlide * 100}%)` }}
+            onTransitionEnd={handleHeroTransitionEnd}
           >
-            {slides.map((slide) => (
+            {loopedSlides.map((slide, index) => (
               <div key={slide._id} className="relative h-full min-w-full">
                 <img
                   src={slide.image}
@@ -193,7 +227,9 @@ const Home = () => {
                     type="button"
                     onClick={() => setCurrentSlide(index)}
                     className={`h-3 w-3 rounded-full border border-white/70 transition ${
-                      index === currentSlide ? "bg-[#68a300]" : "bg-white/70"
+                      index === currentSlide % slides.length
+                        ? "bg-[#68a300]"
+                        : "bg-white/70"
                     }`}
                     aria-label={`Go to hero slide ${index + 1}`}
                   />
