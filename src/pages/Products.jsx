@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { useSearchParams } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import {
   fetchProducts,
@@ -11,12 +12,14 @@ import Loader from "../components/Loader";
 
 const Products = () => {
   const dispatch = useDispatch();
+  const [searchParams] = useSearchParams();
   const products = useSelector(selectProducts);
   const status = useSelector(selectProductsStatus);
   const error = useSelector(selectProductsError);
+  const initialCategory = searchParams.get("category") || "";
 
   const [filters, setFilters] = useState({
-    category: "",
+    category: initialCategory,
     priceRange: "",
     search: "",
     sortBy: "name",
@@ -25,6 +28,13 @@ const Products = () => {
   useEffect(() => {
     dispatch(fetchProducts());
   }, [dispatch]);
+
+  useEffect(() => {
+    setFilters((prev) => ({
+      ...prev,
+      category: searchParams.get("category") || "",
+    }));
+  }, [searchParams]);
 
   const filteredProducts = products.filter((product) => {
     const matchesCategory =

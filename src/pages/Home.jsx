@@ -1,7 +1,47 @@
 import { Link } from "react-router-dom";
 import { MdEco, MdShield, MdLocalShipping, MdFavorite } from "react-icons/md";
+import {
+  FaLeaf,
+  FaMugHot,
+  FaCapsules,
+  FaOilCan,
+  FaSeedling,
+} from "react-icons/fa";
 
 const Home = () => {
+  const categories = [
+    {
+      name: "Herbs",
+      value: "herbs",
+      icon: <FaLeaf className="text-3xl text-[#68a300]" />,
+      description: "Whole herbs and botanical essentials",
+    },
+    {
+      name: "Teas",
+      value: "teas",
+      icon: <FaMugHot className="text-3xl text-[#68a300]" />,
+      description: "Comforting blends for daily wellness",
+    },
+    {
+      name: "Supplements",
+      value: "supplements",
+      icon: <FaCapsules className="text-3xl text-[#68a300]" />,
+      description: "Targeted support for your routine",
+    },
+    {
+      name: "Oils",
+      value: "oils",
+      icon: <FaOilCan className="text-3xl text-[#68a300]" />,
+      description: "Pure oils with therapeutic benefits",
+    },
+    {
+      name: "Other",
+      value: "other",
+      icon: <FaSeedling className="text-3xl text-[#68a300]" />,
+      description: "Special wellness picks and more",
+    },
+  ];
+
   const featuredProducts = [
     {
       _id: "1",
@@ -59,6 +99,40 @@ const Home = () => {
           >
             Shop Now
           </Link>
+        </div>
+      </section>
+
+      {/* Categories */}
+      <section className="bg-white py-16 px-6">
+        <div className="max-w-7xl mx-auto">
+          <div className="text-center mb-10">
+            <p className="text-[#68a300] font-semibold uppercase tracking-[0.2em] text-sm mb-3">
+              Shop by Category
+            </p>
+            <h2 className="text-3xl md:text-4xl font-bold text-gray-900">
+              Herbal Choice For Your Health
+            </h2>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-5">
+            {categories.map((category) => (
+              <Link
+                key={category.value}
+                to={`/products?category=${category.value}`}
+                className="group rounded-2xl border border-gray-200 bg-[#f9fcf3] p-6 text-center shadow-sm transition-all duration-300 hover:-translate-y-1 hover:border-[#68a300] hover:shadow-md"
+              >
+                <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-white shadow-sm transition-colors group-hover:bg-[#68a300]/10">
+                  {category.icon}
+                </div>
+                <h3 className="text-lg font-semibold text-gray-900 mb-2">
+                  {category.name}
+                </h3>
+                <p className="text-sm text-gray-600 leading-6">
+                  {category.description}
+                </p>
+              </Link>
+            ))}
+          </div>
         </div>
       </section>
 
