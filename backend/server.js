@@ -13,6 +13,7 @@ import categoryRoutes from "./routes/categories.js";
 import orderRoutes from "./routes/orders.js";
 import uploadRoutes from "./routes/upload.js";
 import announcementRoutes from "./routes/announcements.js";
+import heroSlideRoutes from "./routes/heroSlides.js";
 import { ensureDefaultCategories } from "./models/Category.js";
 import { errorHandler } from "./middleware/errorHandler.js";
 
@@ -76,6 +77,7 @@ app.use("/api/categories", categoryRoutes);
 app.use("/api/orders", orderRoutes);
 app.use("/api/upload", uploadRoutes);
 app.use("/api/announcements", announcementRoutes);
+app.use("/api/hero-slides", heroSlideRoutes);
 
 // Health check
 app.get("/api/health", (req, res) => {

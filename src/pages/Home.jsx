@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-import { useEffect } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { MdEco, MdShield, MdLocalShipping, MdFavorite } from "react-icons/md";
 import {
@@ -8,19 +8,73 @@ import {
   FaCapsules,
   FaOilCan,
   FaSeedling,
+  FaChevronLeft,
+  FaChevronRight,
 } from "react-icons/fa";
 import {
   fetchCategories,
   selectCategories,
 } from "../store/slices/productSlice";
+import {
+  fetchHeroSlides,
+  selectHeroSlides,
+} from "../store/slices/heroSlideSlice";
 
 const Home = () => {
   const dispatch = useDispatch();
   const categories = useSelector(selectCategories);
+  const heroSlides = useSelector(selectHeroSlides);
+  const [currentSlide, setCurrentSlide] = useState(0);
 
   useEffect(() => {
     dispatch(fetchCategories({ force: true }));
+    dispatch(fetchHeroSlides());
   }, [dispatch]);
+
+  const slides = useMemo(() => {
+    if (heroSlides.length > 0) {
+      return heroSlides.map((slide) => ({
+        _id: slide._id,
+        image: `http://localhost:5000${slide.image}`,
+        title: slide.title || "Pure Health Pure Life",
+        subtitle:
+          slide.subtitle || "Premium herbal products for a healthier lifestyle.",
+      }));
+    }
+
+    return [
+      {
+        _id: "fallback-hero",
+        image: "/images/banners/hero_banner1.jpg",
+        title: "Pure Health Pure Life",
+        subtitle: "Premium herbal products for a healthier lifestyle.",
+      },
+    ];
+  }, [heroSlides]);
+
+  useEffect(() => {
+    setCurrentSlide(0);
+  }, [slides.length]);
+
+  useEffect(() => {
+    if (slides.length <= 1) {
+      return undefined;
+    }
+
+    const intervalId = window.setInterval(() => {
+      setCurrentSlide((prev) => (prev + 1) % slides.length);
+    }, 3000);
+
+    return () => window.clearInterval(intervalId);
+  }, [slides.length]);
+
+  const handlePrevSlide = () => {
+    setCurrentSlide((prev) => (prev - 1 + slides.length) % slides.length);
+  };
+
+  const handleNextSlide = () => {
+    setCurrentSlide((prev) => (prev + 1) % slides.length);
+  };
 
   const categoryMeta = {
     herbs: {
@@ -79,29 +133,74 @@ const Home = () => {
   return (
     <div className="min-h-screen">
       {/* Hero */}
-      <section
-        className="relative h-[550px] bg-cover bg-center flex items-center"
-        style={{
-          backgroundImage: "url('/images/banners/hero_banner1.jpg')",
-        }}
-      >
-        <div className="absolute inset-0 bg-black/70"></div>
-
-        <div className="relative text-center max-w-5xl mx-auto px-4 text-white">
-          <h1 className="text-5xl font-bold mb-6">
-            Pure Health <span className="text-[#68a300]">Pure Life</span>
-          </h1>
-
-          <p className="mb-8">
-            Premium herbal products for a healthier lifestyle.
-          </p>
-
-          <Link
-            to="/products"
-            className="bg-[#68a300] text-white px-6 py-3 rounded-lg"
+      <section className="relative overflow-hidden">
+        <div className="relative h-[320px] sm:h-[420px] lg:h-[560px]">
+          <div
+            className="flex h-full transition-transform duration-700 ease-in-out"
+            style={{ transform: `translateX(-${currentSlide * 100}%)` }}
           >
-            Shop Now
-          </Link>
+            {slides.map((slide) => (
+              <div key={slide._id} className="relative h-full min-w-full">
+                <img
+                  src={slide.image}
+                  alt={slide.title}
+                  className="h-full w-full object-cover"
+                />
+                <div className="absolute inset-0 bg-black/45" />
+                <div className="absolute inset-0 flex items-center justify-center px-4">
+                  <div className="max-w-4xl text-center text-white">
+                    <h1 className="mb-4 text-4xl font-bold sm:text-5xl lg:text-6xl">
+                      {slide.title}
+                    </h1>
+                    <p className="mb-8 text-sm sm:text-base lg:text-lg">
+                      {slide.subtitle}
+                    </p>
+                    <Link
+                      to="/products"
+                      className="inline-flex rounded-lg bg-[#68a300] px-6 py-3 font-semibold text-white transition hover:bg-[#5d9200]"
+                    >
+                      Shop Now
+                    </Link>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+
+          {slides.length > 1 && (
+            <>
+              <button
+                type="button"
+                onClick={handlePrevSlide}
+                className="absolute left-3 top-1/2 z-10 flex h-11 w-11 -translate-y-1/2 items-center justify-center rounded-full bg-white/85 text-gray-700 shadow transition hover:bg-white"
+                aria-label="Previous hero slide"
+              >
+                <FaChevronLeft />
+              </button>
+              <button
+                type="button"
+                onClick={handleNextSlide}
+                className="absolute right-3 top-1/2 z-10 flex h-11 w-11 -translate-y-1/2 items-center justify-center rounded-full bg-white/85 text-gray-700 shadow transition hover:bg-white"
+                aria-label="Next hero slide"
+              >
+                <FaChevronRight />
+              </button>
+
+              <div className="absolute bottom-5 left-1/2 z-10 flex -translate-x-1/2 items-center gap-2">
+                {slides.map((slide, index) => (
+                  <button
+                    key={slide._id}
+                    type="button"
+                    onClick={() => setCurrentSlide(index)}
+                    className={`h-3 w-3 rounded-full border border-white/70 transition ${
+                      index === currentSlide ? "bg-[#68a300]" : "bg-white/70"
+                    }`}
+                    aria-label={`Go to hero slide ${index + 1}`}
+                  />
+                ))}
+              </div>
+            </>
+          )}
         </div>
       </section>
 

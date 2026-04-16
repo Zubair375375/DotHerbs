@@ -37,6 +37,7 @@ import {
   FaCheck,
   FaTimes,
   FaBullhorn,
+  FaImage,
 } from "react-icons/fa";
 import {
   fetchAllAnnouncements,
@@ -45,6 +46,12 @@ import {
   deleteAnnouncement,
   selectAllAnnouncements,
 } from "../store/slices/announcementSlice";
+import {
+  fetchAllHeroSlides,
+  createHeroSlide,
+  deleteHeroSlide,
+  selectAllHeroSlides,
+} from "../store/slices/heroSlideSlice";
 
 const AdminDashboard = () => {
   const dispatch = useDispatch();
@@ -58,6 +65,7 @@ const AdminDashboard = () => {
   const productPagination = useSelector((state) => state.products.pagination);
   const orderPagination = useSelector((state) => state.orders.pagination);
   const userPagination = useSelector((state) => state.users.pagination);
+  const heroSlides = useSelector(selectAllHeroSlides);
 
   const [activeTab, setActiveTab] = useState("overview");
   const [loading, setLoading] = useState(false);
@@ -73,6 +81,14 @@ const AdminDashboard = () => {
   const [categoryImageFile, setCategoryImageFile] = useState(null);
   const [categoryImagePreview, setCategoryImagePreview] = useState(null);
   const [uploadingCategoryImage, setUploadingCategoryImage] = useState(false);
+  const [heroForm, setHeroForm] = useState({
+    title: "",
+    subtitle: "",
+    displayOrder: 0,
+  });
+  const [heroImageFile, setHeroImageFile] = useState(null);
+  const [heroImagePreview, setHeroImagePreview] = useState(null);
+  const [uploadingHeroImage, setUploadingHeroImage] = useState(false);
   const [announcementForm, setAnnouncementForm] = useState({
     title: "",
     message: "",
@@ -104,6 +120,7 @@ const AdminDashboard = () => {
       dispatch(getOrders({ page: 1, limit: 200 }));
       dispatch(getUsers({ page: 1, limit: 200 }));
       dispatch(fetchAllAnnouncements());
+      dispatch(fetchAllHeroSlides());
     }
   }, [dispatch, isAuthenticated, user]);
 
@@ -120,8 +137,32 @@ const AdminDashboard = () => {
       dispatch(getUsers({ page: 1, limit: 200 }));
     } else if (activeTab === "announcements") {
       dispatch(fetchAllAnnouncements());
+    } else if (activeTab === "hero") {
+      dispatch(fetchAllHeroSlides());
     }
   }, [activeTab, dispatch, isAuthenticated, user]);
+
+  const uploadDashboardImage = async (file) => {
+    const formDataUpload = new FormData();
+    formDataUpload.append("image", file);
+    const rawToken = localStorage.getItem("accessToken");
+    const token = rawToken ? JSON.parse(rawToken) : null;
+    const response = await fetch(
+      `${import.meta.env.VITE_API_URL || "http://localhost:5000/api"}/upload`,
+      {
+        method: "POST",
+        headers: { Authorization: `Bearer ${token}` },
+        body: formDataUpload,
+      },
+    );
+
+    if (!response.ok) {
+      throw new Error("Failed to upload image");
+    }
+
+    const result = await response.json();
+    return result.data.url;
+  };
 
   const handleDeleteProduct = async (productId) => {
     if (window.confirm("Are you sure you want to delete this product?")) {
@@ -191,6 +232,49 @@ const AdminDashboard = () => {
       toast.success("Category deleted successfully");
     } catch (error) {
       toast.error(error || "Failed to delete category");
+    }
+  };
+
+  const handleCreateHeroSlide = async (e) => {
+    e.preventDefault();
+
+    if (!heroImageFile) {
+      toast.error("Hero image is required");
+      return;
+    }
+
+    try {
+      setUploadingHeroImage(true);
+      const imageUrl = await uploadDashboardImage(heroImageFile);
+      await dispatch(
+        createHeroSlide({
+          image: imageUrl,
+          title: heroForm.title,
+          subtitle: heroForm.subtitle,
+          displayOrder: Number(heroForm.displayOrder || 0),
+        }),
+      ).unwrap();
+      setHeroForm({ title: "", subtitle: "", displayOrder: 0 });
+      setHeroImageFile(null);
+      setHeroImagePreview(null);
+      toast.success("Hero slide created successfully");
+    } catch (error) {
+      toast.error(error || "Failed to create hero slide");
+    } finally {
+      setUploadingHeroImage(false);
+    }
+  };
+
+  const handleDeleteHeroSlide = async (slideId) => {
+    if (!window.confirm("Delete this hero slide?")) {
+      return;
+    }
+
+    try {
+      await dispatch(deleteHeroSlide(slideId)).unwrap();
+      toast.success("Hero slide deleted successfully");
+    } catch (error) {
+      toast.error(error || "Failed to delete hero slide");
     }
   };
 
@@ -354,6 +438,16 @@ const AdminDashboard = () => {
               }`}
             >
               Categories
+            </button>
+            <button
+              onClick={() => setActiveTab("hero")}
+              className={`py-4 px-1 border-b-2 border-t-0 border-l-0 border-r-0 font-medium text-sm ${
+                activeTab === "hero"
+                  ? "border-green-500 text-green-600"
+                  : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
+              }`}
+            >
+              Hero
             </button>
             <button
               onClick={() => setActiveTab("announcements")}
@@ -831,6 +925,161 @@ const AdminDashboard = () => {
                   ))}
                 </tbody>
               </table>
+            </div>
+          </div>
+        )}
+
+        {/* Hero Tab */}
+        {activeTab === "hero" && (
+          <div className="p-6">
+            <div className="grid grid-cols-1 gap-8 lg:grid-cols-[380px,1fr]">
+              <div className="rounded-lg border bg-gray-50 p-5">
+                <h2 className="mb-4 text-2xl font-semibold">Add Hero Slide</h2>
+                <form className="space-y-4" onSubmit={handleCreateHeroSlide}>
+                  <div>
+                    <label className="mb-2 block text-sm font-medium text-gray-700">
+                      Hero Image
+                    </label>
+                    {heroImagePreview && (
+                      <img
+                        src={heroImagePreview}
+                        alt="Hero preview"
+                        className="mb-3 h-40 w-full rounded-lg object-cover"
+                      />
+                    )}
+                    <input
+                      type="file"
+                      accept="image/*"
+                      onChange={(e) => {
+                        const file = e.target.files[0];
+                        if (!file) {
+                          return;
+                        }
+
+                        setHeroImageFile(file);
+                        const reader = new FileReader();
+                        reader.onload = (event) =>
+                          setHeroImagePreview(event.target.result);
+                        reader.readAsDataURL(file);
+                      }}
+                      className="w-full rounded border border-gray-300 px-3 py-2 text-sm"
+                    />
+                  </div>
+                  <div>
+                    <label className="mb-2 block text-sm font-medium text-gray-700">
+                      Title
+                    </label>
+                    <input
+                      type="text"
+                      value={heroForm.title}
+                      onChange={(e) =>
+                        setHeroForm((prev) => ({
+                          ...prev,
+                          title: e.target.value,
+                        }))
+                      }
+                      className="w-full rounded border border-gray-300 px-3 py-2"
+                      placeholder="Optional slide title"
+                    />
+                  </div>
+                  <div>
+                    <label className="mb-2 block text-sm font-medium text-gray-700">
+                      Subtitle
+                    </label>
+                    <textarea
+                      value={heroForm.subtitle}
+                      onChange={(e) =>
+                        setHeroForm((prev) => ({
+                          ...prev,
+                          subtitle: e.target.value,
+                        }))
+                      }
+                      rows={3}
+                      className="w-full rounded border border-gray-300 px-3 py-2"
+                      placeholder="Optional slide subtitle"
+                    />
+                  </div>
+                  <div>
+                    <label className="mb-2 block text-sm font-medium text-gray-700">
+                      Display Order
+                    </label>
+                    <input
+                      type="number"
+                      value={heroForm.displayOrder}
+                      onChange={(e) =>
+                        setHeroForm((prev) => ({
+                          ...prev,
+                          displayOrder: e.target.value,
+                        }))
+                      }
+                      className="w-full rounded border border-gray-300 px-3 py-2"
+                      min="0"
+                    />
+                  </div>
+                  <button
+                    type="submit"
+                    disabled={uploadingHeroImage}
+                    className="flex items-center space-x-2 rounded bg-[#68a300] px-4 py-2 text-white hover:bg-[#5f9600] disabled:opacity-60"
+                  >
+                    <FaPlus />
+                    <span>
+                      {uploadingHeroImage ? "Uploading..." : "Add Hero Slide"}
+                    </span>
+                  </button>
+                </form>
+              </div>
+
+              <div>
+                <div className="mb-6 flex items-center justify-between">
+                  <h2 className="text-2xl font-semibold">Hero Slides</h2>
+                  <div className="flex items-center gap-2 text-sm text-gray-500">
+                    <FaImage />
+                    <span>{heroSlides.length} slides</span>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 gap-5 md:grid-cols-2 xl:grid-cols-3">
+                  {heroSlides.map((slide) => (
+                    <div
+                      key={slide._id}
+                      className="overflow-hidden rounded-xl border bg-white shadow-sm"
+                    >
+                      <img
+                        src={`http://localhost:5000${slide.image}`}
+                        alt={slide.title || "Hero slide"}
+                        className="h-44 w-full object-cover"
+                      />
+                      <div className="space-y-2 p-4">
+                        <div className="flex items-start justify-between gap-4">
+                          <div>
+                            <h3 className="font-semibold text-gray-900">
+                              {slide.title || "Untitled slide"}
+                            </h3>
+                            <p className="text-sm text-gray-500">
+                              Order: {slide.displayOrder || 0}
+                            </p>
+                          </div>
+                          <button
+                            onClick={() => handleDeleteHeroSlide(slide._id)}
+                            className="text-red-600 hover:text-red-900"
+                          >
+                            <FaTrash />
+                          </button>
+                        </div>
+                        <p className="text-sm text-gray-600">
+                          {slide.subtitle || "No subtitle added."}
+                        </p>
+                      </div>
+                    </div>
+                  ))}
+
+                  {heroSlides.length === 0 && (
+                    <div className="rounded-xl border border-dashed p-8 text-center text-gray-400 md:col-span-2 xl:col-span-3">
+                      No hero slides yet.
+                    </div>
+                  )}
+                </div>
+              </div>
             </div>
           </div>
         )}
