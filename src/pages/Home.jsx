@@ -1,4 +1,6 @@
 import { Link } from "react-router-dom";
+import { useEffect } from "react";
+import { useDispatch, useSelector } from "react-redux";
 import { MdEco, MdShield, MdLocalShipping, MdFavorite } from "react-icons/md";
 import {
   FaLeaf,
@@ -7,40 +9,38 @@ import {
   FaOilCan,
   FaSeedling,
 } from "react-icons/fa";
+import { fetchCategories, selectCategories } from "../store/slices/productSlice";
 
 const Home = () => {
-  const categories = [
-    {
-      name: "Herbs",
-      value: "herbs",
+  const dispatch = useDispatch();
+  const categories = useSelector(selectCategories);
+
+  useEffect(() => {
+    dispatch(fetchCategories());
+  }, [dispatch]);
+
+  const categoryMeta = {
+    herbs: {
       icon: <FaLeaf className="text-3xl text-[#68a300]" />,
       description: "Whole herbs and botanical essentials",
     },
-    {
-      name: "Teas",
-      value: "teas",
+    teas: {
       icon: <FaMugHot className="text-3xl text-[#68a300]" />,
       description: "Comforting blends for daily wellness",
     },
-    {
-      name: "Supplements",
-      value: "supplements",
+    supplements: {
       icon: <FaCapsules className="text-3xl text-[#68a300]" />,
       description: "Targeted support for your routine",
     },
-    {
-      name: "Oils",
-      value: "oils",
+    oils: {
       icon: <FaOilCan className="text-3xl text-[#68a300]" />,
       description: "Pure oils with therapeutic benefits",
     },
-    {
-      name: "Other",
-      value: "other",
+    other: {
       icon: <FaSeedling className="text-3xl text-[#68a300]" />,
       description: "Special wellness picks and more",
     },
-  ];
+  };
 
   const featuredProducts = [
     {
@@ -115,23 +115,31 @@ const Home = () => {
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-5">
-            {categories.map((category) => (
+            {categories.map((category) => {
+              const meta = categoryMeta[category.value] || {
+                icon: <FaSeedling className="text-3xl text-[#68a300]" />,
+                description:
+                  category.description || "Explore curated wellness essentials",
+              };
+
+              return (
               <Link
                 key={category.value}
                 to={`/products?category=${category.value}`}
                 className="group rounded-2xl border border-gray-200 bg-[#f9fcf3] p-6 text-center shadow-sm transition-all duration-300 hover:-translate-y-1 hover:border-[#68a300] hover:shadow-md"
               >
                 <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-white shadow-sm transition-colors group-hover:bg-[#68a300]/10">
-                  {category.icon}
+                  {meta.icon}
                 </div>
                 <h3 className="text-lg font-semibold text-gray-900 mb-2">
                   {category.name}
                 </h3>
                 <p className="text-sm text-gray-600 leading-6">
-                  {category.description}
+                  {category.description || meta.description}
                 </p>
               </Link>
-            ))}
+              );
+            })}
           </div>
         </div>
       </section>

@@ -4,7 +4,9 @@ import { useParams, useNavigate } from "react-router-dom";
 import toast from "react-hot-toast";
 import {
   fetchProduct,
+  fetchCategories,
   updateProduct,
+  selectCategories,
   selectProduct,
   selectProductsStatus,
   selectProductsError,
@@ -15,14 +17,6 @@ import {
   selectIsAuthenticated,
 } from "../../store/slices/authSlice";
 
-const categories = [
-  { value: "herbs", label: "Herbs" },
-  { value: "teas", label: "Teas" },
-  { value: "oils", label: "Oils" },
-  { value: "supplements", label: "Supplements" },
-  { value: "other", label: "Other" },
-];
-
 const EditProduct = ({ onClose, onSuccess, product: productProp }) => {
   const { id } = useParams();
   const dispatch = useDispatch();
@@ -30,6 +24,7 @@ const EditProduct = ({ onClose, onSuccess, product: productProp }) => {
   const product = productProp || useSelector(selectProduct);
   const isLoading = useSelector(selectProductsStatus);
   const error = useSelector(selectProductsError);
+  const categories = useSelector(selectCategories);
   const user = useSelector(selectAuthUser);
   const isAuthenticated = useSelector(selectIsAuthenticated);
 
@@ -37,7 +32,7 @@ const EditProduct = ({ onClose, onSuccess, product: productProp }) => {
     name: "",
     description: "",
     price: "",
-    category: "herbs",
+    category: "",
     stock: "0",
     image: null,
     isActive: true,
@@ -55,6 +50,8 @@ const EditProduct = ({ onClose, onSuccess, product: productProp }) => {
       toast.error("Access denied. Admin privileges required.");
       return;
     }
+
+    dispatch(fetchCategories());
 
     // If product is passed as prop (modal usage), use it directly
     // Otherwise fetch by id for standalone page usage
@@ -76,7 +73,7 @@ const EditProduct = ({ onClose, onSuccess, product: productProp }) => {
         name: product.name || "",
         description: product.description || "",
         price: product.price?.toString() || "",
-        category: product.category || "herbs",
+        category: product.category || categories[0]?.value || "",
         stock: product.stock?.toString() || "0",
         image: null, // Don't set image file, just use existing URL for preview
         isActive: product.isActive ?? true,
@@ -86,7 +83,7 @@ const EditProduct = ({ onClose, onSuccess, product: productProp }) => {
         setImagePreview(product.images[0].url || product.images[0]);
       }
     }
-  }, [product]);
+  }, [categories, product]);
 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
@@ -255,8 +252,8 @@ const EditProduct = ({ onClose, onSuccess, product: productProp }) => {
                 required
               >
                 {categories.map((option) => (
-                  <option key={option.value} value={option.value}>
-                    {option.label}
+                  <option key={option._id || option.value} value={option.value}>
+                    {option.name}
                   </option>
                 ))}
               </select>

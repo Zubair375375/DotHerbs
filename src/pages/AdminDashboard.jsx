@@ -6,8 +6,12 @@ import {
   selectIsAuthenticated,
 } from "../store/slices/authSlice";
 import {
+  fetchCategories,
   fetchProducts,
   selectProducts,
+  selectCategories,
+  createCategory,
+  deleteCategory,
   deleteProduct,
 } from "../store/slices/productSlice";
 import {
@@ -48,6 +52,7 @@ const AdminDashboard = () => {
   const user = useSelector(selectAuthUser);
   const isAuthenticated = useSelector(selectIsAuthenticated);
   const products = useSelector(selectProducts);
+  const categories = useSelector(selectCategories);
   const orders = useSelector(selectOrders);
   const users = useSelector(selectAllUsers);
   const productPagination = useSelector((state) => state.products.pagination);
@@ -61,6 +66,10 @@ const AdminDashboard = () => {
   const [editingProduct, setEditingProduct] = useState(null);
   const [showAnnouncementModal, setShowAnnouncementModal] = useState(false);
   const [editingAnnouncement, setEditingAnnouncement] = useState(null);
+  const [categoryForm, setCategoryForm] = useState({
+    name: "",
+    description: "",
+  });
   const [announcementForm, setAnnouncementForm] = useState({
     title: "",
     message: "",
@@ -88,6 +97,7 @@ const AdminDashboard = () => {
     if (isAuthenticated && user?.role === "admin") {
       // Prefetch core dashboard datasets so overview and stat cards are accurate immediately.
       dispatch(fetchProducts({ page: 1, limit: 200 }));
+      dispatch(fetchCategories());
       dispatch(getOrders({ page: 1, limit: 200 }));
       dispatch(getUsers({ page: 1, limit: 200 }));
       dispatch(fetchAllAnnouncements());
@@ -99,6 +109,8 @@ const AdminDashboard = () => {
 
     if (activeTab === "products") {
       dispatch(fetchProducts({ page: 1, limit: 200 }));
+    } else if (activeTab === "categories") {
+      dispatch(fetchCategories());
     } else if (activeTab === "orders") {
       dispatch(getOrders({ page: 1, limit: 200 }));
     } else if (activeTab === "users") {
@@ -122,6 +134,36 @@ const AdminDashboard = () => {
   const handleEditProduct = (product) => {
     setEditingProduct(product);
     setShowEditProductModal(true);
+  };
+
+  const handleCreateCategory = async (e) => {
+    e.preventDefault();
+
+    if (!categoryForm.name.trim()) {
+      toast.error("Category name is required");
+      return;
+    }
+
+    try {
+      await dispatch(createCategory(categoryForm)).unwrap();
+      setCategoryForm({ name: "", description: "" });
+      toast.success("Category created successfully");
+    } catch (error) {
+      toast.error(error || "Failed to create category");
+    }
+  };
+
+  const handleDeleteCategory = async (categoryId) => {
+    if (!window.confirm("Delete this category?")) {
+      return;
+    }
+
+    try {
+      await dispatch(deleteCategory(categoryId)).unwrap();
+      toast.success("Category deleted successfully");
+    } catch (error) {
+      toast.error(error || "Failed to delete category");
+    }
   };
 
   const handleUpdateOrderStatus = async (orderId, newStatus) => {
@@ -274,6 +316,16 @@ const AdminDashboard = () => {
               }`}
             >
               Users
+            </button>
+            <button
+              onClick={() => setActiveTab("categories")}
+              className={`py-4 px-1 border-b-2 border-t-0 border-l-0 border-r-0 font-medium text-sm ${
+                activeTab === "categories"
+                  ? "border-green-500 text-green-600"
+                  : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
+              }`}
+            >
+              Categories
             </button>
             <button
               onClick={() => setActiveTab("announcements")}
@@ -458,6 +510,107 @@ const AdminDashboard = () => {
                   ))}
                 </tbody>
               </table>
+            </div>
+          </div>
+        )}
+
+        {/* Categories Tab */}
+        {activeTab === "categories" && (
+          <div className="p-6">
+            <div className="grid grid-cols-1 lg:grid-cols-[360px,1fr] gap-8">
+              <div className="border rounded-lg p-5 bg-gray-50">
+                <h2 className="text-2xl font-semibold mb-4">Add Category</h2>
+                <form className="space-y-4" onSubmit={handleCreateCategory}>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Category Name
+                    </label>
+                    <input
+                      type="text"
+                      value={categoryForm.name}
+                      onChange={(e) =>
+                        setCategoryForm((prev) => ({
+                          ...prev,
+                          name: e.target.value,
+                        }))
+                      }
+                      className="w-full border border-gray-300 rounded px-3 py-2"
+                      placeholder="e.g. Skincare"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Description
+                    </label>
+                    <textarea
+                      value={categoryForm.description}
+                      onChange={(e) =>
+                        setCategoryForm((prev) => ({
+                          ...prev,
+                          description: e.target.value,
+                        }))
+                      }
+                      rows={3}
+                      className="w-full border border-gray-300 rounded px-3 py-2"
+                      placeholder="Optional short description for the home page"
+                    />
+                  </div>
+                  <button
+                    type="submit"
+                    className="bg-[#68a300] text-white px-4 py-2 rounded hover:bg-[#5f9600] flex items-center space-x-2"
+                  >
+                    <FaPlus />
+                    <span>Add Category</span>
+                  </button>
+                </form>
+              </div>
+
+              <div>
+                <h2 className="text-2xl font-semibold mb-6">Category Management</h2>
+                <div className="overflow-x-auto">
+                  <table className="min-w-full table-auto">
+                    <thead>
+                      <tr className="bg-gray-50">
+                        <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+                          Name
+                        </th>
+                        <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+                          Value
+                        </th>
+                        <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+                          Description
+                        </th>
+                        <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+                          Actions
+                        </th>
+                      </tr>
+                    </thead>
+                    <tbody className="bg-white divide-y divide-gray-200">
+                      {categories.map((category) => (
+                        <tr key={category._id || category.value}>
+                          <td className="px-4 py-4 text-sm font-medium text-gray-900">
+                            {category.name}
+                          </td>
+                          <td className="px-4 py-4 text-sm text-gray-500">
+                            {category.value}
+                          </td>
+                          <td className="px-4 py-4 text-sm text-gray-500">
+                            {category.description || "-"}
+                          </td>
+                          <td className="px-4 py-4 text-sm font-medium">
+                            <button
+                              onClick={() => handleDeleteCategory(category._id)}
+                              className="text-red-600 hover:text-red-900"
+                            >
+                              <FaTrash />
+                            </button>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
             </div>
           </div>
         )}

@@ -3,6 +3,8 @@ import { useDispatch, useSelector } from "react-redux";
 import toast from "react-hot-toast";
 import {
   createProduct,
+  fetchCategories,
+  selectCategories,
   selectProductsStatus,
   selectProductsError,
 } from "../../store/slices/productSlice";
@@ -11,26 +13,19 @@ import {
   selectIsAuthenticated,
 } from "../../store/slices/authSlice";
 
-const categories = [
-  { value: "herbs", label: "Herbs" },
-  { value: "teas", label: "Teas" },
-  { value: "oils", label: "Oils" },
-  { value: "supplements", label: "Supplements" },
-  { value: "other", label: "Other" },
-];
-
 const CreateProduct = ({ onClose, onSuccess }) => {
   const dispatch = useDispatch();
   const user = useSelector(selectAuthUser);
   const isAuthenticated = useSelector(selectIsAuthenticated);
   const isLoading = useSelector(selectProductsStatus);
   const error = useSelector(selectProductsError);
+  const categories = useSelector(selectCategories);
 
   const [formData, setFormData] = useState({
     name: "",
     description: "",
     price: "",
-    category: "herbs",
+    category: "",
     stock: "0",
     image: null,
     isActive: true,
@@ -39,6 +34,8 @@ const CreateProduct = ({ onClose, onSuccess }) => {
   const [uploading, setUploading] = useState(false);
 
   useEffect(() => {
+    dispatch(fetchCategories());
+
     console.log(
       "CreateProduct useEffect - isAuthenticated:",
       isAuthenticated,
@@ -50,7 +47,13 @@ const CreateProduct = ({ onClose, onSuccess }) => {
       onClose();
       toast.error("Access denied. Admin privileges required.");
     }
-  }, [isAuthenticated, user, onClose]);
+  }, [dispatch, isAuthenticated, user, onClose]);
+
+  useEffect(() => {
+    if (categories.length > 0 && !formData.category) {
+      setFormData((prev) => ({ ...prev, category: categories[0].value }));
+    }
+  }, [categories, formData.category]);
 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
@@ -124,10 +127,7 @@ const CreateProduct = ({ onClose, onSuccess }) => {
       return;
     }
 
-    if (
-      !category ||
-      !["herbs", "teas", "oils", "supplements", "other"].includes(category)
-    ) {
+    if (!category) {
       toast.error("Please select a valid category.");
       return;
     }
@@ -225,8 +225,8 @@ const CreateProduct = ({ onClose, onSuccess }) => {
               required
             >
               {categories.map((option) => (
-                <option key={option.value} value={option.value}>
-                  {option.label}
+                <option key={option._id || option.value} value={option.value}>
+                  {option.name}
                 </option>
               ))}
             </select>

@@ -2,7 +2,9 @@ import { useState, useEffect } from "react";
 import { useSearchParams } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import {
+  fetchCategories,
   fetchProducts,
+  selectCategories,
   selectProducts,
   selectProductsStatus,
   selectProductsError,
@@ -14,6 +16,7 @@ const Products = () => {
   const dispatch = useDispatch();
   const [searchParams] = useSearchParams();
   const products = useSelector(selectProducts);
+  const categories = useSelector(selectCategories);
   const status = useSelector(selectProductsStatus);
   const error = useSelector(selectProductsError);
   const initialCategory = searchParams.get("category") || "";
@@ -27,6 +30,7 @@ const Products = () => {
 
   useEffect(() => {
     dispatch(fetchProducts());
+    dispatch(fetchCategories());
   }, [dispatch]);
 
   useEffect(() => {
@@ -127,11 +131,11 @@ const Products = () => {
                 className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
               >
                 <option value="">All Categories</option>
-                <option value="herbs">Herbs</option>
-                <option value="spices">Spices</option>
-                <option value="teas">Teas</option>
-                <option value="supplements">Supplements</option>
-                <option value="oils">Essential Oils</option>
+                {categories.map((category) => (
+                  <option key={category._id || category.value} value={category.value}>
+                    {category.name}
+                  </option>
+                ))}
               </select>
             </div>
 

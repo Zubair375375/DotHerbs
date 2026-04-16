@@ -1,4 +1,5 @@
 import { validationResult } from "express-validator";
+import Category from "../models/Category.js";
 import Product from "../models/Product.js";
 
 // @desc    Get all products
@@ -275,7 +276,9 @@ export const createProductReview = async (req, res) => {
 // @access  Public
 export const getCategories = async (req, res) => {
   try {
-    const categories = await Product.distinct("category", { isActive: true });
+    const categories = await Category.find({ isActive: true })
+      .sort({ name: 1 })
+      .select("name value description");
 
     res.json({
       success: true,

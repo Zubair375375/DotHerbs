@@ -8,6 +8,7 @@ const initialState = {
   products: [],
   product: null,
   categories: [],
+  categoriesStatus: "idle",
   isLoading: false,
   error: null,
   pagination: {
@@ -76,6 +77,64 @@ export const fetchCategories = createAsyncThunk(
     } catch (error) {
       return rejectWithValue(
         error.response?.data?.error || "Failed to fetch categories",
+      );
+    }
+  },
+  {
+    condition: (arg, { getState }) => {
+      const { products } = getState();
+      const force = arg?.force === true;
+
+      if (force) {
+        return true;
+      }
+
+      if (products.categoriesStatus === "loading") {
+        return false;
+      }
+
+      if (products.categories.length > 0) {
+        return false;
+      }
+
+      return true;
+    },
+  },
+);
+
+export const createCategory = createAsyncThunk(
+  "products/createCategory",
+  async (categoryData, { getState, rejectWithValue }) => {
+    try {
+      const { auth } = getState();
+      const response = await axios.post(`${API_URL}/categories`, categoryData, {
+        headers: {
+          Authorization: `Bearer ${auth.accessToken}`,
+        },
+      });
+      return response.data.data;
+    } catch (error) {
+      return rejectWithValue(
+        error.response?.data?.error || "Failed to create category",
+      );
+    }
+  },
+);
+
+export const deleteCategory = createAsyncThunk(
+  "products/deleteCategory",
+  async (id, { getState, rejectWithValue }) => {
+    try {
+      const { auth } = getState();
+      await axios.delete(`${API_URL}/categories/${id}`, {
+        headers: {
+          Authorization: `Bearer ${auth.accessToken}`,
+        },
+      });
+      return id;
+    } catch (error) {
+      return rejectWithValue(
+        error.response?.data?.error || "Failed to delete category",
       );
     }
   },
@@ -213,8 +272,32 @@ const productSlice = createSlice({
         state.error = action.payload;
       })
       // Fetch categories
+      .addCase(fetchCategories.pending, (state) => {
+        state.categoriesStatus = "loading";
+      })
       .addCase(fetchCategories.fulfilled, (state, action) => {
+        state.categoriesStatus = "succeeded";
         state.categories = action.payload;
+      })
+      .addCase(fetchCategories.rejected, (state, action) => {
+        state.categoriesStatus = "failed";
+        state.error = action.payload;
+      })
+      .addCase(createCategory.fulfilled, (state, action) => {
+        state.categories.push(action.payload);
+        state.categories.sort((a, b) => a.name.localeCompare(b.name));
+        state.categoriesStatus = "succeeded";
+      })
+      .addCase(createCategory.rejected, (state, action) => {
+        state.error = action.payload;
+      })
+      .addCase(deleteCategory.fulfilled, (state, action) => {
+        state.categories = state.categories.filter(
+          (category) => category._id !== action.payload,
+        );
+      })
+      .addCase(deleteCategory.rejected, (state, action) => {
+        state.error = action.payload;
       })
       // Create product
       .addCase(createProduct.pending, (state) => {
@@ -285,6 +368,8 @@ const productSlice = createSlice({
 export const { clearError, setFilters, clearFilters, clearProduct } =
   productSlice.actions;
 export const selectProducts = (state) => state.products.products;
+export const selectCategories = (state) => state.products.categories;
+export const selectCategoriesStatus = (state) => state.products.categoriesStatus;
 export const selectProductsError = (state) => state.products.error;
 export const selectProductsStatus = (state) => state.products.isLoading;
 export const selectProduct = (state) => state.products.product;

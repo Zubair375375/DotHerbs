@@ -9,9 +9,11 @@ import connectDB from "./config/database.js";
 import authRoutes from "./routes/auth.js";
 import userRoutes from "./routes/users.js";
 import productRoutes from "./routes/products.js";
+import categoryRoutes from "./routes/categories.js";
 import orderRoutes from "./routes/orders.js";
 import uploadRoutes from "./routes/upload.js";
 import announcementRoutes from "./routes/announcements.js";
+import { ensureDefaultCategories } from "./models/Category.js";
 import { errorHandler } from "./middleware/errorHandler.js";
 
 dotenv.config();
@@ -21,8 +23,9 @@ const __dirname = path.dirname(__filename);
 
 const app = express();
 
-// Connect to MongoDB
-connectDB();
+// Connect to MongoDB and seed required reference data
+await connectDB();
+await ensureDefaultCategories();
 
 // Security middleware
 app.use(helmet());
@@ -47,6 +50,7 @@ const limiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
   max: 100, // limit each IP to 100 requests per windowMs
   message: "Too many requests from this IP, please try again later.",
+  skip: (req) => req.method === "GET" && req.path === "/api/categories",
 });
 app.use("/api/", limiter);
 
@@ -68,6 +72,7 @@ app.use(
 app.use("/api/auth", authRoutes);
 app.use("/api/users", userRoutes);
 app.use("/api/products", productRoutes);
+app.use("/api/categories", categoryRoutes);
 app.use("/api/orders", orderRoutes);
 app.use("/api/upload", uploadRoutes);
 app.use("/api/announcements", announcementRoutes);

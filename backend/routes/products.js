@@ -1,5 +1,6 @@
 import express from "express";
 import { body } from "express-validator";
+import Category from "../models/Category.js";
 import {
   getProducts,
   getProduct,
@@ -27,8 +28,13 @@ const createProductValidation = [
     .isFloat({ min: 0 })
     .withMessage("Price must be a positive number"),
   body("category")
-    .isIn(["herbs", "teas", "oils", "supplements", "other"])
-    .withMessage("Invalid category"),
+    .custom(async (value) => {
+      const category = await Category.findOne({ value, isActive: true });
+      if (!category) {
+        throw new Error("Invalid category");
+      }
+      return true;
+    }),
   body("stock")
     .isInt({ min: 0 })
     .withMessage("Stock must be a non-negative integer"),
@@ -51,8 +57,13 @@ const updateProductValidation = [
     .withMessage("Price must be a positive number"),
   body("category")
     .optional()
-    .isIn(["herbs", "teas", "oils", "supplements", "other"])
-    .withMessage("Invalid category"),
+    .custom(async (value) => {
+      const category = await Category.findOne({ value, isActive: true });
+      if (!category) {
+        throw new Error("Invalid category");
+      }
+      return true;
+    }),
   body("stock")
     .optional()
     .isInt({ min: 0 })
