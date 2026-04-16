@@ -72,7 +72,7 @@ export const fetchCategories = createAsyncThunk(
   "products/fetchCategories",
   async (_, { rejectWithValue }) => {
     try {
-      const response = await axios.get(`${API_URL}/products/categories`);
+      const response = await axios.get(`${API_URL}/categories`);
       return response.data.data;
     } catch (error) {
       return rejectWithValue(
@@ -369,7 +369,8 @@ export const { clearError, setFilters, clearFilters, clearProduct } =
   productSlice.actions;
 export const selectProducts = (state) => state.products.products;
 export const selectCategories = (state) => state.products.categories;
-export const selectCategoriesStatus = (state) => state.products.categoriesStatus;
+export const selectCategoriesStatus = (state) =>
+  state.products.categoriesStatus;
 export const selectProductsError = (state) => state.products.error;
 export const selectProductsStatus = (state) => state.products.isLoading;
 export const selectProduct = (state) => state.products.product;

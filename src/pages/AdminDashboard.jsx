@@ -70,6 +70,9 @@ const AdminDashboard = () => {
     name: "",
     description: "",
   });
+  const [categoryImageFile, setCategoryImageFile] = useState(null);
+  const [categoryImagePreview, setCategoryImagePreview] = useState(null);
+  const [uploadingCategoryImage, setUploadingCategoryImage] = useState(false);
   const [announcementForm, setAnnouncementForm] = useState({
     title: "",
     message: "",
@@ -145,10 +148,35 @@ const AdminDashboard = () => {
     }
 
     try {
-      await dispatch(createCategory(categoryForm)).unwrap();
+      let imageUrl = "";
+      if (categoryImageFile) {
+        setUploadingCategoryImage(true);
+        const formDataUpload = new FormData();
+        formDataUpload.append("image", categoryImageFile);
+        const rawToken = localStorage.getItem("accessToken");
+        const token = rawToken ? JSON.parse(rawToken) : null;
+        const response = await fetch(
+          `${import.meta.env.VITE_API_URL || "http://localhost:5000/api"}/upload`,
+          {
+            method: "POST",
+            headers: { Authorization: `Bearer ${token}` },
+            body: formDataUpload,
+          },
+        );
+        if (!response.ok) throw new Error("Failed to upload image");
+        const result = await response.json();
+        imageUrl = result.data.url;
+        setUploadingCategoryImage(false);
+      }
+      await dispatch(
+        createCategory({ ...categoryForm, image: imageUrl }),
+      ).unwrap();
       setCategoryForm({ name: "", description: "" });
+      setCategoryImageFile(null);
+      setCategoryImagePreview(null);
       toast.success("Category created successfully");
     } catch (error) {
+      setUploadingCategoryImage(false);
       toast.error(error || "Failed to create category");
     }
   };
@@ -555,22 +583,57 @@ const AdminDashboard = () => {
                       placeholder="Optional short description for the home page"
                     />
                   </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Category Image
+                    </label>
+                    {categoryImagePreview && (
+                      <img
+                        src={categoryImagePreview}
+                        alt="Preview"
+                        className="w-20 h-20 object-cover rounded-full border-2 border-[#68a300] mb-2"
+                      />
+                    )}
+                    <input
+                      type="file"
+                      accept="image/*"
+                      onChange={(e) => {
+                        const file = e.target.files[0];
+                        if (file) {
+                          setCategoryImageFile(file);
+                          const reader = new FileReader();
+                          reader.onload = (ev) =>
+                            setCategoryImagePreview(ev.target.result);
+                          reader.readAsDataURL(file);
+                        }
+                      }}
+                      className="w-full border border-gray-300 rounded px-3 py-2 text-sm"
+                    />
+                  </div>
                   <button
                     type="submit"
-                    className="bg-[#68a300] text-white px-4 py-2 rounded hover:bg-[#5f9600] flex items-center space-x-2"
+                    disabled={uploadingCategoryImage}
+                    className="bg-[#68a300] text-white px-4 py-2 rounded hover:bg-[#5f9600] flex items-center space-x-2 disabled:opacity-60"
                   >
                     <FaPlus />
-                    <span>Add Category</span>
+                    <span>
+                      {uploadingCategoryImage ? "Uploading..." : "Add Category"}
+                    </span>
                   </button>
                 </form>
               </div>
 
               <div>
-                <h2 className="text-2xl font-semibold mb-6">Category Management</h2>
+                <h2 className="text-2xl font-semibold mb-6">
+                  Category Management
+                </h2>
                 <div className="overflow-x-auto">
                   <table className="min-w-full table-auto">
                     <thead>
                       <tr className="bg-gray-50">
+                        <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+                          Image
+                        </th>
                         <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">
                           Name
                         </th>
@@ -588,6 +651,19 @@ const AdminDashboard = () => {
                     <tbody className="bg-white divide-y divide-gray-200">
                       {categories.map((category) => (
                         <tr key={category._id || category.value}>
+                          <td className="px-4 py-4">
+                            {category.image ? (
+                              <img
+                                src={`http://localhost:5000${category.image}`}
+                                alt={category.name}
+                                className="w-10 h-10 object-cover rounded-full border border-gray-200"
+                              />
+                            ) : (
+                              <div className="w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center text-gray-400 text-xs border border-gray-200">
+                                N/A
+                              </div>
+                            )}
+                          </td>
                           <td className="px-4 py-4 text-sm font-medium text-gray-900">
                             {category.name}
                           </td>

@@ -9,14 +9,17 @@ import {
   FaOilCan,
   FaSeedling,
 } from "react-icons/fa";
-import { fetchCategories, selectCategories } from "../store/slices/productSlice";
+import {
+  fetchCategories,
+  selectCategories,
+} from "../store/slices/productSlice";
 
 const Home = () => {
   const dispatch = useDispatch();
   const categories = useSelector(selectCategories);
 
   useEffect(() => {
-    dispatch(fetchCategories());
+    dispatch(fetchCategories({ force: true }));
   }, [dispatch]);
 
   const categoryMeta = {
@@ -123,21 +126,29 @@ const Home = () => {
               };
 
               return (
-              <Link
-                key={category.value}
-                to={`/products?category=${category.value}`}
-                className="group rounded-2xl border border-gray-200 bg-[#f9fcf3] p-6 text-center shadow-sm transition-all duration-300 hover:-translate-y-1 hover:border-[#68a300] hover:shadow-md"
-              >
-                <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-white shadow-sm transition-colors group-hover:bg-[#68a300]/10">
-                  {meta.icon}
-                </div>
-                <h3 className="text-lg font-semibold text-gray-900 mb-2">
-                  {category.name}
-                </h3>
-                <p className="text-sm text-gray-600 leading-6">
-                  {category.description || meta.description}
-                </p>
-              </Link>
+                <Link
+                  key={category.value}
+                  to={`/products?category=${category.value}`}
+                  className="group rounded-2xl border border-gray-200 bg-[#f9fcf3] p-6 text-center shadow-sm transition-all duration-300 hover:-translate-y-1 hover:border-[#68a300] hover:shadow-md"
+                >
+                  <div className="mx-auto mb-4 flex w-26 h-26 items-center justify-center rounded-full bg-white shadow-sm ring-2 ring-[#68a300]/20 transition-all group-hover:ring-[#68a300]/50 overflow-hidden">
+                    {category.image ? (
+                      <img
+                        src={`http://localhost:5000${category.image}`}
+                        alt={category.name}
+                        className="w-full h-full object-cover"
+                      />
+                    ) : (
+                      meta.icon
+                    )}
+                  </div>
+                  <h3 className="text-lg font-semibold text-gray-900 mb-2">
+                    {category.name}
+                  </h3>
+                  <p className="text-sm text-gray-600 leading-6">
+                    {category.description || meta.description}
+                  </p>
+                </Link>
               );
             })}
           </div>
