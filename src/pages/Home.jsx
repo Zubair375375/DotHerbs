@@ -39,7 +39,8 @@ const Home = () => {
         image: `http://localhost:5000${slide.image}`,
         title: slide.title || "Pure Health Pure Life",
         subtitle:
-          slide.subtitle || "Premium herbal products for a healthier lifestyle.",
+          slide.subtitle ||
+          "Premium herbal products for a healthier lifestyle.",
       }));
     }
 
@@ -252,7 +253,7 @@ const Home = () => {
             </h2>
           </div>
 
-          <div className="grid grid-cols-[repeat(auto-fit,minmax(220px,220px))] justify-center gap-5">
+          <div className="grid grid-cols-[repeat(auto-fit,minmax(170px,170px))] justify-center gap-4">
             {categories.map((category) => {
               const meta = categoryMeta[category.value] || {
                 icon: <FaSeedling className="text-3xl text-[#68a300]" />,
@@ -264,9 +265,9 @@ const Home = () => {
                 <Link
                   key={category.value}
                   to={`/products?category=${category.value}`}
-                  className="group rounded-2xl border border-gray-200 bg-[#f9fcf3] p-6 text-center shadow-sm transition-all duration-300 hover:-translate-y-1 hover:border-[#68a300] hover:shadow-md"
+                  className="group rounded-xl bg-[#ffffff] px-3 py-4 text-center transition-all duration-300 hover:-translate-y-1"
                 >
-                  <div className="mx-auto mb-4 flex h-24 w-24 shrink-0 items-center justify-center overflow-hidden rounded-full bg-white shadow-sm ring-2 ring-[#68a300]/20 transition-all group-hover:ring-[#68a300]/50">
+                  <div className="mx-auto mb-4 flex h-24 w-24 shrink-0 items-center justify-center overflow-hidden rounded-full bg-white transition-all">
                     {category.image ? (
                       <img
                         src={`http://localhost:5000${category.image}`}
@@ -280,9 +281,6 @@ const Home = () => {
                   <h3 className="text-lg font-semibold text-gray-900 mb-2">
                     {category.name}
                   </h3>
-                  <p className="text-sm text-gray-600 leading-6">
-                    {category.description || meta.description}
-                  </p>
                 </Link>
               );
             })}

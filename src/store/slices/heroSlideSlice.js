@@ -113,7 +113,9 @@ const heroSlideSlice = createSlice({
         state.adminItems = state.adminItems.filter(
           (slide) => slide._id !== action.payload,
         );
-        state.items = state.items.filter((slide) => slide._id !== action.payload);
+        state.items = state.items.filter(
+          (slide) => slide._id !== action.payload,
+        );
       });
   },
 });
