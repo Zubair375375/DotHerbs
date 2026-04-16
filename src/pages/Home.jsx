@@ -3,10 +3,6 @@ import { useEffect, useMemo, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { MdEco, MdShield, MdLocalShipping, MdFavorite } from "react-icons/md";
 import {
-  FaLeaf,
-  FaMugHot,
-  FaCapsules,
-  FaOilCan,
   FaSeedling,
   FaChevronLeft,
   FaChevronRight,
@@ -109,29 +105,6 @@ const Home = () => {
 
     return () => window.cancelAnimationFrame(frameId);
   }, [isTransitionEnabled]);
-
-  const categoryMeta = {
-    herbs: {
-      icon: <FaLeaf className="text-3xl text-[#68a300]" />,
-      description: "Whole herbs and botanical essentials",
-    },
-    teas: {
-      icon: <FaMugHot className="text-3xl text-[#68a300]" />,
-      description: "Comforting blends for daily wellness",
-    },
-    supplements: {
-      icon: <FaCapsules className="text-3xl text-[#68a300]" />,
-      description: "Targeted support for your routine",
-    },
-    oils: {
-      icon: <FaOilCan className="text-3xl text-[#68a300]" />,
-      description: "Pure oils with therapeutic benefits",
-    },
-    other: {
-      icon: <FaSeedling className="text-3xl text-[#68a300]" />,
-      description: "Special wellness picks and more",
-    },
-  };
 
   const featuredProducts = [
     {
@@ -255,12 +228,6 @@ const Home = () => {
 
           <div className="grid grid-cols-[repeat(auto-fit,minmax(170px,170px))] justify-center gap-4">
             {categories.map((category) => {
-              const meta = categoryMeta[category.value] || {
-                icon: <FaSeedling className="text-3xl text-[#68a300]" />,
-                description:
-                  category.description || "Explore curated wellness essentials",
-              };
-
               return (
                 <Link
                   key={category.value}
@@ -275,7 +242,7 @@ const Home = () => {
                         className="h-full w-full rounded-full object-cover"
                       />
                     ) : (
-                      meta.icon
+                      <FaSeedling className="text-3xl text-[#68a300]" />
                     )}
                   </div>
                   <h3 className="text-lg font-semibold text-gray-900 mb-2">
