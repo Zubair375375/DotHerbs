@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo } from "react";
-import { useSearchParams } from "react-router-dom";
+import { useLocation, useNavigate, useSearchParams } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { FaChevronLeft, FaChevronRight } from "react-icons/fa";
 import {
@@ -19,6 +19,8 @@ import Loader from "../components/Loader";
 
 const Products = () => {
   const dispatch = useDispatch();
+  const location = useLocation();
+  const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const products = useSelector(selectProducts);
   const categories = useSelector(selectCategories);
@@ -26,14 +28,13 @@ const Products = () => {
   const error = useSelector(selectProductsError);
   const productBanners = useSelector(selectProductBanners);
   const initialCategory = searchParams.get("category") || "";
-  const initialSearch = searchParams.get("search") || "";
   const [currentBanner, setCurrentBanner] = useState(0);
   const [isBannerTransition, setIsBannerTransition] = useState(true);
 
   const [filters, setFilters] = useState({
     category: initialCategory,
     priceRange: "",
-    search: initialSearch,
+    search: "",
     sortBy: "name",
   });
 
@@ -113,17 +114,29 @@ const Products = () => {
     setFilters((prev) => ({
       ...prev,
       category: searchParams.get("category") || "",
-      search: searchParams.get("search") || "",
     }));
   }, [searchParams]);
 
+  useEffect(() => {
+    const stateSearch = location.state?.search;
+    if (typeof stateSearch !== "string") {
+      return;
+    }
+
+    setFilters((prev) => ({
+      ...prev,
+      search: stateSearch,
+    }));
+
+    navigate(location.pathname + location.search, { replace: true, state: null });
+  }, [location.pathname, location.search, location.state, navigate]);
+
   const filteredProducts = products.filter((product) => {
+    const searchValue = filters.search.trim().toLowerCase();
     const matchesCategory =
       !filters.category || product.category === filters.category;
     const matchesSearch =
-      !filters.search ||
-      product.name.toLowerCase().includes(filters.search.toLowerCase()) ||
-      product.description.toLowerCase().includes(filters.search.toLowerCase());
+      !searchValue || product.name.toLowerCase().startsWith(searchValue);
 
     let matchesPrice = true;
     if (filters.priceRange) {
@@ -244,20 +257,7 @@ const Products = () => {
 
         {/* Filters */}
         <div className="bg-white p-6 rounded-lg shadow-md mb-6">
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-            {/* Search */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Search
-              </label>
-              <input
-                type="text"
-                placeholder="Search products..."
-                value={filters.search}
-                onChange={(e) => handleFilterChange("search", e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
-              />
-            </div>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
 
             {/* Category */}
             <div>

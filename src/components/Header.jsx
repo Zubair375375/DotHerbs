@@ -1,6 +1,5 @@
 import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
-import { Link, NavLink } from "react-router-dom";
+import { Link, NavLink, useLocation, useNavigate } from "react-router-dom";
 import { useSelector, useDispatch } from "react-redux";
 import { selectAuthUser, logoutUser } from "../store/slices/authSlice";
 import { selectCartItemCount, resetCart } from "../store/slices/cartSlice";
@@ -9,8 +8,6 @@ import {
   MdPerson,
   MdMenu,
   MdClose,
-  MdSettings,
-  MdLogout,
   MdSearch,
 } from "react-icons/md";
 
@@ -19,6 +16,7 @@ const Header = () => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [scrolled, setScrolled] = useState(false);
+  const location = useLocation();
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -27,14 +25,6 @@ const Header = () => {
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
 
-  const handleSearch = (e) => {
-    e.preventDefault();
-    const q = searchQuery.trim();
-    if (q) {
-      navigate(`/products?search=${encodeURIComponent(q)}`);
-      setSearchQuery("");
-    }
-  };
   const dispatch = useDispatch();
   const user = useSelector(selectAuthUser);
   const cartItemCount = useSelector(selectCartItemCount);
@@ -42,6 +32,24 @@ const Header = () => {
   const handleLogout = () => {
     dispatch(logoutUser());
     dispatch(resetCart());
+  };
+
+  const handleSearch = (e) => {
+    e.preventDefault();
+    const q = searchQuery.trim();
+    if (!q) return;
+    navigate("/products", { state: { search: q } });
+    setSearchQuery("");
+  };
+
+  const handleSearchChange = (value) => {
+    setSearchQuery(value);
+
+    if (location.pathname !== "/products") {
+      return;
+    }
+
+    navigate("/products", { replace: true, state: { search: value } });
   };
 
   const navLinks = [
@@ -123,7 +131,7 @@ const Header = () => {
 
         {/* ── Top row: logo + search + icons ── fades/shrinks away on scroll */}
         <div
-          className={`flex justify-center items-center gap-8 overflow-hidden transition-all duration-300 ease-in-out ${
+          className={`flex justify-between items-center overflow-hidden transition-all duration-300 ease-in-out ${
             scrolled ? "h-0 opacity-0 pointer-events-none" : "h-16 opacity-100"
           }`}
         >
@@ -139,7 +147,7 @@ const Header = () => {
               <input
                 type="text"
                 value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
+                onChange={(e) => handleSearchChange(e.target.value)}
                 placeholder="Search products..."
                 className="w-full rounded-md border border-gray-300 bg-gray-50 py-1.5 pl-4 pr-10 text-sm outline-none focus:border-[#68a300] focus:ring-1 focus:ring-[#68a300]"
               />
