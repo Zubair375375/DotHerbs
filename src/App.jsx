@@ -1,7 +1,7 @@
 import { useEffect } from "react";
 import { Routes, Route } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
-import { getCurrentUser } from "./store/slices/authSlice";
+import { getCurrentUser, setAuthChecked } from "./store/slices/authSlice";
 import Layout from "./components/Layout";
 import Home from "./pages/Home";
 import Products from "./pages/Products";
@@ -24,8 +24,11 @@ function App() {
   useEffect(() => {
     if (accessToken) {
       dispatch(getCurrentUser());
+      return;
     }
-  }, []);
+
+    dispatch(setAuthChecked(true));
+  }, [accessToken, dispatch]);
 
   return (
     <Routes>

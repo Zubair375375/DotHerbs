@@ -1,7 +1,12 @@
 import { useState, useEffect } from "react";
 import { Link, NavLink, useLocation, useNavigate } from "react-router-dom";
 import { useSelector, useDispatch } from "react-redux";
-import { selectAuthUser, logoutUser } from "../store/slices/authSlice";
+import {
+  selectAuthChecked,
+  selectAuthIsLoading,
+  selectAuthUser,
+  logoutUser,
+} from "../store/slices/authSlice";
 import { selectCartItemCount, resetCart } from "../store/slices/cartSlice";
 import {
   MdShoppingCart,
@@ -27,7 +32,12 @@ const Header = () => {
 
   const dispatch = useDispatch();
   const user = useSelector(selectAuthUser);
+  const accessToken = useSelector((state) => state.auth.accessToken);
+  const authChecked = useSelector(selectAuthChecked);
+  const authLoading = useSelector(selectAuthIsLoading);
   const cartItemCount = useSelector(selectCartItemCount);
+  const showAuthPendingState =
+    !!accessToken && (!authChecked || (authLoading && !user));
 
   const handleLogout = () => {
     dispatch(logoutUser());
@@ -76,7 +86,9 @@ const Header = () => {
         )}
       </Link>
 
-      {user ? (
+      {showAuthPendingState ? (
+        <div className="h-8 w-20 animate-pulse rounded-md bg-gray-100" />
+      ) : user ? (
         <div className="relative">
           <button
             type="button"

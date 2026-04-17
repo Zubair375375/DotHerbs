@@ -44,6 +44,7 @@ const initialState = {
   user: null,
   accessToken: getTokenFromStorage(),
   refreshToken: getRefreshTokenFromStorage(),
+  hasCheckedAuth: false,
   isLoading: false,
   error: null,
 };
@@ -204,7 +205,11 @@ const authSlice = createSlice({
       state.user = null;
       state.accessToken = null;
       state.refreshToken = null;
+      state.hasCheckedAuth = true;
       removeTokensFromStorage();
+    },
+    setAuthChecked: (state, action) => {
+      state.hasCheckedAuth = action.payload;
     },
   },
   extraReducers: (builder) => {
@@ -219,6 +224,7 @@ const authSlice = createSlice({
         state.user = action.payload.user;
         state.accessToken = action.payload.accessToken;
         state.refreshToken = action.payload.refreshToken;
+        state.hasCheckedAuth = true;
       })
       .addCase(register.rejected, (state, action) => {
         state.isLoading = false;
@@ -234,6 +240,7 @@ const authSlice = createSlice({
         state.user = action.payload.user;
         state.accessToken = action.payload.accessToken;
         state.refreshToken = action.payload.refreshToken;
+        state.hasCheckedAuth = true;
       })
       .addCase(login.rejected, (state, action) => {
         state.isLoading = false;
@@ -248,12 +255,14 @@ const authSlice = createSlice({
         state.user = null;
         state.accessToken = null;
         state.refreshToken = null;
+        state.hasCheckedAuth = true;
       })
       .addCase(logout.rejected, (state) => {
         state.isLoading = false;
         state.user = null;
         state.accessToken = null;
         state.refreshToken = null;
+        state.hasCheckedAuth = true;
       })
       // Refresh token
       .addCase(refreshAccessToken.fulfilled, (state, action) => {
@@ -263,6 +272,7 @@ const authSlice = createSlice({
         state.user = null;
         state.accessToken = null;
         state.refreshToken = null;
+        state.hasCheckedAuth = true;
       })
       // Get current user
       .addCase(getCurrentUser.pending, (state) => {
@@ -271,10 +281,12 @@ const authSlice = createSlice({
       .addCase(getCurrentUser.fulfilled, (state, action) => {
         state.isLoading = false;
         state.user = action.payload;
+        state.hasCheckedAuth = true;
       })
       .addCase(getCurrentUser.rejected, (state, action) => {
         state.isLoading = false;
         state.error = action.payload;
+        state.hasCheckedAuth = true;
       })
       // Update profile
       .addCase(updateProfile.pending, (state) => {
@@ -304,10 +316,12 @@ const authSlice = createSlice({
   },
 });
 
-export const { clearError, setCredentials, logoutUser } = authSlice.actions;
+export const { clearError, setCredentials, logoutUser, setAuthChecked } =
+  authSlice.actions;
 
 export const selectAuthUser = (state) => state.auth.user;
 export const selectIsAuthenticated = (state) => !!state.auth.user; // ✅ FIXED
 export const selectAuthIsLoading = (state) => state.auth.isLoading;
 export const selectAuthError = (state) => state.auth.error;
+export const selectAuthChecked = (state) => state.auth.hasCheckedAuth;
 export default authSlice.reducer;
