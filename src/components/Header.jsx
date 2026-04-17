@@ -39,7 +39,13 @@ const Header = () => {
     const q = searchQuery.trim();
     if (!q) return;
     navigate("/products", { state: { search: q } });
+  };
+
+  const handleClearSearch = () => {
     setSearchQuery("");
+    if (location.pathname === "/products") {
+      navigate("/products", { replace: true, state: { search: "" } });
+    }
   };
 
   const handleSearchChange = (value) => {
@@ -149,8 +155,18 @@ const Header = () => {
                 value={searchQuery}
                 onChange={(e) => handleSearchChange(e.target.value)}
                 placeholder="Search products..."
-                className="w-full rounded-md border border-gray-300 bg-gray-50 py-1.5 pl-4 pr-10 text-sm outline-none focus:border-[#68a300] focus:ring-1 focus:ring-[#68a300]"
+                className="w-full rounded-md border border-gray-300 bg-gray-50 py-1.5 pl-4 pr-16 text-sm outline-none focus:border-[#68a300] focus:ring-1 focus:ring-[#68a300]"
               />
+              {searchQuery && (
+                <button
+                  type="button"
+                  onClick={handleClearSearch}
+                  className="absolute right-9 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-700"
+                  aria-label="Clear search"
+                >
+                  <MdClose className="text-base" />
+                </button>
+              )}
               <button
                 type="submit"
                 className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-[#68a300]"

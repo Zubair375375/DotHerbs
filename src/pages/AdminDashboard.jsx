@@ -392,7 +392,7 @@ const AdminDashboard = () => {
             <div className="ml-4">
               <p className="text-sm font-medium text-gray-600">Total Revenue</p>
               <p className="text-2xl font-bold text-gray-800">
-                ${totalRevenue.toFixed(2)}
+                Rs. {totalRevenue.toFixed(2)}
               </p>
             </div>
           </div>
