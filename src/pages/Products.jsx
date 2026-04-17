@@ -2,7 +2,12 @@ import { useState, useEffect, useMemo } from "react";
 import { useLocation, useNavigate, useSearchParams } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { FaChevronLeft, FaChevronRight } from "react-icons/fa";
-import { MdGridView, MdFormatListBulleted, MdGridOn, MdApps } from "react-icons/md";
+import {
+  MdGridView,
+  MdFormatListBulleted,
+  MdGridOn,
+  MdApps,
+} from "react-icons/md";
 import {
   fetchCategories,
   fetchProducts,
@@ -348,7 +353,9 @@ const Products = () => {
 
           {/* Results + View Controls */}
           <div className="mb-4 flex items-center justify-between gap-3">
-            <p className="text-gray-600">{sortedProducts.length} products found</p>
+            <p className="text-gray-600">
+              {sortedProducts.length} products found
+            </p>
             <div className="flex items-center gap-2 rounded-md border border-gray-200 bg-white p-1">
               <span className="px-2 text-xs font-medium text-gray-500">
                 View as

@@ -102,7 +102,7 @@ const Header = () => {
           </button>
 
           {isProfileMenuOpen && (
-            <div className="absolute right-0 z-50 mt-2 min-w-[160px] overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-lg">
+            <div className="absolute right-0 z-[70] mt-2 min-w-[160px] overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-lg">
               <Link
                 to="/profile"
                 onClick={() => setIsProfileMenuOpen(false)}
@@ -152,7 +152,9 @@ const Header = () => {
       <div className="max-w-7xl mx-auto px-4">
         {/* ── Top row: logo + search + icons ── fades/shrinks away on scroll */}
         <div
-          className={`flex justify-between items-center overflow-hidden transition-all duration-300 ease-in-out ${
+          className={`flex justify-between items-center transition-all duration-300 ease-in-out ${
+            isProfileMenuOpen ? "overflow-visible" : "overflow-hidden"
+          } ${
             scrolled ? "h-0 opacity-0 pointer-events-none" : "h-16 opacity-100"
           }`}
         >
@@ -201,7 +203,9 @@ const Header = () => {
 
         {/* ── Compact row: logo + nav + icons (only when scrolled) ── */}
         <div
-          className={`flex items-center overflow-hidden transition-all duration-300 ease-in-out ${
+          className={`flex items-center transition-all duration-300 ease-in-out ${
+            isProfileMenuOpen ? "overflow-visible" : "overflow-hidden"
+          } ${
             scrolled ? "h-12 opacity-100" : "h-0 opacity-0 pointer-events-none"
           }`}
         >

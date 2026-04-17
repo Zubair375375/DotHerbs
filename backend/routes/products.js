@@ -86,9 +86,9 @@ router.get("/categories", getCategories);
 router.get("/:id", getProduct);
 router.post(
   "/",
-  // protect,
-  // authorize("admin"),
-  // createProductValidation,
+  protect,
+  authorize("admin"),
+  createProductValidation,
   createProduct,
 );
 router.put(

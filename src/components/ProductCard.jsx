@@ -11,12 +11,11 @@ const ProductCard = ({ product, viewMode = "grid" }) => {
   const isAdmin = user?.role === "admin";
   const ratingValue = product.averageRating ?? product.rating ?? 0;
   const reviewCount = product.numReviews ?? product.reviewCount ?? 0;
-  const productImage =
-    product.image
-      ? `http://localhost:5000${product.image}`
-      : product.images?.[0]?.url ||
-        product.images?.[0] ||
-        "/placeholder-product.jpg";
+  const productImage = product.image
+    ? `http://localhost:5000${product.image}`
+    : product.images?.[0]?.url ||
+      product.images?.[0] ||
+      "/placeholder-product.jpg";
 
   const handleAddToCart = (e) => {
     e.preventDefault();
@@ -70,7 +69,9 @@ const ProductCard = ({ product, viewMode = "grid" }) => {
             </h3>
 
             <div className="mb-2 flex items-center">
-              <div className="flex items-center">{renderStars(ratingValue)}</div>
+              <div className="flex items-center">
+                {renderStars(ratingValue)}
+              </div>
               <span className="ml-2 text-sm text-secondary-600">
                 ({reviewCount})
               </span>
@@ -126,9 +127,15 @@ const ProductCard = ({ product, viewMode = "grid" }) => {
             {product.name}
           </h3>
 
+          <p className="mb-2 line-clamp-2 text-xs text-secondary-600">
+            {product.description}
+          </p>
+
           <div className="mb-2 flex items-center">
             <div className="flex items-center">{renderStars(ratingValue)}</div>
-            <span className="ml-1 text-xs text-secondary-600">({reviewCount})</span>
+            <span className="ml-1 text-xs text-secondary-600">
+              ({reviewCount})
+            </span>
           </div>
 
           <div className="flex items-center justify-between gap-2">
@@ -176,9 +183,15 @@ const ProductCard = ({ product, viewMode = "grid" }) => {
             {product.name}
           </h3>
 
+          <p className="mb-2 line-clamp-1 text-[11px] text-secondary-600">
+            {product.description}
+          </p>
+
           <div className="flex items-center justify-between gap-1">
             <span className="text-xs font-medium">
-              <span className="mr-1 text-[9px] align-super text-black-100">PKR</span>
+              <span className="mr-1 text-[9px] align-super text-black-100">
+                PKR
+              </span>
               {product.price.toFixed(2)}
             </span>
 
