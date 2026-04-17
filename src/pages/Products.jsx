@@ -90,7 +90,9 @@ const Products = () => {
 
   useEffect(() => {
     if (isBannerTransition) return undefined;
-    const frameId = window.requestAnimationFrame(() => setIsBannerTransition(true));
+    const frameId = window.requestAnimationFrame(() =>
+      setIsBannerTransition(true),
+    );
     return () => window.cancelAnimationFrame(frameId);
   }, [isBannerTransition]);
 
@@ -103,7 +105,9 @@ const Products = () => {
   };
 
   const handlePrevBanner = () => {
-    setCurrentBanner((prev) => (prev - 1 + bannerSlides.length) % bannerSlides.length);
+    setCurrentBanner(
+      (prev) => (prev - 1 + bannerSlides.length) % bannerSlides.length,
+    );
   };
 
   const handleNextBanner = () => {
@@ -128,7 +132,10 @@ const Products = () => {
       search: stateSearch,
     }));
 
-    navigate(location.pathname + location.search, { replace: true, state: null });
+    navigate(location.pathname + location.search, {
+      replace: true,
+      state: null,
+    });
   }, [location.pathname, location.search, location.state, navigate]);
 
   const filteredProducts = products.filter((product) => {
@@ -194,7 +201,9 @@ const Products = () => {
         <div className="relative h-[220px] sm:h-[280px] lg:h-[340px]">
           <div
             className={`flex h-full ${
-              isBannerTransition ? "transition-transform duration-700 ease-in-out" : ""
+              isBannerTransition
+                ? "transition-transform duration-700 ease-in-out"
+                : ""
             }`}
             style={{ transform: `translateX(-${currentBanner * 100}%)` }}
             onTransitionEnd={handleBannerTransitionEnd}
@@ -254,105 +263,108 @@ const Products = () => {
 
       <div className="container mx-auto px-4 py-8">
         <div className="mb-8">
+          {/* Filters */}
+          <div className="bg-white p-6 rounded-lg shadow-md mb-6">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              {/* Category */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Category
+                </label>
+                <select
+                  value={filters.category}
+                  onChange={(e) =>
+                    handleFilterChange("category", e.target.value)
+                  }
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
+                >
+                  <option value="">All Categories</option>
+                  {categories.map((category) => (
+                    <option
+                      key={category._id || category.value}
+                      value={category.value}
+                    >
+                      {category.name}
+                    </option>
+                  ))}
+                </select>
+              </div>
 
-        {/* Filters */}
-        <div className="bg-white p-6 rounded-lg shadow-md mb-6">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              {/* Price Range */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Price Range
+                </label>
+                <select
+                  value={filters.priceRange}
+                  onChange={(e) =>
+                    handleFilterChange("priceRange", e.target.value)
+                  }
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
+                >
+                  <option value="">All Prices</option>
+                  <option value="0-25">$0 - $25</option>
+                  <option value="25-50">$25 - $50</option>
+                  <option value="50-100">$50 - $100</option>
+                  <option value="100">$100+</option>
+                </select>
+              </div>
 
-            {/* Category */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Category
-              </label>
-              <select
-                value={filters.category}
-                onChange={(e) => handleFilterChange("category", e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
-              >
-                <option value="">All Categories</option>
-                {categories.map((category) => (
-                  <option key={category._id || category.value} value={category.value}>
-                    {category.name}
-                  </option>
-                ))}
-              </select>
-            </div>
-
-            {/* Price Range */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Price Range
-              </label>
-              <select
-                value={filters.priceRange}
-                onChange={(e) =>
-                  handleFilterChange("priceRange", e.target.value)
-                }
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
-              >
-                <option value="">All Prices</option>
-                <option value="0-25">$0 - $25</option>
-                <option value="25-50">$25 - $50</option>
-                <option value="50-100">$50 - $100</option>
-                <option value="100">$100+</option>
-              </select>
-            </div>
-
-            {/* Sort By */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Sort By
-              </label>
-              <select
-                value={filters.sortBy}
-                onChange={(e) => handleFilterChange("sortBy", e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
-              >
-                <option value="name">Name</option>
-                <option value="price-low">Price: Low to High</option>
-                <option value="price-high">Price: High to Low</option>
-                <option value="rating">Rating</option>
-                <option value="newest">Newest</option>
-              </select>
+              {/* Sort By */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Sort By
+                </label>
+                <select
+                  value={filters.sortBy}
+                  onChange={(e) => handleFilterChange("sortBy", e.target.value)}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
+                >
+                  <option value="name">Name</option>
+                  <option value="price-low">Price: Low to High</option>
+                  <option value="price-high">Price: High to Low</option>
+                  <option value="rating">Rating</option>
+                  <option value="newest">Newest</option>
+                </select>
+              </div>
             </div>
           </div>
-        </div>
 
-        {/* Results */}
-        <div className="mb-4">
-          <p className="text-gray-600">
-            {sortedProducts.length} products found
-          </p>
-        </div>
-
-        {/* Products Grid */}
-        {sortedProducts.length > 0 ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-            {sortedProducts.map((product) => (
-              <ProductCard key={product._id} product={product} />
-            ))}
-          </div>
-        ) : (
-          <div className="text-center py-12">
-            <p className="text-gray-500 text-lg">
-              No products found matching your criteria.
+          {/* Results */}
+          <div className="mb-4">
+            <p className="text-gray-600">
+              {sortedProducts.length} products found
             </p>
-            <button
-              onClick={() =>
-                setFilters({
-                  category: "",
-                  priceRange: "",
-                  search: "",
-                  sortBy: "name",
-                })
-              }
-              className="mt-4 bg-[#68a300] text-white px-4 py-2 rounded hover:bg-[#5f9600]"
-            >
-              Clear Filters
-            </button>
           </div>
-        )}
-      </div>
+
+          {/* Products Grid */}
+          {sortedProducts.length > 0 ? (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+              {sortedProducts.map((product) => (
+                <ProductCard key={product._id} product={product} />
+              ))}
+            </div>
+          ) : (
+            <div className="text-center py-12">
+              <p className="text-gray-500 text-lg">
+                No products found matching your criteria.
+              </p>
+              <button
+                onClick={() =>
+                  setFilters({
+                    category: "",
+                    priceRange: "",
+                    search: "",
+                    sortBy: "name",
+                  })
+                }
+                className="mt-4 bg-[#68a300] text-white px-4 py-2 rounded hover:bg-[#5f9600]"
+              >
+                Clear Filters
+              </button>
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );

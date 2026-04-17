@@ -117,12 +117,15 @@ const productBannerSlice = createSlice({
         state.adminItems = state.adminItems.filter(
           (banner) => banner._id !== action.payload,
         );
-        state.items = state.items.filter((banner) => banner._id !== action.payload);
+        state.items = state.items.filter(
+          (banner) => banner._id !== action.payload,
+        );
       });
   },
 });
 
 export const selectProductBanners = (state) => state.productBanners.items;
-export const selectAllProductBanners = (state) => state.productBanners.adminItems;
+export const selectAllProductBanners = (state) =>
+  state.productBanners.adminItems;
 
 export default productBannerSlice.reducer;

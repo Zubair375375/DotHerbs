@@ -607,8 +607,13 @@ const AdminDashboard = () => {
 
             <div className="mb-8 grid grid-cols-1 gap-8 lg:grid-cols-[360px,1fr]">
               <div className="rounded-lg border bg-gray-50 p-5">
-                <h3 className="mb-4 text-xl font-semibold">Products Page Banners</h3>
-                <form className="space-y-4" onSubmit={handleCreateProductBanner}>
+                <h3 className="mb-4 text-xl font-semibold">
+                  Products Page Banners
+                </h3>
+                <form
+                  className="space-y-4"
+                  onSubmit={handleCreateProductBanner}
+                >
                   <div>
                     <label className="mb-2 block text-sm font-medium text-gray-700">
                       Banner Image

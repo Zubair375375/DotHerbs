@@ -113,8 +113,12 @@ const Header = () => {
         </div>
       ) : (
         <div className="flex space-x-2 text-sm">
-          <Link to="/login" className="text-gray-700 hover:text-[#68a300]">Login</Link>
-          <Link to="/register" className="text-gray-700 hover:text-[#68a300]">Sign Up</Link>
+          <Link to="/login" className="text-gray-700 hover:text-[#68a300]">
+            Login
+          </Link>
+          <Link to="/register" className="text-gray-700 hover:text-[#68a300]">
+            Sign Up
+          </Link>
         </div>
       )}
 
@@ -134,7 +138,6 @@ const Header = () => {
   return (
     <header className="bg-white border-b sticky top-0 z-50 shadow-sm">
       <div className="max-w-7xl mx-auto px-4">
-
         {/* ── Top row: logo + search + icons ── fades/shrinks away on scroll */}
         <div
           className={`flex justify-between items-center overflow-hidden transition-all duration-300 ease-in-out ${
@@ -142,7 +145,11 @@ const Header = () => {
           }`}
         >
           <Link to="/" className="flex items-center shrink-0">
-            <img src="/assets/logos/Logo.png" alt="Dot-Herbs" className="h-6 w-auto" />
+            <img
+              src="/assets/logos/Logo.png"
+              alt="Dot-Herbs"
+              className="h-6 w-auto"
+            />
           </Link>
 
           <form
@@ -188,7 +195,11 @@ const Header = () => {
         >
           <div className="flex w-1/4 items-center justify-start">
             <Link to="/" className="flex items-center shrink-0">
-              <img src="/assets/logos/Logo.png" alt="Dot-Herbs" className="h-5 w-auto" />
+              <img
+                src="/assets/logos/Logo.png"
+                alt="Dot-Herbs"
+                className="h-5 w-auto"
+              />
             </Link>
           </div>
 
@@ -199,7 +210,9 @@ const Header = () => {
                 to={to}
                 className={({ isActive }) =>
                   `text-sm font-medium transition-colors ${
-                    isActive ? "text-[#68a300]" : "text-gray-700 hover:text-[#68a300]"
+                    isActive
+                      ? "text-[#68a300]"
+                      : "text-gray-700 hover:text-[#68a300]"
                   }`
                 }
               >
@@ -208,7 +221,9 @@ const Header = () => {
             ))}
           </nav>
 
-          <div className="flex w-1/4 items-center justify-end">{rightIcons}</div>
+          <div className="flex w-1/4 items-center justify-end">
+            {rightIcons}
+          </div>
         </div>
 
         {/* ── Nav links row (shown at top, hidden when scrolled) ── */}
@@ -235,7 +250,6 @@ const Header = () => {
             ))}
           </nav>
         </div>
-
       </div>
 
       {/* Mobile Menu */}
@@ -248,7 +262,9 @@ const Header = () => {
               onClick={() => setIsMobileMenuOpen(false)}
               className={({ isActive }) =>
                 `block py-1 font-medium transition-colors ${
-                  isActive ? "text-[#68a300]" : "text-gray-700 hover:text-[#68a300]"
+                  isActive
+                    ? "text-[#68a300]"
+                    : "text-gray-700 hover:text-[#68a300]"
                 }`
               }
             >
