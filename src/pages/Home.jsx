@@ -19,6 +19,18 @@ const Home = () => {
   const [currentSlide, setCurrentSlide] = useState(0);
   const [isTransitionEnabled, setIsTransitionEnabled] = useState(true);
 
+  const toHeroImageUrl = (image) => {
+    if (!image) {
+      return "/images/banners/hero_banner1.jpg";
+    }
+
+    if (image.startsWith("http://") || image.startsWith("https://")) {
+      return image;
+    }
+
+    return `http://localhost:5000${image}`;
+  };
+
   useEffect(() => {
     dispatch(fetchCategories({ force: true }));
     dispatch(fetchHeroSlides());
@@ -28,7 +40,7 @@ const Home = () => {
     if (heroSlides.length > 0) {
       return heroSlides.map((slide) => ({
         _id: slide._id,
-        image: `http://localhost:5000${slide.image}`,
+        image: toHeroImageUrl(slide.image),
         title: slide.title || "Pure Health Pure Life",
         subtitle:
           slide.subtitle ||
@@ -70,6 +82,17 @@ const Home = () => {
 
     return () => window.clearInterval(intervalId);
   }, [slides.length]);
+
+  useEffect(() => {
+    if (slides.length <= 1) {
+      return;
+    }
+
+    if (currentSlide > slides.length) {
+      setIsTransitionEnabled(false);
+      setCurrentSlide(0);
+    }
+  }, [currentSlide, slides.length]);
 
   const handlePrevSlide = () => {
     setCurrentSlide((prev) => (prev - 1 + slides.length) % slides.length);
@@ -144,7 +167,7 @@ const Home = () => {
             onTransitionEnd={handleHeroTransitionEnd}
           >
             {loopedSlides.map((slide, index) => (
-              <div key={slide._id} className="relative h-full min-w-full">
+              <div key={`${slide._id}-${index}`} className="relative h-full min-w-full">
                 <img
                   src={slide.image}
                   alt={slide.title}
@@ -230,6 +253,15 @@ const Home = () => {
                 </Link>
               );
             })}
+          </div>
+
+          <div className="mt-10 text-center">
+            <Link
+              to="/products"
+              className="inline-flex items-center justify-center rounded-full bg-[#68a300] px-7 py-3 text-sm font-semibold text-white transition hover:bg-[#5f9600]"
+            >
+              View All Products
+            </Link>
           </div>
         </div>
       </section>
