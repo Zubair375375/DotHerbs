@@ -82,8 +82,6 @@ const AdminDashboard = () => {
   const [categoryImagePreview, setCategoryImagePreview] = useState(null);
   const [uploadingCategoryImage, setUploadingCategoryImage] = useState(false);
   const [heroForm, setHeroForm] = useState({
-    title: "",
-    subtitle: "",
     displayOrder: 0,
   });
   const [heroImageFile, setHeroImageFile] = useState(null);
@@ -249,12 +247,10 @@ const AdminDashboard = () => {
       await dispatch(
         createHeroSlide({
           image: imageUrl,
-          title: heroForm.title,
-          subtitle: heroForm.subtitle,
           displayOrder: Number(heroForm.displayOrder || 0),
         }),
       ).unwrap();
-      setHeroForm({ title: "", subtitle: "", displayOrder: 0 });
+      setHeroForm({ displayOrder: 0 });
       setHeroImageFile(null);
       setHeroImagePreview(null);
       toast.success("Hero slide created successfully");
@@ -967,40 +963,6 @@ const AdminDashboard = () => {
                   </div>
                   <div>
                     <label className="mb-2 block text-sm font-medium text-gray-700">
-                      Title
-                    </label>
-                    <input
-                      type="text"
-                      value={heroForm.title}
-                      onChange={(e) =>
-                        setHeroForm((prev) => ({
-                          ...prev,
-                          title: e.target.value,
-                        }))
-                      }
-                      className="w-full rounded border border-gray-300 px-3 py-2"
-                      placeholder="Optional slide title"
-                    />
-                  </div>
-                  <div>
-                    <label className="mb-2 block text-sm font-medium text-gray-700">
-                      Subtitle
-                    </label>
-                    <textarea
-                      value={heroForm.subtitle}
-                      onChange={(e) =>
-                        setHeroForm((prev) => ({
-                          ...prev,
-                          subtitle: e.target.value,
-                        }))
-                      }
-                      rows={3}
-                      className="w-full rounded border border-gray-300 px-3 py-2"
-                      placeholder="Optional slide subtitle"
-                    />
-                  </div>
-                  <div>
-                    <label className="mb-2 block text-sm font-medium text-gray-700">
                       Display Order
                     </label>
                     <input
@@ -1046,15 +1008,12 @@ const AdminDashboard = () => {
                     >
                       <img
                         src={`http://localhost:5000${slide.image}`}
-                        alt={slide.title || "Hero slide"}
+                        alt="Hero slide"
                         className="h-44 w-full object-cover"
                       />
                       <div className="space-y-2 p-4">
                         <div className="flex items-start justify-between gap-4">
                           <div>
-                            <h3 className="font-semibold text-gray-900">
-                              {slide.title || "Untitled slide"}
-                            </h3>
                             <p className="text-sm text-gray-500">
                               Order: {slide.displayOrder || 0}
                             </p>
@@ -1066,9 +1025,6 @@ const AdminDashboard = () => {
                             <FaTrash />
                           </button>
                         </div>
-                        <p className="text-sm text-gray-600">
-                          {slide.subtitle || "No subtitle added."}
-                        </p>
                       </div>
                     </div>
                   ))}

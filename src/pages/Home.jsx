@@ -150,23 +150,6 @@ const Home = () => {
                   alt={slide.title}
                   className="h-full w-full object-cover"
                 />
-                <div className="absolute inset-0 bg-black/45" />
-                <div className="absolute inset-0 flex items-center justify-center px-4">
-                  <div className="max-w-4xl text-center text-white">
-                    <h1 className="mb-4 text-4xl font-bold sm:text-5xl lg:text-6xl">
-                      {slide.title}
-                    </h1>
-                    <p className="mb-8 text-sm sm:text-base lg:text-lg">
-                      {slide.subtitle}
-                    </p>
-                    <Link
-                      to="/products"
-                      className="inline-flex rounded-lg bg-[#68a300] px-6 py-3 font-semibold text-white transition hover:bg-[#5d9200]"
-                    >
-                      Shop Now
-                    </Link>
-                  </div>
-                </div>
               </div>
             ))}
           </div>
