@@ -1,33 +1,5 @@
 import mongoose from "mongoose";
 
-export const DEFAULT_CATEGORIES = [
-  {
-    name: "Herbs",
-    value: "herbs",
-    description: "Whole herbs and botanical essentials",
-  },
-  {
-    name: "Teas",
-    value: "teas",
-    description: "Comforting blends for daily wellness",
-  },
-  {
-    name: "Oils",
-    value: "oils",
-    description: "Pure oils with therapeutic benefits",
-  },
-  {
-    name: "Supplements",
-    value: "supplements",
-    description: "Targeted support for your routine",
-  },
-  {
-    name: "Other",
-    value: "other",
-    description: "Special wellness picks and more",
-  },
-];
-
 const slugify = (value) =>
   value
     .toLowerCase()
@@ -77,16 +49,6 @@ categorySchema.pre("validate", function (next) {
   }
   next();
 });
-
-export const ensureDefaultCategories = async () => {
-  for (const category of DEFAULT_CATEGORIES) {
-    await Category.updateOne(
-      { value: category.value },
-      { $setOnInsert: category },
-      { upsert: true },
-    );
-  }
-};
 
 const Category = mongoose.model("Category", categorySchema);
 

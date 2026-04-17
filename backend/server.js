@@ -14,7 +14,6 @@ import orderRoutes from "./routes/orders.js";
 import uploadRoutes from "./routes/upload.js";
 import announcementRoutes from "./routes/announcements.js";
 import heroSlideRoutes from "./routes/heroSlides.js";
-import { ensureDefaultCategories } from "./models/Category.js";
 import { errorHandler } from "./middleware/errorHandler.js";
 
 dotenv.config();
@@ -24,9 +23,8 @@ const __dirname = path.dirname(__filename);
 
 const app = express();
 
-// Connect to MongoDB and seed required reference data
+// Connect to MongoDB
 await connectDB();
-await ensureDefaultCategories();
 
 // Security middleware
 app.use(helmet());

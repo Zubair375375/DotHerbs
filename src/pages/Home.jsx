@@ -2,11 +2,7 @@ import { Link } from "react-router-dom";
 import { useEffect, useMemo, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { MdEco, MdShield, MdLocalShipping, MdFavorite } from "react-icons/md";
-import {
-  FaSeedling,
-  FaChevronLeft,
-  FaChevronRight,
-} from "react-icons/fa";
+import { FaSeedling, FaChevronLeft, FaChevronRight } from "react-icons/fa";
 import {
   fetchCategories,
   selectCategories,
