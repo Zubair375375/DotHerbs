@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Link, NavLink } from "react-router-dom";
 import { useSelector, useDispatch } from "react-redux";
@@ -18,7 +18,14 @@ const Header = () => {
   const [isProfileMenuOpen, setIsProfileMenuOpen] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
+  const [scrolled, setScrolled] = useState(false);
   const navigate = useNavigate();
+
+  useEffect(() => {
+    const onScroll = () => setScrolled(window.scrollY > 60);
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
+  }, []);
 
   const handleSearch = (e) => {
     e.preventDefault();
@@ -37,23 +44,96 @@ const Header = () => {
     dispatch(resetCart());
   };
 
+  const navLinks = [
+    { to: "/products", label: "All Products" },
+    { to: "/about", label: "About Us" },
+    { to: "/contact", label: "Contact" },
+    ...(user?.role === "admin" ? [{ to: "/admin", label: "Admin" }] : []),
+  ];
+
+  const rightIcons = (
+    <div className="flex items-center space-x-3">
+      <Link to="/cart" className="relative">
+        <MdShoppingCart className="text-xl text-[#68a300]" />
+        {cartItemCount > 0 && (
+          <span className="absolute -top-2 -right-2 bg-red-500 text-white text-xs w-5 h-5 flex items-center justify-center rounded-full">
+            {cartItemCount}
+          </span>
+        )}
+      </Link>
+
+      {user ? (
+        <div className="relative">
+          <button
+            type="button"
+            onClick={() => {
+              setIsProfileMenuOpen(!isProfileMenuOpen);
+              setIsMobileMenuOpen(false);
+            }}
+            className="rounded-full p-1.5 hover:bg-gray-100"
+          >
+            <MdPerson className="text-xl" />
+          </button>
+
+          {isProfileMenuOpen && (
+            <div className="absolute right-0 z-50 mt-2 min-w-[160px] overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-lg">
+              <Link
+                to="/profile"
+                onClick={() => setIsProfileMenuOpen(false)}
+                className="block px-4 py-3 text-sm text-gray-700 hover:bg-gray-50"
+              >
+                Profile
+              </Link>
+              <button
+                type="button"
+                onClick={() => {
+                  handleLogout();
+                  setIsProfileMenuOpen(false);
+                }}
+                className="w-full px-4 py-3 text-left text-sm text-gray-700 hover:bg-gray-50"
+              >
+                Logout
+              </button>
+            </div>
+          )}
+        </div>
+      ) : (
+        <div className="flex space-x-2 text-sm">
+          <Link to="/login" className="text-gray-700 hover:text-[#68a300]">Login</Link>
+          <Link to="/register" className="text-gray-700 hover:text-[#68a300]">Sign Up</Link>
+        </div>
+      )}
+
+      <button
+        type="button"
+        className="md:hidden"
+        onClick={() => {
+          setIsMobileMenuOpen(!isMobileMenuOpen);
+          setIsProfileMenuOpen(false);
+        }}
+      >
+        {isMobileMenuOpen ? <MdClose /> : <MdMenu />}
+      </button>
+    </div>
+  );
+
   return (
     <header className="bg-white border-b sticky top-0 z-50 shadow-sm">
       <div className="max-w-7xl mx-auto px-4">
-        <div className="flex justify-between items-center h-16">
-          {/* Logo */}
-          <Link to="/" className="flex items-center">
-            <img
-              src="/assets/logos/Logo.png"
-              alt="Dot-Herbs"
-              className="h-6 w-auto"
-            />
+
+        {/* ── Top row: logo + search + icons ── fades/shrinks away on scroll */}
+        <div
+          className={`flex justify-center items-center gap-8 overflow-hidden transition-all duration-300 ease-in-out ${
+            scrolled ? "h-0 opacity-0 pointer-events-none" : "h-16 opacity-100"
+          }`}
+        >
+          <Link to="/" className="flex items-center shrink-0">
+            <img src="/assets/logos/Logo.png" alt="Dot-Herbs" className="h-6 w-auto" />
           </Link>
 
-          {/* Search */}
           <form
             onSubmit={handleSearch}
-            className="hidden md:flex items-center flex-1 mx-8 max-w-sm"
+            className="hidden md:flex items-center w-[480px]"
           >
             <div className="relative w-full">
               <input
@@ -61,7 +141,7 @@ const Header = () => {
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 placeholder="Search products..."
-                className="w-full rounded-full border border-gray-300 bg-gray-50 py-1.5 pl-4 pr-10 text-sm outline-none focus:border-[#68a300] focus:ring-1 focus:ring-[#68a300]"
+                className="w-full rounded-md border border-gray-300 bg-gray-50 py-1.5 pl-4 pr-10 text-sm outline-none focus:border-[#68a300] focus:ring-1 focus:ring-[#68a300]"
               />
               <button
                 type="submit"
@@ -73,84 +153,48 @@ const Header = () => {
             </div>
           </form>
 
-          {/* Right */}
-          <div className="flex items-center space-x-4">
-            {/* Cart */}
-            <Link to="/cart" className="relative">
-              <MdShoppingCart className="text-xl text-[#68a300]" />
-              {cartItemCount > 0 && (
-                <span className="absolute -top-2 -right-2 bg-red-500 text-white text-xs w-5 h-5 flex items-center justify-center rounded-full">
-                  {cartItemCount}
-                </span>
-              )}
-            </Link>
-
-            {/* User */}
-            {user ? (
-              <div className="relative">
-                <button
-                  type="button"
-                  onClick={() => {
-                    setIsProfileMenuOpen(!isProfileMenuOpen);
-                    setIsMobileMenuOpen(false);
-                  }}
-                  className="rounded-full p-2 hover:bg-gray-100"
-                >
-                  <MdPerson className="text-xl" />
-                </button>
-
-                {isProfileMenuOpen && (
-                  <div className="absolute right-0 z-50 mt-2 min-w-[160px] overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-lg">
-                    <Link
-                      to="/profile"
-                      className="block px-4 py-3 text-sm text-gray-700 hover:bg-gray-50"
-                    >
-                      Profile
-                    </Link>
-                    <button
-                      type="button"
-                      onClick={() => {
-                        handleLogout();
-                        setIsProfileMenuOpen(false);
-                      }}
-                      className="w-full px-4 py-3 text-left text-sm text-gray-700 hover:bg-gray-50"
-                    >
-                      Logout
-                    </button>
-                  </div>
-                )}
-              </div>
-            ) : (
-              <div className="flex space-x-2">
-                <Link to="/login">Login</Link>
-                <Link to="/register">Sign Up</Link>
-              </div>
-            )}
-
-            {/* Mobile */}
-            <button
-              type="button"
-              className="md:hidden"
-              onClick={() => {
-                setIsMobileMenuOpen(!isMobileMenuOpen);
-                setIsProfileMenuOpen(false);
-              }}
-            >
-              {isMobileMenuOpen ? <MdClose /> : <MdMenu />}
-            </button>
-          </div>
+          {rightIcons}
         </div>
-      </div>
 
-      {/* Sticky Nav Links Row */}
-      <div className="hidden md:block bg-white border-t border-gray-100">
-        <div className="max-w-7xl mx-auto px-4">
+        {/* ── Compact row: logo + nav + icons (only when scrolled) ── */}
+        <div
+          className={`flex items-center overflow-hidden transition-all duration-300 ease-in-out ${
+            scrolled ? "h-12 opacity-100" : "h-0 opacity-0 pointer-events-none"
+          }`}
+        >
+          <div className="flex w-1/4 items-center justify-start">
+            <Link to="/" className="flex items-center shrink-0">
+              <img src="/assets/logos/Logo.png" alt="Dot-Herbs" className="h-5 w-auto" />
+            </Link>
+          </div>
+
+          <nav className="hidden md:flex w-2/4 items-center justify-center space-x-6">
+            {navLinks.map(({ to, label }) => (
+              <NavLink
+                key={to}
+                to={to}
+                className={({ isActive }) =>
+                  `text-sm font-medium transition-colors ${
+                    isActive ? "text-[#68a300]" : "text-gray-700 hover:text-[#68a300]"
+                  }`
+                }
+              >
+                {label}
+              </NavLink>
+            ))}
+          </nav>
+
+          <div className="flex w-1/4 items-center justify-end">{rightIcons}</div>
+        </div>
+
+        {/* ── Nav links row (shown at top, hidden when scrolled) ── */}
+        <div
+          className={`hidden md:block border-t border-gray-100 overflow-hidden transition-all duration-300 ease-in-out ${
+            scrolled ? "h-0 opacity-0" : "h-11 opacity-100"
+          }`}
+        >
           <nav className="flex justify-center items-center space-x-8 h-11">
-            {[
-              { to: "/products", label: "All Products" },
-              { to: "/about", label: "About Us" },
-              { to: "/contact", label: "Contact" },
-            ].map(({ to, label }) => (
+            {navLinks.map(({ to, label }) => (
               <NavLink
                 key={to}
                 to={to}
@@ -165,66 +209,30 @@ const Header = () => {
                 {label}
               </NavLink>
             ))}
-            {user?.role === "admin" && (
-              <NavLink
-                to="/admin"
-                className={({ isActive }) =>
-                  `pb-0.5 transition-colors font-medium text-sm ${
-                    isActive
-                      ? "text-[#68a300] border-b-2 border-[#68a300]"
-                      : "text-gray-700 hover:text-[#68a300]"
-                  }`
-                }
-              >
-                Admin
-              </NavLink>
-            )}
           </nav>
         </div>
+
       </div>
 
-      <div className="md:hidden">
-        {/* Mobile Menu */}
-        {isMobileMenuOpen && (
-          <div className="md:hidden mt-2 space-y-2 rounded-2xl border border-gray-200 bg-white p-4 shadow-sm">
-            {[
-              { to: "/products", label: "Products" },
-              { to: "/about", label: "About Us" },
-              { to: "/contact", label: "Contact" },
-            ].map(({ to, label }) => (
-              <NavLink
-                key={to}
-                to={to}
-                onClick={() => setIsMobileMenuOpen(false)}
-                className={({ isActive }) =>
-                  `block py-1 font-medium transition-colors ${
-                    isActive
-                      ? "text-[#68a300]"
-                      : "text-gray-700 hover:text-[#68a300]"
-                  }`
-                }
-              >
-                {label}
-              </NavLink>
-            ))}
-            {user?.role === "admin" && (
-              <NavLink
-                to="/admin"
-                onClick={() => setIsMobileMenuOpen(false)}
-                className={({ isActive }) =>
-                  `block py-1 font-medium transition-colors ${
-                    isActive
-                      ? "text-[#68a300]"
-                      : "text-gray-700 hover:text-[#68a300]"
-                  }`
-                }
-              >
-                Admin
-              </NavLink>
-            )}
-          </div>
-        )}
-      </div>
+      {/* Mobile Menu */}
+      {isMobileMenuOpen && (
+        <div className="md:hidden px-4 pb-4 space-y-2 border-t border-gray-100 bg-white">
+          {navLinks.map(({ to, label }) => (
+            <NavLink
+              key={to}
+              to={to}
+              onClick={() => setIsMobileMenuOpen(false)}
+              className={({ isActive }) =>
+                `block py-1 font-medium transition-colors ${
+                  isActive ? "text-[#68a300]" : "text-gray-700 hover:text-[#68a300]"
+                }`
+              }
+            >
+              {label}
+            </NavLink>
+          ))}
+        </div>
+      )}
     </header>
   );
 };
