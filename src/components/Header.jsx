@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { Link, NavLink } from "react-router-dom";
 import { useSelector, useDispatch } from "react-redux";
 import { selectAuthUser, logoutUser } from "../store/slices/authSlice";
@@ -10,11 +11,23 @@ import {
   MdClose,
   MdSettings,
   MdLogout,
+  MdSearch,
 } from "react-icons/md";
 
 const Header = () => {
   const [isProfileMenuOpen, setIsProfileMenuOpen] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
+  const navigate = useNavigate();
+
+  const handleSearch = (e) => {
+    e.preventDefault();
+    const q = searchQuery.trim();
+    if (q) {
+      navigate(`/products?search=${encodeURIComponent(q)}`);
+      setSearchQuery("");
+    }
+  };
   const dispatch = useDispatch();
   const user = useSelector(selectAuthUser);
   const cartItemCount = useSelector(selectCartItemCount);
@@ -25,7 +38,7 @@ const Header = () => {
   };
 
   return (
-    <header className="bg-white shadow-md border-b">
+    <header className="bg-white border-b sticky top-0 z-50 shadow-sm">
       <div className="max-w-7xl mx-auto px-4">
         <div className="flex justify-between items-center h-16">
           {/* Logo */}
@@ -37,42 +50,28 @@ const Header = () => {
             />
           </Link>
 
-          {/* Desktop Nav */}
-          <nav className="hidden md:flex space-x-6">
-            {[
-              { to: "/products", label: "All Products" },
-              { to: "/about", label: "About Us" },
-              { to: "/contact", label: "Contact" },
-            ].map(({ to, label }) => (
-              <NavLink
-                key={to}
-                to={to}
-                className={({ isActive }) =>
-                  `pb-1 transition-colors font-medium ${
-                    isActive
-                      ? "text-[#68a300] border-b-2 border-[#68a300]"
-                      : "text-gray-700 hover:text-[#68a300]"
-                  }`
-                }
+          {/* Search */}
+          <form
+            onSubmit={handleSearch}
+            className="hidden md:flex items-center flex-1 mx-8 max-w-sm"
+          >
+            <div className="relative w-full">
+              <input
+                type="text"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                placeholder="Search products..."
+                className="w-full rounded-full border border-gray-300 bg-gray-50 py-1.5 pl-4 pr-10 text-sm outline-none focus:border-[#68a300] focus:ring-1 focus:ring-[#68a300]"
+              />
+              <button
+                type="submit"
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-[#68a300]"
+                aria-label="Search"
               >
-                {label}
-              </NavLink>
-            ))}
-            {user?.role === "admin" && (
-              <NavLink
-                to="/admin"
-                className={({ isActive }) =>
-                  `pb-1 transition-colors font-medium ${
-                    isActive
-                      ? "text-[#68a300] border-b-2 border-[#68a300]"
-                      : "text-gray-700 hover:text-[#68a300]"
-                  }`
-                }
-              >
-                Admin
-              </NavLink>
-            )}
-          </nav>
+                <MdSearch className="text-lg" />
+              </button>
+            </div>
+          </form>
 
           {/* Right */}
           <div className="flex items-center space-x-4">
@@ -141,7 +140,50 @@ const Header = () => {
             </button>
           </div>
         </div>
+      </div>
 
+      {/* Sticky Nav Links Row */}
+      <div className="hidden md:block bg-white border-t border-gray-100">
+        <div className="max-w-7xl mx-auto px-4">
+          <nav className="flex justify-center items-center space-x-8 h-11">
+            {[
+              { to: "/products", label: "All Products" },
+              { to: "/about", label: "About Us" },
+              { to: "/contact", label: "Contact" },
+            ].map(({ to, label }) => (
+              <NavLink
+                key={to}
+                to={to}
+                className={({ isActive }) =>
+                  `pb-0.5 transition-colors font-medium text-sm ${
+                    isActive
+                      ? "text-[#68a300] border-b-2 border-[#68a300]"
+                      : "text-gray-700 hover:text-[#68a300]"
+                  }`
+                }
+              >
+                {label}
+              </NavLink>
+            ))}
+            {user?.role === "admin" && (
+              <NavLink
+                to="/admin"
+                className={({ isActive }) =>
+                  `pb-0.5 transition-colors font-medium text-sm ${
+                    isActive
+                      ? "text-[#68a300] border-b-2 border-[#68a300]"
+                      : "text-gray-700 hover:text-[#68a300]"
+                  }`
+                }
+              >
+                Admin
+              </NavLink>
+            )}
+          </nav>
+        </div>
+      </div>
+
+      <div className="md:hidden">
         {/* Mobile Menu */}
         {isMobileMenuOpen && (
           <div className="md:hidden mt-2 space-y-2 rounded-2xl border border-gray-200 bg-white p-4 shadow-sm">

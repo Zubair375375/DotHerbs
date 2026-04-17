@@ -26,13 +26,14 @@ const Products = () => {
   const error = useSelector(selectProductsError);
   const productBanners = useSelector(selectProductBanners);
   const initialCategory = searchParams.get("category") || "";
+  const initialSearch = searchParams.get("search") || "";
   const [currentBanner, setCurrentBanner] = useState(0);
   const [isBannerTransition, setIsBannerTransition] = useState(true);
 
   const [filters, setFilters] = useState({
     category: initialCategory,
     priceRange: "",
-    search: "",
+    search: initialSearch,
     sortBy: "name",
   });
 
@@ -112,6 +113,7 @@ const Products = () => {
     setFilters((prev) => ({
       ...prev,
       category: searchParams.get("category") || "",
+      search: searchParams.get("search") || "",
     }));
   }, [searchParams]);
 
