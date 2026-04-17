@@ -52,6 +52,12 @@ import {
   deleteHeroSlide,
   selectAllHeroSlides,
 } from "../store/slices/heroSlideSlice";
+import {
+  fetchAllProductBanners,
+  createProductBanner,
+  deleteProductBanner,
+  selectAllProductBanners,
+} from "../store/slices/productBannerSlice";
 
 const AdminDashboard = () => {
   const dispatch = useDispatch();
@@ -66,6 +72,7 @@ const AdminDashboard = () => {
   const orderPagination = useSelector((state) => state.orders.pagination);
   const userPagination = useSelector((state) => state.users.pagination);
   const heroSlides = useSelector(selectAllHeroSlides);
+  const productBanners = useSelector(selectAllProductBanners);
 
   const [activeTab, setActiveTab] = useState("overview");
   const [loading, setLoading] = useState(false);
@@ -81,6 +88,14 @@ const AdminDashboard = () => {
   const [categoryImageFile, setCategoryImageFile] = useState(null);
   const [categoryImagePreview, setCategoryImagePreview] = useState(null);
   const [uploadingCategoryImage, setUploadingCategoryImage] = useState(false);
+  const [productBannerForm, setProductBannerForm] = useState({
+    displayOrder: 0,
+  });
+  const [productBannerImageFile, setProductBannerImageFile] = useState(null);
+  const [productBannerImagePreview, setProductBannerImagePreview] =
+    useState(null);
+  const [uploadingProductBannerImage, setUploadingProductBannerImage] =
+    useState(false);
   const [heroForm, setHeroForm] = useState({
     displayOrder: 0,
   });
@@ -119,6 +134,7 @@ const AdminDashboard = () => {
       dispatch(getUsers({ page: 1, limit: 200 }));
       dispatch(fetchAllAnnouncements());
       dispatch(fetchAllHeroSlides());
+      dispatch(fetchAllProductBanners());
     }
   }, [dispatch, isAuthenticated, user]);
 
@@ -127,6 +143,7 @@ const AdminDashboard = () => {
 
     if (activeTab === "products") {
       dispatch(fetchProducts({ page: 1, limit: 200 }));
+      dispatch(fetchAllProductBanners());
     } else if (activeTab === "categories") {
       dispatch(fetchCategories());
     } else if (activeTab === "orders") {
@@ -258,6 +275,47 @@ const AdminDashboard = () => {
       toast.error(error || "Failed to create hero slide");
     } finally {
       setUploadingHeroImage(false);
+    }
+  };
+
+  const handleCreateProductBanner = async (e) => {
+    e.preventDefault();
+
+    if (!productBannerImageFile) {
+      toast.error("Banner image is required");
+      return;
+    }
+
+    try {
+      setUploadingProductBannerImage(true);
+      const imageUrl = await uploadDashboardImage(productBannerImageFile);
+      await dispatch(
+        createProductBanner({
+          image: imageUrl,
+          displayOrder: Number(productBannerForm.displayOrder || 0),
+        }),
+      ).unwrap();
+      setProductBannerForm({ displayOrder: 0 });
+      setProductBannerImageFile(null);
+      setProductBannerImagePreview(null);
+      toast.success("Products banner created successfully");
+    } catch (error) {
+      toast.error(error || "Failed to create products banner");
+    } finally {
+      setUploadingProductBannerImage(false);
+    }
+  };
+
+  const handleDeleteProductBanner = async (bannerId) => {
+    if (!window.confirm("Delete this products banner?")) {
+      return;
+    }
+
+    try {
+      await dispatch(deleteProductBanner(bannerId)).unwrap();
+      toast.success("Products banner deleted successfully");
+    } catch (error) {
+      toast.error(error || "Failed to delete products banner");
     }
   };
 
@@ -545,6 +603,109 @@ const AdminDashboard = () => {
                 <FaPlus />
                 <span>Add Product</span>
               </button>
+            </div>
+
+            <div className="mb-8 grid grid-cols-1 gap-8 lg:grid-cols-[360px,1fr]">
+              <div className="rounded-lg border bg-gray-50 p-5">
+                <h3 className="mb-4 text-xl font-semibold">Products Page Banners</h3>
+                <form className="space-y-4" onSubmit={handleCreateProductBanner}>
+                  <div>
+                    <label className="mb-2 block text-sm font-medium text-gray-700">
+                      Banner Image
+                    </label>
+                    {productBannerImagePreview && (
+                      <img
+                        src={productBannerImagePreview}
+                        alt="Products banner preview"
+                        className="mb-3 h-32 w-full rounded-lg object-cover"
+                      />
+                    )}
+                    <input
+                      type="file"
+                      accept="image/*"
+                      onChange={(e) => {
+                        const file = e.target.files[0];
+                        if (!file) {
+                          return;
+                        }
+
+                        setProductBannerImageFile(file);
+                        const reader = new FileReader();
+                        reader.onload = (event) =>
+                          setProductBannerImagePreview(event.target.result);
+                        reader.readAsDataURL(file);
+                      }}
+                      className="w-full rounded border border-gray-300 px-3 py-2 text-sm"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="mb-2 block text-sm font-medium text-gray-700">
+                      Display Order
+                    </label>
+                    <input
+                      type="number"
+                      value={productBannerForm.displayOrder}
+                      onChange={(e) =>
+                        setProductBannerForm((prev) => ({
+                          ...prev,
+                          displayOrder: e.target.value,
+                        }))
+                      }
+                      className="w-full rounded border border-gray-300 px-3 py-2"
+                      min="0"
+                    />
+                  </div>
+
+                  <button
+                    type="submit"
+                    disabled={uploadingProductBannerImage}
+                    className="flex items-center space-x-2 rounded bg-[#68a300] px-4 py-2 text-white hover:bg-[#5f9600] disabled:opacity-60"
+                  >
+                    <FaPlus />
+                    <span>
+                      {uploadingProductBannerImage
+                        ? "Uploading..."
+                        : "Add Banner"}
+                    </span>
+                  </button>
+                </form>
+              </div>
+
+              <div>
+                <h3 className="mb-4 text-xl font-semibold">Existing Banners</h3>
+                <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
+                  {productBanners.map((banner) => (
+                    <div
+                      key={banner._id}
+                      className="overflow-hidden rounded-xl border bg-white shadow-sm"
+                    >
+                      <img
+                        src={`http://localhost:5000${banner.image}`}
+                        alt="Products banner"
+                        className="h-32 w-full object-cover"
+                      />
+                      <div className="flex items-center justify-between p-3">
+                        <p className="text-sm text-gray-500">
+                          Order: {banner.displayOrder || 0}
+                        </p>
+                        <button
+                          onClick={() => handleDeleteProductBanner(banner._id)}
+                          className="text-red-600 hover:text-red-900"
+                        >
+                          <FaTrash />
+                        </button>
+                      </div>
+                    </div>
+                  ))}
+
+                  {productBanners.length === 0 && (
+                    <div className="rounded-xl border border-dashed p-8 text-center text-gray-400 md:col-span-2 xl:col-span-3">
+                      No products banners yet.
+                    </div>
+                  )}
+                </div>
+              </div>
             </div>
 
             <div className="overflow-x-auto">

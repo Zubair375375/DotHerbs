@@ -1,6 +1,7 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { useSearchParams } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
+import { FaChevronLeft, FaChevronRight } from "react-icons/fa";
 import {
   fetchCategories,
   fetchProducts,
@@ -9,6 +10,10 @@ import {
   selectProductsStatus,
   selectProductsError,
 } from "../store/slices/productSlice";
+import {
+  fetchProductBanners,
+  selectProductBanners,
+} from "../store/slices/productBannerSlice";
 import ProductCard from "../components/ProductCard";
 import Loader from "../components/Loader";
 
@@ -19,7 +24,10 @@ const Products = () => {
   const categories = useSelector(selectCategories);
   const status = useSelector(selectProductsStatus);
   const error = useSelector(selectProductsError);
+  const productBanners = useSelector(selectProductBanners);
   const initialCategory = searchParams.get("category") || "";
+  const [currentBanner, setCurrentBanner] = useState(0);
+  const [isBannerTransition, setIsBannerTransition] = useState(true);
 
   const [filters, setFilters] = useState({
     category: initialCategory,
@@ -31,7 +39,74 @@ const Products = () => {
   useEffect(() => {
     dispatch(fetchProducts());
     dispatch(fetchCategories());
+    dispatch(fetchProductBanners());
   }, [dispatch]);
+
+  const bannerSlides = useMemo(() => {
+    if (productBanners.length > 0) {
+      return productBanners.map((banner) => ({
+        _id: banner._id,
+        image: banner.image?.startsWith("http")
+          ? banner.image
+          : `http://localhost:5000${banner.image}`,
+      }));
+    }
+
+    return [
+      {
+        _id: "fallback-products-banner",
+        image: "/images/banners/hero_banner1.jpg",
+      },
+    ];
+  }, [productBanners]);
+
+  const loopedBannerSlides = useMemo(() => {
+    if (bannerSlides.length <= 1) return bannerSlides;
+    return [...bannerSlides, bannerSlides[0]];
+  }, [bannerSlides]);
+
+  useEffect(() => {
+    setCurrentBanner(0);
+    setIsBannerTransition(true);
+  }, [bannerSlides.length]);
+
+  useEffect(() => {
+    if (bannerSlides.length <= 1) return undefined;
+    const intervalId = window.setInterval(() => {
+      setCurrentBanner((prev) => prev + 1);
+    }, 3000);
+    return () => window.clearInterval(intervalId);
+  }, [bannerSlides.length]);
+
+  useEffect(() => {
+    if (bannerSlides.length <= 1) return;
+    if (currentBanner > bannerSlides.length) {
+      setIsBannerTransition(false);
+      setCurrentBanner(0);
+    }
+  }, [currentBanner, bannerSlides.length]);
+
+  useEffect(() => {
+    if (isBannerTransition) return undefined;
+    const frameId = window.requestAnimationFrame(() => setIsBannerTransition(true));
+    return () => window.cancelAnimationFrame(frameId);
+  }, [isBannerTransition]);
+
+  const handleBannerTransitionEnd = () => {
+    if (bannerSlides.length <= 1) return;
+    if (currentBanner === bannerSlides.length) {
+      setIsBannerTransition(false);
+      setCurrentBanner(0);
+    }
+  };
+
+  const handlePrevBanner = () => {
+    setCurrentBanner((prev) => (prev - 1 + bannerSlides.length) % bannerSlides.length);
+  };
+
+  const handleNextBanner = () => {
+    setCurrentBanner((prev) => prev + 1);
+  };
 
   useEffect(() => {
     setFilters((prev) => ({
@@ -99,9 +174,71 @@ const Products = () => {
   }
 
   return (
-    <div className="container mx-auto px-4 py-8">
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold text-gray-800 mb-6">Our Products</h1>
+    <div>
+      <section className="relative mb-8 overflow-hidden">
+        <div className="relative h-[220px] sm:h-[280px] lg:h-[340px]">
+          <div
+            className={`flex h-full ${
+              isBannerTransition ? "transition-transform duration-700 ease-in-out" : ""
+            }`}
+            style={{ transform: `translateX(-${currentBanner * 100}%)` }}
+            onTransitionEnd={handleBannerTransitionEnd}
+          >
+            {loopedBannerSlides.map((banner, index) => (
+              <div
+                key={`${banner._id}-${index}`}
+                className="relative h-full min-w-full"
+              >
+                <img
+                  src={banner.image}
+                  alt="Products banner"
+                  className="h-full w-full object-cover"
+                />
+              </div>
+            ))}
+          </div>
+
+          {bannerSlides.length > 1 && (
+            <>
+              <button
+                type="button"
+                onClick={handlePrevBanner}
+                className="absolute left-3 top-1/2 z-10 flex h-10 w-10 -translate-y-1/2 items-center justify-center rounded-full bg-white/85 text-gray-700 shadow transition hover:bg-white"
+                aria-label="Previous products banner"
+              >
+                <FaChevronLeft />
+              </button>
+              <button
+                type="button"
+                onClick={handleNextBanner}
+                className="absolute right-3 top-1/2 z-10 flex h-10 w-10 -translate-y-1/2 items-center justify-center rounded-full bg-white/85 text-gray-700 shadow transition hover:bg-white"
+                aria-label="Next products banner"
+              >
+                <FaChevronRight />
+              </button>
+
+              <div className="absolute bottom-4 left-1/2 z-10 flex -translate-x-1/2 items-center gap-2">
+                {bannerSlides.map((banner, index) => (
+                  <button
+                    key={banner._id}
+                    type="button"
+                    onClick={() => setCurrentBanner(index)}
+                    className={`h-2.5 w-2.5 rounded-full border border-white/70 transition ${
+                      index === currentBanner % bannerSlides.length
+                        ? "bg-[#68a300]"
+                        : "bg-white/80"
+                    }`}
+                    aria-label={`Go to products banner ${index + 1}`}
+                  />
+                ))}
+              </div>
+            </>
+          )}
+        </div>
+      </section>
+
+      <div className="container mx-auto px-4 py-8">
+        <div className="mb-8">
 
         {/* Filters */}
         <div className="bg-white p-6 rounded-lg shadow-md mb-6">
@@ -213,6 +350,7 @@ const Products = () => {
             </button>
           </div>
         )}
+      </div>
       </div>
     </div>
   );

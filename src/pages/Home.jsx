@@ -167,7 +167,10 @@ const Home = () => {
             onTransitionEnd={handleHeroTransitionEnd}
           >
             {loopedSlides.map((slide, index) => (
-              <div key={`${slide._id}-${index}`} className="relative h-full min-w-full">
+              <div
+                key={`${slide._id}-${index}`}
+                className="relative h-full min-w-full"
+              >
                 <img
                   src={slide.image}
                   alt={slide.title}
