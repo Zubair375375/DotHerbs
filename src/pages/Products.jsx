@@ -2,6 +2,7 @@ import { useState, useEffect, useMemo } from "react";
 import { useLocation, useNavigate, useSearchParams } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { FaChevronLeft, FaChevronRight } from "react-icons/fa";
+import { MdGridView, MdFormatListBulleted, MdGridOn, MdApps } from "react-icons/md";
 import {
   fetchCategories,
   fetchProducts,
@@ -17,6 +18,12 @@ import {
 import ProductCard from "../components/ProductCard";
 import Loader from "../components/Loader";
 
+const getInitialViewMode = () => {
+  const validModes = ["grid", "list", "compact", "tiny"];
+  const saved = localStorage.getItem("productsViewMode");
+  return validModes.includes(saved) ? saved : "grid";
+};
+
 const Products = () => {
   const dispatch = useDispatch();
   const location = useLocation();
@@ -30,6 +37,7 @@ const Products = () => {
   const initialCategory = searchParams.get("category") || "";
   const [currentBanner, setCurrentBanner] = useState(0);
   const [isBannerTransition, setIsBannerTransition] = useState(true);
+  const [viewMode, setViewMode] = useState(getInitialViewMode);
 
   const [filters, setFilters] = useState({
     category: initialCategory,
@@ -173,6 +181,14 @@ const Products = () => {
 
   const handleFilterChange = (key, value) => {
     setFilters((prev) => ({ ...prev, [key]: value }));
+  };
+
+  const handleViewModeChange = (mode) => {
+    if (!["grid", "list", "compact", "tiny"].includes(mode)) {
+      return;
+    }
+    setViewMode(mode);
+    localStorage.setItem("productsViewMode", mode);
   };
 
   if (status === "loading") {
@@ -330,18 +346,91 @@ const Products = () => {
             </div>
           </div>
 
-          {/* Results */}
-          <div className="mb-4">
-            <p className="text-gray-600">
-              {sortedProducts.length} products found
-            </p>
+          {/* Results + View Controls */}
+          <div className="mb-4 flex items-center justify-between gap-3">
+            <p className="text-gray-600">{sortedProducts.length} products found</p>
+            <div className="flex items-center gap-2 rounded-md border border-gray-200 bg-white p-1">
+              <span className="px-2 text-xs font-medium text-gray-500">
+                View as
+              </span>
+              <button
+                type="button"
+                onClick={() => handleViewModeChange("grid")}
+                className={`inline-flex items-center gap-1 rounded px-3 py-2 text-xs font-medium transition ${
+                  viewMode === "grid"
+                    ? "bg-[#68a300] text-white"
+                    : "text-gray-600 hover:bg-gray-100"
+                }`}
+                aria-pressed={viewMode === "grid"}
+                aria-label="Grid view"
+                title="Grid view"
+              >
+                <MdGridView className="text-base" />
+              </button>
+              <button
+                type="button"
+                onClick={() => handleViewModeChange("list")}
+                className={`inline-flex items-center gap-1 rounded px-3 py-2 text-xs font-medium transition ${
+                  viewMode === "list"
+                    ? "bg-[#68a300] text-white"
+                    : "text-gray-600 hover:bg-gray-100"
+                }`}
+                aria-pressed={viewMode === "list"}
+                aria-label="List view"
+                title="List view"
+              >
+                <MdFormatListBulleted className="text-base" />
+              </button>
+              <button
+                type="button"
+                onClick={() => handleViewModeChange("compact")}
+                className={`inline-flex items-center gap-1 rounded px-3 py-2 text-xs font-medium transition ${
+                  viewMode === "compact"
+                    ? "bg-[#68a300] text-white"
+                    : "text-gray-600 hover:bg-gray-100"
+                }`}
+                aria-pressed={viewMode === "compact"}
+                aria-label="Compact view"
+                title="Compact view"
+              >
+                <MdGridOn className="text-base" />
+              </button>
+              <button
+                type="button"
+                onClick={() => handleViewModeChange("tiny")}
+                className={`inline-flex items-center gap-1 rounded px-3 py-2 text-xs font-medium transition ${
+                  viewMode === "tiny"
+                    ? "bg-[#68a300] text-white"
+                    : "text-gray-600 hover:bg-gray-100"
+                }`}
+                aria-pressed={viewMode === "tiny"}
+                aria-label="Tiny view"
+                title="Tiny view"
+              >
+                <MdApps className="text-base" />
+              </button>
+            </div>
           </div>
 
           {/* Products Grid */}
           {sortedProducts.length > 0 ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+            <div
+              className={
+                viewMode === "list"
+                  ? "space-y-4"
+                  : viewMode === "compact"
+                    ? "grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4"
+                    : viewMode === "tiny"
+                      ? "grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-3"
+                      : "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6"
+              }
+            >
               {sortedProducts.map((product) => (
-                <ProductCard key={product._id} product={product} />
+                <ProductCard
+                  key={product._id}
+                  product={product}
+                  viewMode={viewMode}
+                />
               ))}
             </div>
           ) : (
