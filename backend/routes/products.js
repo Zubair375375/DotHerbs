@@ -27,14 +27,13 @@ const createProductValidation = [
   body("price")
     .isFloat({ min: 0 })
     .withMessage("Price must be a positive number"),
-  body("category")
-    .custom(async (value) => {
-      const category = await Category.findOne({ value, isActive: true });
-      if (!category) {
-        throw new Error("Invalid category");
-      }
-      return true;
-    }),
+  body("category").custom(async (value) => {
+    const category = await Category.findOne({ value, isActive: true });
+    if (!category) {
+      throw new Error("Invalid category");
+    }
+    return true;
+  }),
   body("stock")
     .isInt({ min: 0 })
     .withMessage("Stock must be a non-negative integer"),

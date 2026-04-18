@@ -39,6 +39,14 @@ import {
   FaBullhorn,
   FaImage,
 } from "react-icons/fa";
+import { FaFileExcel } from "react-icons/fa";
+import {
+  exportToExcel,
+  formatProductsForExport,
+  formatOrdersForExport,
+  formatUsersForExport,
+  formatCategoriesForExport,
+} from "../utils/exportToExcel";
 import {
   fetchAllAnnouncements,
   createAnnouncement,
@@ -194,10 +202,8 @@ const AdminDashboard = () => {
     setEditingProduct(product);
     setShowEditProductModal(true);
   };
-
   const handleCreateCategory = async (e) => {
     e.preventDefault();
-
     if (!categoryForm.name.trim()) {
       toast.error("Category name is required");
       return;
@@ -603,6 +609,23 @@ const AdminDashboard = () => {
                 <FaPlus />
                 <span>Add Product</span>
               </button>
+              <button
+                onClick={() =>
+                  exportToExcel(
+                    [
+                      {
+                        name: "Products",
+                        data: formatProductsForExport(products),
+                      },
+                    ],
+                    "products.xlsx",
+                  )
+                }
+                className="flex items-center space-x-2 rounded bg-green-700 px-4 py-2 text-white hover:bg-green-800"
+              >
+                <FaFileExcel />
+                <span>Export</span>
+              </button>
             </div>
 
             <div className="mb-8 grid grid-cols-1 gap-8 lg:grid-cols-[360px,1fr]">
@@ -950,7 +973,21 @@ const AdminDashboard = () => {
         {/* Orders Tab */}
         {activeTab === "orders" && (
           <div className="p-6">
-            <h2 className="text-2xl font-semibold mb-6">Order Management</h2>
+            <div className="mb-6 flex items-center justify-between">
+              <h2 className="text-2xl font-semibold">Order Management</h2>
+              <button
+                onClick={() =>
+                  exportToExcel(
+                    [{ name: "Orders", data: formatOrdersForExport(orders) }],
+                    "orders.xlsx",
+                  )
+                }
+                className="flex items-center space-x-2 rounded bg-green-700 px-4 py-2 text-white hover:bg-green-800"
+              >
+                <FaFileExcel />
+                <span>Export</span>
+              </button>
+            </div>
 
             <div className="overflow-x-auto">
               <table className="min-w-full table-auto">
@@ -1025,7 +1062,21 @@ const AdminDashboard = () => {
         {/* Users Tab */}
         {activeTab === "users" && (
           <div className="p-6">
-            <h2 className="text-2xl font-semibold mb-6">User Management</h2>
+            <div className="mb-6 flex items-center justify-between">
+              <h2 className="text-2xl font-semibold">User Management</h2>
+              <button
+                onClick={() =>
+                  exportToExcel(
+                    [{ name: "Users", data: formatUsersForExport(users) }],
+                    "users.xlsx",
+                  )
+                }
+                className="flex items-center space-x-2 rounded bg-green-700 px-4 py-2 text-white hover:bg-green-800"
+              >
+                <FaFileExcel />
+                <span>Export</span>
+              </button>
+            </div>
 
             <div className="overflow-x-auto">
               <table className="min-w-full table-auto">

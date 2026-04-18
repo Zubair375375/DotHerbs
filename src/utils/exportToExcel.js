@@ -1,0 +1,106 @@
+/**
+ * exportToExcel – converts arrays of objects to a multi-sheet Excel workbook
+ * and triggers an immediate browser download.
+ *
+ * Usage (single sheet):
+ *   exportToExcel([{ name: "Products", data: productsArray }], "products.xlsx");
+ *
+ * Usage (multi-sheet):
+ *   exportToExcel(
+ *     [
+ *       { name: "Products", data: productsArray },
+ *       { name: "Orders",   data: ordersArray   },
+ *     ],
+ *     "dashboard-export.xlsx",
+ *   );
+ */
+import * as XLSX from "xlsx";
+
+/**
+ * @param {Array<{ name: string, data: object[] }>} sheets
+ * @param {string} [filename]
+ */
+export function exportToExcel(sheets, filename = "export.xlsx") {
+  const wb = XLSX.utils.book_new();
+
+  sheets.forEach(({ name, data }) => {
+    if (!data || data.length === 0) {
+      // Still write an empty sheet so the tab exists
+      const ws = XLSX.utils.aoa_to_sheet([["No data available"]]);
+      XLSX.utils.book_append_sheet(wb, ws, name.slice(0, 31));
+      return;
+    }
+
+    const ws = XLSX.utils.json_to_sheet(data);
+
+    // Auto-fit column widths based on header lengths
+    const colWidths = Object.keys(data[0]).map((key) => ({
+      wch: Math.max(key.length + 2, 14),
+    }));
+    ws["!cols"] = colWidths;
+
+    XLSX.utils.book_append_sheet(wb, ws, name.slice(0, 31));
+  });
+
+  XLSX.writeFile(wb, filename);
+}
+
+// ─── Formatter helpers ─────────────────────────────────────────────────────
+
+/** Flatten a products array into export-friendly rows */
+export function formatProductsForExport(products) {
+  return products.map((p) => ({
+    ID: p._id,
+    Name: p.name,
+    Category: p.category,
+    "Price (PKR)": p.price,
+    Stock: p.stock,
+    Rating: p.rating ?? 0,
+    Reviews: p.numReviews ?? 0,
+    Active: p.isActive ? "Yes" : "No",
+    "Created At": p.createdAt ? new Date(p.createdAt).toLocaleDateString() : "",
+  }));
+}
+
+/** Flatten an orders array into export-friendly rows */
+export function formatOrdersForExport(orders) {
+  return orders.map((o) => ({
+    "Order ID": o._id,
+    Customer: o.user?.name || o.user?.email || "—",
+    Status: o.status,
+    "Total (PKR)": o.total ?? 0,
+    "Items Count": Array.isArray(o.items) ? o.items.length : 0,
+    "Placed At": o.createdAt ? new Date(o.createdAt).toLocaleDateString() : "",
+    "Delivery Address": o.shippingAddress
+      ? [
+          o.shippingAddress.street,
+          o.shippingAddress.city,
+          o.shippingAddress.country,
+        ]
+          .filter(Boolean)
+          .join(", ")
+      : "",
+  }));
+}
+
+/** Flatten a users array into export-friendly rows */
+export function formatUsersForExport(users) {
+  return users.map((u) => ({
+    ID: u._id,
+    Name: u.name,
+    Email: u.email,
+    Role: u.role,
+    "Joined At": u.createdAt ? new Date(u.createdAt).toLocaleDateString() : "",
+  }));
+}
+
+/** Flatten a categories array into export-friendly rows */
+export function formatCategoriesForExport(categories) {
+  return categories.map((c) => ({
+    ID: c._id,
+    Name: c.name,
+    Value: c.value,
+    Description: c.description || "",
+    Active: c.isActive ? "Yes" : "No",
+  }));
+}

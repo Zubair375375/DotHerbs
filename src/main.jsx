@@ -10,7 +10,7 @@ import App from "./App.jsx";
 ReactDOM.createRoot(document.getElementById("root")).render(
   <StrictMode>
     <Provider store={store}>
-      <BrowserRouter>
+      <BrowserRouter future={{ v7_relativeSplatPath: true }}>
         <App />
       </BrowserRouter>
     </Provider>
