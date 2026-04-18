@@ -55,7 +55,7 @@ const createOrderValidation = [
     .notEmpty()
     .withMessage("Country is required"),
   body("paymentMethod")
-    .isIn(["stripe", "paypal"])
+    .isIn(["stripe", "paypal", "demo"])
     .withMessage("Invalid payment method"),
   body("taxPrice")
     .isFloat({ min: 0 })

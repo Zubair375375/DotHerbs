@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import {
   selectAuthUser,
   selectIsAuthenticated,
@@ -26,6 +26,7 @@ import {
 const Profile = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
+  const location = useLocation();
   const user = useSelector(selectAuthUser);
   const isAuthenticated = useSelector(selectIsAuthenticated);
   const isLoading = useSelector(selectAuthIsLoading);
@@ -33,6 +34,7 @@ const Profile = () => {
   const userOrders = useSelector(selectOrders);
 
   const [activeTab, setActiveTab] = useState("profile");
+  const [showOrderThanks, setShowOrderThanks] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
   const [formData, setFormData] = useState({
     name: "",
@@ -72,6 +74,13 @@ const Profile = () => {
       dispatch(getMyOrders());
     }
   }, [isAuthenticated, navigate, user, activeTab, dispatch]);
+
+  useEffect(() => {
+    if (location.state?.orderPlaced) {
+      setShowOrderThanks(true);
+      setActiveTab("orders");
+    }
+  }, [location.state]);
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -231,6 +240,37 @@ const Profile = () => {
 
           {/* Main Content */}
           <div className="lg:col-span-3">
+            {showOrderThanks && (
+              <div className="mb-6 rounded-lg border border-green-200 bg-green-50 p-5 shadow-sm">
+                <div className="flex items-start justify-between gap-4">
+                  <div>
+                    <h3 className="text-lg font-semibold text-green-800">
+                      Thank you for placing your order!
+                    </h3>
+                    <p className="mt-1 text-sm text-green-700">
+                      Your order has been received successfully and is now visible in your order history.
+                    </p>
+                    {location.state?.orderId && (
+                      <p className="mt-2 text-sm font-medium text-green-800">
+                        Order reference: #{location.state.orderId.slice(-8)}
+                      </p>
+                    )}
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setShowOrderThanks(false);
+                      navigate("/profile", { replace: true });
+                    }}
+                    className="text-green-700 hover:text-green-900"
+                    aria-label="Dismiss order success message"
+                  >
+                    <FaTimes />
+                  </button>
+                </div>
+              </div>
+            )}
+
             {/* Profile Tab */}
             {activeTab === "profile" && (
               <div className="bg-white rounded-lg shadow-md p-6">
@@ -478,7 +518,10 @@ const Profile = () => {
                             Total: ${order.totalPrice?.toFixed(2)}
                           </p>
                           <p className="text-sm text-gray-600">
-                            Payment: {order.paymentMethod}
+                            Payment:{" "}
+                            {order.paymentMethod === "demo"
+                              ? "Demo Order"
+                              : order.paymentMethod}
                           </p>
                         </div>
                         <button className="text-green-600 hover:text-green-800 text-sm font-medium">

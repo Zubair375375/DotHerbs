@@ -30,7 +30,7 @@ const Checkout = () => {
     country: "",
   });
 
-  const [paymentMethod, setPaymentMethod] = useState("stripe");
+  const [paymentMethod] = useState("demo");
   const [isProcessing, setIsProcessing] = useState(false);
 
   useEffect(() => {
@@ -56,7 +56,13 @@ const Checkout = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    if (!shippingAddress.street || !shippingAddress.city || !shippingAddress.state || !shippingAddress.zipCode || !shippingAddress.country) {
+    if (
+      !shippingAddress.street ||
+      !shippingAddress.city ||
+      !shippingAddress.state ||
+      !shippingAddress.zipCode ||
+      !shippingAddress.country
+    ) {
       toast.error("Please fill in all shipping address fields");
       return;
     }
@@ -68,7 +74,11 @@ const Checkout = () => {
         orderItems: cartItems.map((item) => ({
           product: item.product._id,
           name: item.product.name,
-          image: item.product.images[0],
+          image:
+            item.product.image ||
+            item.product.images?.[0]?.url ||
+            item.product.images?.[0] ||
+            "/placeholder-product.jpg",
           price: item.price,
           quantity: item.quantity,
         })),
@@ -79,10 +89,15 @@ const Checkout = () => {
         totalPrice: cartTotal,
       };
 
-      await dispatch(createOrder(orderData)).unwrap();
+      const createdOrder = await dispatch(createOrder(orderData)).unwrap();
       dispatch(clearCart());
       toast.success("Order placed successfully!");
-      navigate("/profile");
+      navigate("/profile", {
+        state: {
+          orderPlaced: true,
+          orderId: createdOrder?._id,
+        },
+      });
     } catch (error) {
       toast.error(error || "Failed to place order");
     } finally {
@@ -109,7 +124,10 @@ const Checkout = () => {
 
             <div className="space-y-4">
               {cartItems.map((item) => (
-                <div key={item.product._id} className="flex items-center space-x-4">
+                <div
+                  key={item.product._id}
+                  className="flex items-center space-x-4"
+                >
                   <img
                     src={
                       item.product.image
@@ -226,36 +244,21 @@ const Checkout = () => {
                   </div>
                 </div>
 
-                {/* Payment Method */}
+                {/* Demo payment */}
                 <div className="bg-white rounded-lg shadow-md p-6">
                   <h2 className="text-xl font-semibold mb-4 flex items-center">
                     <FaCreditCard className="mr-2" />
-                    Payment Method
+                    Demo Order Placement
                   </h2>
 
-                  <div className="space-y-2">
-                    <label className="flex items-center">
-                      <input
-                        type="radio"
-                        name="paymentMethod"
-                        value="stripe"
-                        checked={paymentMethod === "stripe"}
-                        onChange={(e) => setPaymentMethod(e.target.value)}
-                        className="mr-2"
-                      />
-                      <span>Stripe (Credit/Debit Card)</span>
-                    </label>
-                    <label className="flex items-center">
-                      <input
-                        type="radio"
-                        name="paymentMethod"
-                        value="paypal"
-                        checked={paymentMethod === "paypal"}
-                        onChange={(e) => setPaymentMethod(e.target.value)}
-                        className="mr-2"
-                      />
-                      <span>PayPal</span>
-                    </label>
+                  <div className="rounded-md border border-green-100 bg-green-50 p-4 text-sm text-gray-700">
+                    <p className="font-medium text-green-700">
+                      Demo checkout is enabled.
+                    </p>
+                    <p className="mt-1">
+                      No card or payment details are required. Your order will
+                      be placed directly for demonstration purposes.
+                    </p>
                   </div>
                 </div>
 
@@ -270,7 +273,7 @@ const Checkout = () => {
                       <span className="ml-2">Processing...</span>
                     </>
                   ) : (
-                    "Place Order"
+                    "Place Demo Order"
                   )}
                 </button>
               </form>
