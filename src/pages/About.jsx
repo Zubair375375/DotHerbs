@@ -383,7 +383,7 @@ const About = () => {
       </section>
 
       {/* Facility Detail */}
-      <section className="bg-[#ffffff] py-16">
+      <section className="bg-[#ffffff] py-14">
         <div className="mx-auto max-w-6xl px-6">
           <div className="grid items-center gap-8 lg:grid-cols-12">
             <div className="grid gap-4 sm:grid-cols-2 lg:col-span-6">
@@ -550,26 +550,26 @@ const About = () => {
       </section>
 
       {/* Health Priority */}
-      <section className="bg-[#ffffff] py-20">
-        <div className="mx-auto max-w-7xl px-6">
+      <section className="bg-[#ffffff] py-16">
+        <div className="mx-auto max-w-6xl px-6">
           <div className="text-center">
-            <h3 className="text-3xl font-extrabold uppercase tracking-[0.08em] text-[#152238] sm:text-4xl">
+            <h3 className="text-2xl font-extrabold uppercase tracking-[0.08em] text-[#152238] sm:text-3xl">
               {healthPrioritySection.heading}
             </h3>
             <div className="mx-auto mt-5 h-1 w-44 rounded-full bg-[#5b3f95]" />
           </div>
 
-          <div className="mt-12 grid grid-cols-1 gap-16 lg:grid-cols-2 lg:items-stretch">
+          <div className="mt-8 grid grid-cols-1 gap-8 lg:grid-cols-2 lg:items-stretch">
             <div className="space-y-4">
               {healthPrioritySection.items.map((item, index) => (
                 <article
                   key={`${item.title}-${index}`}
-                  className="rounded-2xl bg-gray-50 p-6"
+                  className="rounded-2xl bg-gray-50 p-5"
                 >
-                  <h4 className="text-lg font-extrabold uppercase tracking-[0.04em] text-[#152238]">
+                  <h4 className="text-base font-extrabold uppercase tracking-[0.04em] text-[#152238]">
                     {item.title || "No Content"}
                   </h4>
-                  <p className="mt-3 text-lg leading-relaxed text-[#2d3648]">
+                  <p className="mt-2.5 text-base leading-relaxed text-[#2d3648]">
                     {item.description ||
                       "Section description is not available right now."}
                   </p>
@@ -577,7 +577,7 @@ const About = () => {
               ))}
             </div>
 
-            <div className="grid min-h-[340px] grid-cols-3 grid-rows-2 gap-3 lg:h-full lg:min-h-0">
+            <div className="grid min-h-[280px] grid-cols-3 grid-rows-2 gap-2.5 lg:h-full lg:min-h-0">
               {[0, 1, 2, 3].map((index) => {
                 const slotClass =
                   index === 0
@@ -592,7 +592,7 @@ const About = () => {
                 return (
                   <div
                     key={`health-priority-image-${index}`}
-                    className={`${slotClass} overflow-hidden rounded-3xl border border-[#e5e7eb] bg-white`}
+                    className={`${slotClass} overflow-hidden rounded-2xl border border-[#e5e7eb] bg-white`}
                   >
                     {imageUrl ? (
                       <img

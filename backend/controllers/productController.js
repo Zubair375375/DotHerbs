@@ -1,4 +1,5 @@
 import { validationResult } from "express-validator";
+import mongoose from "mongoose";
 import Category from "../models/Category.js";
 import Product from "../models/Product.js";
 
@@ -84,6 +85,13 @@ export const getProducts = async (req, res) => {
 // @access  Public
 export const getProduct = async (req, res) => {
   try {
+    if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
+      return res.status(400).json({
+        success: false,
+        error: "Invalid product id",
+      });
+    }
+
     const product = await Product.findById(req.params.id);
 
     if (!product || !product.isActive) {
@@ -151,6 +159,13 @@ export const updateProduct = async (req, res) => {
   }
 
   try {
+    if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
+      return res.status(400).json({
+        success: false,
+        error: "Invalid product id",
+      });
+    }
+
     const product = await Product.findById(req.params.id);
 
     if (!product) {
@@ -186,6 +201,13 @@ export const updateProduct = async (req, res) => {
 // @access  Private/Admin
 export const deleteProduct = async (req, res) => {
   try {
+    if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
+      return res.status(400).json({
+        success: false,
+        error: "Invalid product id",
+      });
+    }
+
     const product = await Product.findById(req.params.id);
 
     if (!product) {
@@ -225,6 +247,13 @@ export const createProductReview = async (req, res) => {
   }
 
   try {
+    if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
+      return res.status(400).json({
+        success: false,
+        error: "Invalid product id",
+      });
+    }
+
     const { rating, comment } = req.body;
 
     const product = await Product.findById(req.params.id);

@@ -120,7 +120,7 @@ const ProductDetail = () => {
         <div className="text-center text-red-600">
           <p>Error loading product: {error}</p>
           <button
-            onClick={() => dispatch(fetchProductById(id))}
+            onClick={() => dispatch(fetchProduct(id))}
             className="mt-4 bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700"
           >
             Try Again
