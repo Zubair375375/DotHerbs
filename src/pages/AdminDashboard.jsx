@@ -38,6 +38,7 @@ import {
   FaTimes,
   FaBullhorn,
   FaImage,
+  FaVideo,
 } from "react-icons/fa";
 import { FaFileExcel } from "react-icons/fa";
 import {
@@ -110,6 +111,25 @@ const AdminDashboard = () => {
   const [heroImageFile, setHeroImageFile] = useState(null);
   const [heroImagePreview, setHeroImagePreview] = useState(null);
   const [uploadingHeroImage, setUploadingHeroImage] = useState(false);
+  const [aboutVideoFile, setAboutVideoFile] = useState(null);
+  const [aboutVideoPreview, setAboutVideoPreview] = useState("");
+  const [aboutVideoUrl, setAboutVideoUrl] = useState("");
+  const [uploadingAboutVideo, setUploadingAboutVideo] = useState(false);
+  const [loadingAboutVideo, setLoadingAboutVideo] = useState(false);
+  const [aboutSectionHeading, setAboutSectionHeading] = useState("");
+  const [aboutSectionDescription, setAboutSectionDescription] = useState("");
+  const [aboutSectionImages, setAboutSectionImages] = useState(["", "", ""]);
+  const [aboutSectionImageFiles, setAboutSectionImageFiles] = useState([
+    null,
+    null,
+    null,
+  ]);
+  const [aboutSectionImagePreviews, setAboutSectionImagePreviews] = useState([
+    "",
+    "",
+    "",
+  ]);
+  const [savingAboutSection, setSavingAboutSection] = useState(false);
   const [announcementForm, setAnnouncementForm] = useState({
     title: "",
     message: "",
@@ -119,6 +139,64 @@ const AdminDashboard = () => {
     endDate: "",
   });
   const announcements = useSelector(selectAllAnnouncements);
+  const API_URL = import.meta.env.VITE_API_URL || "http://localhost:5000/api";
+  const API_ORIGIN = API_URL.replace(/\/api\/?$/, "");
+  const defaultFacilityHeading =
+    "Pakistan's Largest Nutraceutical Manufacturing Facility";
+  const defaultFacilityDescription =
+    "With over a decade of experience, Dot-Herbs specializes in manufacturing nutraceutical and natural healthcare products. Backed by modern laboratories, strict quality protocols, and scalable production systems, we continue to set standards in safety, consistency, and product innovation.";
+  const defaultFacilityImages = [
+    "/images/banners/hero_banner1.jpg",
+    "/images/banners/hero_banner1.jpg",
+    "/images/banners/hero_banner1.jpg",
+  ];
+
+  const resolveMediaUrl = (url) => {
+    if (!url) return "";
+    if (url.startsWith("http://") || url.startsWith("https://")) return url;
+    if (url.startsWith("/uploads/")) return `${API_ORIGIN}${url}`;
+    return url;
+  };
+
+  const getAuthToken = () => {
+    const rawToken = localStorage.getItem("accessToken");
+    return rawToken ? JSON.parse(rawToken) : null;
+  };
+
+  const fetchAboutContent = async () => {
+    try {
+      setLoadingAboutVideo(true);
+      const response = await fetch(`${API_URL}/about-content`);
+      if (!response.ok) {
+        throw new Error("Failed to fetch About video");
+      }
+      const result = await response.json();
+      setAboutVideoUrl(result?.data?.videoUrl || "");
+      setAboutSectionHeading(
+        result?.data?.facilityHeading?.trim() || defaultFacilityHeading,
+      );
+      setAboutSectionDescription(
+        result?.data?.facilityDescription?.trim() || defaultFacilityDescription,
+      );
+      const remoteImages = Array.isArray(result?.data?.facilityImages)
+        ? result.data.facilityImages
+        : [];
+      setAboutSectionImages(
+        [0, 1, 2].map((index) => remoteImages[index] || defaultFacilityImages[index]),
+      );
+      setAboutSectionImageFiles([null, null, null]);
+      setAboutSectionImagePreviews(["", "", ""]);
+    } catch {
+      setAboutVideoUrl("");
+      setAboutSectionHeading(defaultFacilityHeading);
+      setAboutSectionDescription(defaultFacilityDescription);
+      setAboutSectionImages(defaultFacilityImages);
+      setAboutSectionImageFiles([null, null, null]);
+      setAboutSectionImagePreviews(["", "", ""]);
+    } finally {
+      setLoadingAboutVideo(false);
+    }
+  };
 
   useEffect(() => {
     if (!isAuthenticated) {
@@ -143,6 +221,7 @@ const AdminDashboard = () => {
       dispatch(fetchAllAnnouncements());
       dispatch(fetchAllHeroSlides());
       dispatch(fetchAllProductBanners());
+      fetchAboutContent();
     }
   }, [dispatch, isAuthenticated, user]);
 
@@ -162,22 +241,28 @@ const AdminDashboard = () => {
       dispatch(fetchAllAnnouncements());
     } else if (activeTab === "hero") {
       dispatch(fetchAllHeroSlides());
+    } else if (activeTab === "about-video") {
+      fetchAboutContent();
     }
   }, [activeTab, dispatch, isAuthenticated, user]);
+
+  useEffect(() => {
+    return () => {
+      if (aboutVideoPreview) {
+        URL.revokeObjectURL(aboutVideoPreview);
+      }
+    };
+  }, [aboutVideoPreview]);
 
   const uploadDashboardImage = async (file) => {
     const formDataUpload = new FormData();
     formDataUpload.append("image", file);
-    const rawToken = localStorage.getItem("accessToken");
-    const token = rawToken ? JSON.parse(rawToken) : null;
-    const response = await fetch(
-      `${import.meta.env.VITE_API_URL || "http://localhost:5000/api"}/upload`,
-      {
-        method: "POST",
-        headers: { Authorization: `Bearer ${token}` },
-        body: formDataUpload,
-      },
-    );
+    const token = getAuthToken();
+    const response = await fetch(`${API_URL}/upload`, {
+      method: "POST",
+      headers: { Authorization: `Bearer ${token}` },
+      body: formDataUpload,
+    });
 
     if (!response.ok) {
       throw new Error("Failed to upload image");
@@ -185,6 +270,201 @@ const AdminDashboard = () => {
 
     const result = await response.json();
     return result.data.url;
+  };
+
+  const uploadDashboardVideo = async (file) => {
+    const formDataUpload = new FormData();
+    formDataUpload.append("video", file);
+    const token = getAuthToken();
+    const response = await fetch(`${API_URL}/upload/video`, {
+      method: "POST",
+      headers: { Authorization: `Bearer ${token}` },
+      body: formDataUpload,
+    });
+
+    const result = await response.json();
+
+    if (!response.ok) {
+      throw new Error(result?.error || "Failed to upload video");
+    }
+
+    return result.data.url;
+  };
+
+  const handleUploadAboutVideo = async (e) => {
+    e.preventDefault();
+
+    if (!aboutVideoFile) {
+      toast.error("Please select a video file first");
+      return;
+    }
+
+    try {
+      setUploadingAboutVideo(true);
+      const uploadedVideoUrl = await uploadDashboardVideo(aboutVideoFile);
+      const token = getAuthToken();
+      const response = await fetch(`${API_URL}/about-content`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ videoUrl: uploadedVideoUrl }),
+      });
+
+      const result = await response.json();
+
+      if (!response.ok) {
+        throw new Error(result?.error || "Failed to save About video");
+      }
+
+      setAboutVideoUrl(result?.data?.videoUrl || uploadedVideoUrl);
+      setAboutVideoFile(null);
+      if (aboutVideoPreview) {
+        URL.revokeObjectURL(aboutVideoPreview);
+      }
+      setAboutVideoPreview("");
+      toast.success("About video updated successfully");
+    } catch (error) {
+      toast.error(error.message || "Failed to update About video");
+    } finally {
+      setUploadingAboutVideo(false);
+    }
+  };
+
+  const handleRemoveAboutVideo = async () => {
+    if (!window.confirm("Remove current About page video?")) {
+      return;
+    }
+
+    try {
+      setUploadingAboutVideo(true);
+      const token = getAuthToken();
+      const response = await fetch(`${API_URL}/about-content`, {
+        method: "DELETE",
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      const result = await response.json();
+
+      if (!response.ok) {
+        throw new Error(result?.error || "Failed to remove About video");
+      }
+
+      setAboutVideoUrl("");
+      setAboutVideoFile(null);
+      if (aboutVideoPreview) {
+        URL.revokeObjectURL(aboutVideoPreview);
+      }
+      setAboutVideoPreview("");
+      toast.success("About video removed");
+    } catch (error) {
+      toast.error(error.message || "Failed to remove About video");
+    } finally {
+      setUploadingAboutVideo(false);
+    }
+  };
+
+  const handleAboutSectionImageChange = (index, file) => {
+    if (!file) {
+      return;
+    }
+
+    const nextFiles = [...aboutSectionImageFiles];
+    nextFiles[index] = file;
+    setAboutSectionImageFiles(nextFiles);
+
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      const nextPreviews = [...aboutSectionImagePreviews];
+      nextPreviews[index] = event.target?.result || "";
+      setAboutSectionImagePreviews(nextPreviews);
+    };
+    reader.readAsDataURL(file);
+  };
+
+  const handleSaveAboutSection = async (e) => {
+    e.preventDefault();
+
+    if (!aboutSectionHeading.trim()) {
+      toast.error("Section heading is required");
+      return;
+    }
+
+    if (!aboutSectionDescription.trim()) {
+      toast.error("Section description is required");
+      return;
+    }
+
+    try {
+      setSavingAboutSection(true);
+
+      const uploadedImages = [...aboutSectionImages];
+      for (let index = 0; index < 3; index += 1) {
+        if (aboutSectionImageFiles[index]) {
+          uploadedImages[index] = await uploadDashboardImage(
+            aboutSectionImageFiles[index],
+          );
+        }
+      }
+
+      if (uploadedImages.some((item) => !item)) {
+        throw new Error("Please provide all 3 images");
+      }
+
+      const token = getAuthToken();
+      const response = await fetch(`${API_URL}/about-content`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          facilityHeading: aboutSectionHeading.trim(),
+          facilityDescription: aboutSectionDescription.trim(),
+          facilityImages: uploadedImages,
+        }),
+      });
+
+      const result = await response.json();
+
+      if (!response.ok) {
+        throw new Error(result?.error || "Failed to save section");
+      }
+
+      setAboutSectionImages(uploadedImages);
+      setAboutSectionImageFiles([null, null, null]);
+      setAboutSectionImagePreviews(["", "", ""]);
+      toast.success("Section after video updated successfully");
+    } catch (error) {
+      toast.error(error.message || "Failed to save section");
+    } finally {
+      setSavingAboutSection(false);
+    }
+  };
+
+  const handleResetAboutSectionDefaults = () => {
+    setAboutSectionHeading(defaultFacilityHeading);
+    setAboutSectionDescription(defaultFacilityDescription);
+    setAboutSectionImages(defaultFacilityImages);
+    setAboutSectionImageFiles([null, null, null]);
+    setAboutSectionImagePreviews(["", "", ""]);
+  };
+
+  const handleRemoveAboutSectionImage = (index) => {
+    const nextImages = [...aboutSectionImages];
+    nextImages[index] = "";
+    setAboutSectionImages(nextImages);
+
+    const nextFiles = [...aboutSectionImageFiles];
+    nextFiles[index] = null;
+    setAboutSectionImageFiles(nextFiles);
+
+    const nextPreviews = [...aboutSectionImagePreviews];
+    nextPreviews[index] = "";
+    setAboutSectionImagePreviews(nextPreviews);
   };
 
   const handleDeleteProduct = async (productId) => {
@@ -508,6 +788,16 @@ const AdminDashboard = () => {
               }`}
             >
               Hero
+            </button>
+            <button
+              onClick={() => setActiveTab("about-video")}
+              className={`py-4 px-1 border-b-2 border-t-0 border-l-0 border-r-0 font-medium text-sm ${
+                activeTab === "about-video"
+                  ? "border-green-500 text-green-600"
+                  : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
+              }`}
+            >
+              About
             </button>
             <button
               onClick={() => setActiveTab("announcements")}
@@ -1253,6 +1543,203 @@ const AdminDashboard = () => {
                   )}
                 </div>
               </div>
+            </div>
+          </div>
+        )}
+
+        {/* About Video Tab */}
+        {activeTab === "about-video" && (
+          <div className="p-6 space-y-8">
+            <div className="grid grid-cols-1 gap-8 lg:grid-cols-[380px,1fr]">
+              <div className="rounded-lg border bg-gray-50 p-5">
+                <h2 className="mb-4 text-2xl font-semibold">About Page Video</h2>
+                <form className="space-y-4" onSubmit={handleUploadAboutVideo}>
+                  <div>
+                    <label className="mb-2 block text-sm font-medium text-gray-700">
+                      Upload Video
+                    </label>
+                    {aboutVideoPreview && (
+                      <video
+                        src={aboutVideoPreview}
+                        controls
+                        className="mb-3 h-44 w-full rounded-lg border object-cover"
+                      />
+                    )}
+                    <input
+                      type="file"
+                      accept="video/*"
+                      onChange={(e) => {
+                        const file = e.target.files[0];
+                        if (!file) {
+                          return;
+                        }
+
+                        setAboutVideoFile(file);
+                        if (aboutVideoPreview) {
+                          URL.revokeObjectURL(aboutVideoPreview);
+                        }
+                        setAboutVideoPreview(URL.createObjectURL(file));
+                      }}
+                      className="w-full rounded border border-gray-300 px-3 py-2 text-sm"
+                    />
+                    <p className="mt-2 text-xs text-gray-500">
+                      Supported: MP4/WebM/OGG, max size 100MB.
+                    </p>
+                  </div>
+
+                  <div className="flex gap-3">
+                    <button
+                      type="submit"
+                      disabled={uploadingAboutVideo}
+                      className="flex items-center space-x-2 rounded bg-[#68a300] px-4 py-2 text-white hover:bg-[#5f9600] disabled:opacity-60"
+                    >
+                      <FaVideo />
+                      <span>
+                        {uploadingAboutVideo ? "Saving..." : "Save Video"}
+                      </span>
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={handleRemoveAboutVideo}
+                      disabled={uploadingAboutVideo || !aboutVideoUrl}
+                      className="flex items-center space-x-2 rounded border border-red-200 bg-white px-4 py-2 text-red-600 hover:bg-red-50 disabled:opacity-50"
+                    >
+                      <FaTrash />
+                      <span>Remove</span>
+                    </button>
+                  </div>
+                </form>
+              </div>
+
+              <div>
+                <div className="mb-6 flex items-center justify-between">
+                  <h2 className="text-2xl font-semibold">Current About Video</h2>
+                  <div className="flex items-center gap-2 text-sm text-gray-500">
+                    <FaVideo />
+                    <span>{aboutVideoUrl ? "Configured" : "Not Set"}</span>
+                  </div>
+                </div>
+
+                <div className="overflow-hidden rounded-xl border bg-white p-4 shadow-sm">
+                  {loadingAboutVideo ? (
+                    <div className="flex h-72 items-center justify-center text-gray-400">
+                      Loading...
+                    </div>
+                  ) : aboutVideoUrl ? (
+                    <video
+                      src={resolveMediaUrl(aboutVideoUrl)}
+                      controls
+                      className="h-72 w-full rounded-lg bg-black object-contain"
+                    />
+                  ) : (
+                    <div className="flex h-72 items-center justify-center rounded-lg border-2 border-dashed border-gray-300 bg-gray-50 text-gray-400">
+                      No video uploaded yet.
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+
+            <div className="rounded-xl border bg-white p-6 shadow-sm">
+              <div className="mb-6 flex flex-wrap items-center justify-between gap-3">
+                <h2 className="text-2xl font-semibold">
+                  Section After Video Content
+                </h2>
+                <button
+                  type="button"
+                  onClick={handleResetAboutSectionDefaults}
+                  className="rounded border border-gray-300 px-3 py-2 text-sm text-gray-700 hover:bg-gray-50"
+                >
+                  Reset Defaults
+                </button>
+              </div>
+
+              <form className="space-y-6" onSubmit={handleSaveAboutSection}>
+                <div>
+                  <label className="mb-2 block text-sm font-medium text-gray-700">
+                    Heading
+                  </label>
+                  <input
+                    type="text"
+                    value={aboutSectionHeading}
+                    onChange={(e) => setAboutSectionHeading(e.target.value)}
+                    className="w-full rounded border border-gray-300 px-3 py-2 text-sm"
+                    maxLength={180}
+                    placeholder="Enter section heading"
+                  />
+                </div>
+
+                <div>
+                  <label className="mb-2 block text-sm font-medium text-gray-700">
+                    Descriptive Paragraph
+                  </label>
+                  <textarea
+                    value={aboutSectionDescription}
+                    onChange={(e) => setAboutSectionDescription(e.target.value)}
+                    className="w-full rounded border border-gray-300 px-3 py-2 text-sm"
+                    rows={4}
+                    maxLength={1200}
+                    placeholder="Enter section paragraph"
+                  />
+                </div>
+
+                <div>
+                  <p className="mb-3 text-sm font-medium text-gray-700">
+                    Upload 3 Images
+                  </p>
+                  <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
+                    {[0, 1, 2].map((index) => {
+                      const preview =
+                        aboutSectionImagePreviews[index] ||
+                        resolveMediaUrl(aboutSectionImages[index]);
+
+                      return (
+                        <div key={index} className="rounded-lg border bg-gray-50 p-3">
+                          <p className="mb-2 text-xs font-semibold uppercase text-gray-500">
+                            Image {index + 1}
+                          </p>
+                          {preview ? (
+                            <img
+                              src={preview}
+                              alt={`Section preview ${index + 1}`}
+                              className="mb-3 h-28 w-full rounded object-cover"
+                            />
+                          ) : (
+                            <div className="mb-3 flex h-28 items-center justify-center rounded border-2 border-dashed border-gray-300 text-xs text-gray-400">
+                              No image selected
+                            </div>
+                          )}
+                          <input
+                            type="file"
+                            accept="image/*"
+                            onChange={(e) =>
+                              handleAboutSectionImageChange(index, e.target.files[0])
+                            }
+                            className="w-full rounded border border-gray-300 px-2 py-2 text-xs"
+                          />
+                          <button
+                            type="button"
+                            onClick={() => handleRemoveAboutSectionImage(index)}
+                            className="mt-2 w-full rounded border border-red-200 px-2 py-2 text-xs text-red-600 hover:bg-red-50"
+                          >
+                            Clear
+                          </button>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+
+                <button
+                  type="submit"
+                  disabled={savingAboutSection}
+                  className="inline-flex items-center space-x-2 rounded bg-[#68a300] px-4 py-2 text-white hover:bg-[#5f9600] disabled:opacity-60"
+                >
+                  <FaCheck />
+                  <span>{savingAboutSection ? "Saving..." : "Save Section"}</span>
+                </button>
+              </form>
             </div>
           </div>
         )}

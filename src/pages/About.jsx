@@ -1,3 +1,4 @@
+import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import {
   FaLeaf,
@@ -6,6 +7,9 @@ import {
   FaGlobeAmericas,
   FaAward,
   FaUsers,
+  FaChevronRight,
+  FaChevronUp,
+  FaChevronDown,
 } from "react-icons/fa";
 import { MdVerified, MdNaturePeople, MdEco } from "react-icons/md";
 
@@ -74,7 +78,83 @@ const certifications = [
   { icon: <MdNaturePeople className="w-6 h-6" />, label: "Fair Trade Partner" },
 ];
 
+const factoryStrengths = [
+  "Premium Quality",
+  "Safe to Use",
+  "Superior Efficacy",
+];
+
+const factoryLines = [
+  "Oils",
+  "Tablets",
+  "Capsules",
+  "Gummies",
+  "Syrups",
+  "Softgels",
+];
+
+const scienceBadges = ["GMP", "HACCP", "ISO 9001:2015", "U.S. FDA"];
+
+const defaultFacilitySection = {
+  heading: "Pakistan's Largest Nutraceutical Manufacturing Facility",
+  description:
+    "With over a decade of experience, Dot-Herbs specializes in manufacturing nutraceutical and natural healthcare products. Backed by modern laboratories, strict quality protocols, and scalable production systems, we continue to set standards in safety, consistency, and product innovation.",
+  images: [
+    "/images/banners/hero_banner1.jpg",
+    "/images/banners/hero_banner1.jpg",
+    "/images/banners/hero_banner1.jpg",
+  ],
+};
+
 const About = () => {
+  const [aboutVideoUrl, setAboutVideoUrl] = useState("");
+  const [facilitySection, setFacilitySection] = useState(defaultFacilitySection);
+  const API_URL = import.meta.env.VITE_API_URL || "http://localhost:5000/api";
+  const API_ORIGIN = API_URL.replace(/\/api\/?$/, "");
+
+  const resolveMediaUrl = (url) => {
+    if (!url) return "";
+    if (url.startsWith("http://") || url.startsWith("https://")) return url;
+    if (url.startsWith("/uploads/")) return `${API_ORIGIN}${url}`;
+    return url;
+  };
+
+  useEffect(() => {
+    const fetchAboutContent = async () => {
+      try {
+        const response = await fetch(`${API_URL}/about-content`);
+        if (!response.ok) {
+          return;
+        }
+
+        const result = await response.json();
+        setAboutVideoUrl(result?.data?.videoUrl || "");
+        const remoteImages = Array.isArray(result?.data?.facilityImages)
+          ? result.data.facilityImages
+          : [];
+
+        const normalizedImages = [0, 1, 2].map(
+          (index) => remoteImages[index] || defaultFacilitySection.images[index],
+        );
+
+        setFacilitySection({
+          heading:
+            result?.data?.facilityHeading?.trim() ||
+            defaultFacilitySection.heading,
+          description:
+            result?.data?.facilityDescription?.trim() ||
+            defaultFacilitySection.description,
+          images: normalizedImages,
+        });
+      } catch {
+        setAboutVideoUrl("");
+        setFacilitySection(defaultFacilitySection);
+      }
+    };
+
+    fetchAboutContent();
+  }, [API_URL]);
+
   return (
     <div className="bg-white">
       {/* Hero */}
@@ -120,12 +200,172 @@ const About = () => {
         <div className="max-w-6xl mx-auto px-6 py-14 grid grid-cols-2 md:grid-cols-4 gap-8">
           {stats.map((stat) => (
             <div key={stat.label} className="text-center">
-              <p className="text-4xl font-extrabold text-[#68a300] mb-1">
+              <p className="text-4xl font-extrabold text-black mb-1">
                 {stat.value}
               </p>
               <p className="text-gray-500 font-medium">{stat.label}</p>
             </div>
           ))}
+        </div>
+      </section>
+
+      {/* Manufacturing Showcase */}
+      <section className="bg-[#ffffff] py-14 lg:py-16">
+        <div className="mx-auto max-w-[1500px] px-4 sm:px-6">
+          <div className="text-center">
+            <h2 className="text-4xl font-extrabold tracking-wide text-[#68a300] sm:text-6xl">
+              DOT HERBS
+            </h2>
+            <p className="mt-1 text-lg font-semibold tracking-[0.08em] text-gray-600 sm:text-4xl">
+              PAKISTAN'S NO.1 HERBAL BRAND
+            </p>
+          </div>
+
+          <div className="mt-8 grid grid-cols-1 items-center gap-4 lg:grid-cols-[180px,minmax(0,1fr),180px]">
+            <div className="hidden rounded-[28px] border border-[#d8d6de] bg-[#f3f3f3] p-7 lg:block">
+              {factoryStrengths.map((item, index) => (
+                <div
+                  key={item}
+                  className={`flex items-center gap-3 py-5 ${
+                    index !== 0 ? "border-t border-[#d8d6de]" : ""
+                  }`}
+                >
+                  <MdVerified className="h-7 w-7 text-[#5b3f95]" />
+                  <span className="text-xl font-semibold uppercase tracking-[0.04em] text-[#4d2f85]">
+                    {item}
+                  </span>
+                </div>
+              ))}
+            </div>
+
+            <div className="relative mx-auto flex h-[280px] w-full max-w-[1180px] items-center justify-center overflow-hidden rounded-xl border-2 border-dashed border-[#cfc9dd] bg-white sm:h-[460px] lg:h-[620px]">
+              {aboutVideoUrl ? (
+                <video
+                  src={resolveMediaUrl(aboutVideoUrl)}
+                  controls
+                  className="h-full w-full bg-black object-contain"
+                />
+              ) : (
+                <div className="text-center">
+                  <p className="text-lg font-semibold text-[#5b3f95] sm:text-2xl">
+                    No Content
+                  </p>
+                  <p className="mt-2 text-sm text-gray-500 sm:text-base">
+                    Video is not available right now.
+                  </p>
+                </div>
+              )}
+            </div>
+
+            <div className="hidden rounded-[28px] border border-[#d8d6de] bg-[#f3f3f3] p-7 lg:block">
+              <div className="flex justify-center pb-4 text-[#5b3f95]">
+                <FaChevronUp className="h-5 w-5" />
+              </div>
+              <div className="space-y-3">
+                {factoryLines.map((line) => (
+                  <button
+                    key={line}
+                    type="button"
+                    className="flex w-full items-center justify-between rounded-md border border-[#cfc9dd] px-4 py-2.5 text-base font-semibold uppercase tracking-[0.03em] text-[#5b3f95] transition hover:bg-white"
+                  >
+                    <span>{line}</span>
+                    <FaChevronRight className="h-4 w-4" />
+                  </button>
+                ))}
+              </div>
+              <div className="flex justify-center pt-4 text-[#5b3f95]">
+                <FaChevronDown className="h-5 w-5" />
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Facility Detail */}
+      <section className="bg-[#ffffff] py-16">
+        <div className="mx-auto max-w-7xl px-6">
+          <div className="grid items-center gap-8 lg:grid-cols-12">
+            <div className="grid gap-4 sm:grid-cols-2 lg:col-span-6">
+              <div className="overflow-hidden rounded-2xl sm:col-span-2">
+                <img
+                  src={resolveMediaUrl(facilitySection.images[0])}
+                  alt="Nutraceutical production process"
+                  className="h-44 w-full object-cover sm:h-52"
+                />
+              </div>
+              <div className="overflow-hidden rounded-2xl">
+                <img
+                  src={resolveMediaUrl(facilitySection.images[1])}
+                  alt="Laboratory quality inspection"
+                  className="h-40 w-full object-cover sm:h-44"
+                />
+              </div>
+              <div className="overflow-hidden rounded-2xl sm:col-span-1">
+                <img
+                  src={resolveMediaUrl(facilitySection.images[2])}
+                  alt="Tablet processing conveyor"
+                  className="h-40 w-full object-cover sm:h-44"
+                />
+              </div>
+            </div>
+
+            <div className="lg:col-span-6">
+              <h3 className="text-3xl font-extrabold uppercase leading-tight tracking-wide text-[#152238] sm:text-4xl">
+                {facilitySection.heading}
+              </h3>
+              <div className="mt-5 h-1 w-36 rounded-full bg-[#5b3f95]" />
+              <p className="mt-6 text-lg leading-relaxed text-[#2d3648]">
+                {facilitySection.description}
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Science Section */}
+      <section className="bg-[#ffffff] py-16">
+        <div className="mx-auto grid max-w-7xl items-center gap-10 px-6 lg:grid-cols-2">
+          <div>
+            <h3 className="text-3xl font-extrabold uppercase tracking-wide text-[#152238] sm:text-4xl">
+              We Are Backed By Science
+            </h3>
+            <div className="mt-5 h-1 w-28 rounded-full bg-[#5b3f95]" />
+            <p className="mt-6 max-w-xl text-lg leading-relaxed text-[#2d3648]">
+              Dot-Herbs delivers high-quality, safe products crafted under
+              expert supervision and aligned with global standards.
+              Committed to GMP, HACCP, ISO systems, and compliance-driven
+              quality controls, we ensure excellence at every stage.
+            </p>
+
+            <div className="mt-8 flex flex-wrap gap-4">
+              {scienceBadges.map((badge) => (
+                <div
+                  key={badge}
+                  className="flex h-20 w-20 items-center justify-center rounded-full border-2 border-[#c8ceda] bg-white text-center text-xs font-extrabold uppercase text-[#1f2d44] shadow-sm"
+                >
+                  {badge}
+                </div>
+              ))}
+            </div>
+          </div>
+
+          <div className="relative overflow-hidden rounded-3xl border border-[#e1e6ef] bg-gradient-to-br from-[#f4f7fb] to-[#e9eef8] p-8">
+            <div className="absolute -right-8 -top-8 h-40 w-40 rounded-full bg-[#dbe5f5]" />
+            <div className="absolute -bottom-10 -left-10 h-44 w-44 rounded-full bg-[#e4ebf8]" />
+            <div className="relative z-10 grid min-h-[280px] place-items-center">
+              <div className="text-center">
+                <div className="mx-auto mb-4 flex h-20 w-20 items-center justify-center rounded-full bg-white text-[#5b3f95] shadow-md">
+                  <FaFlask className="h-10 w-10" />
+                </div>
+                <p className="text-2xl font-bold text-[#1f2d44]">
+                  Certified Lab Ecosystem
+                </p>
+                <p className="mt-2 text-sm font-medium uppercase tracking-[0.15em] text-[#61718c]">
+                  Research . Testing . Validation
+                </p>
+              </div>
+            </div>
+          </div>
         </div>
       </section>
 

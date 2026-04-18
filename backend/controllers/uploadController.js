@@ -27,6 +27,32 @@ export const uploadImage = async (req, res) => {
   }
 };
 
+// @desc    Upload video to local /uploads folder
+// @route   POST /api/upload/video
+// @access  Private/Admin
+export const uploadVideo = async (req, res) => {
+  try {
+    if (!req.file) {
+      return res
+        .status(400)
+        .json({ success: false, error: "No file uploaded" });
+    }
+
+    const videoUrl = `/uploads/${req.file.filename}`;
+
+    res.json({
+      success: true,
+      data: {
+        url: videoUrl,
+        public_id: req.file.filename,
+      },
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ success: false, error: "Video upload failed" });
+  }
+};
+
 // @desc    Delete image from /uploads folder
 // @route   DELETE /api/upload/:filename
 // @access  Private/Admin

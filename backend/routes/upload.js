@@ -3,7 +3,11 @@ import multer from "multer";
 import path from "path";
 import fs from "fs";
 import crypto from "crypto";
-import { uploadImage, deleteImage } from "../controllers/uploadController.js";
+import {
+  uploadImage,
+  uploadVideo,
+  deleteImage,
+} from "../controllers/uploadController.js";
 import { protect, authorize } from "../middleware/auth.js";
 
 const router = express.Router();
@@ -36,7 +40,26 @@ const upload = multer({
   },
 });
 
+const videoUpload = multer({
+  storage,
+  limits: { fileSize: 100 * 1024 * 1024 },
+  fileFilter: (req, file, cb) => {
+    if (file.mimetype.startsWith("video/")) {
+      cb(null, true);
+    } else {
+      cb(new Error("Only video files are allowed"), false);
+    }
+  },
+});
+
 router.post("/", protect, upload.single("image"), uploadImage);
+router.post(
+  "/video",
+  protect,
+  authorize("admin"),
+  videoUpload.single("video"),
+  uploadVideo,
+);
 router.delete("/:filename", protect, authorize("admin"), deleteImage);
 
 export default router;
