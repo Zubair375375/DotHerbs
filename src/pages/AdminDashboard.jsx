@@ -145,8 +145,7 @@ const AdminDashboard = () => {
   const [whyNutrifactorDescription, setWhyNutrifactorDescription] =
     useState("");
   const [whyNutrifactorImage, setWhyNutrifactorImage] = useState("");
-  const [whyNutrifactorImageFile, setWhyNutrifactorImageFile] =
-    useState(null);
+  const [whyNutrifactorImageFile, setWhyNutrifactorImageFile] = useState(null);
   const [whyNutrifactorImagePreview, setWhyNutrifactorImagePreview] =
     useState("");
   const [savingWhyNutrifactorSection, setSavingWhyNutrifactorSection] =
@@ -179,6 +178,10 @@ const AdminDashboard = () => {
     useState(["", "", "", ""]);
   const [savingHealthPrioritySection, setSavingHealthPrioritySection] =
     useState(false);
+  const [teamMembers, setTeamMembers] = useState([]);
+  const [teamMemberImageFiles, setTeamMemberImageFiles] = useState([]);
+  const [teamMemberImagePreviews, setTeamMemberImagePreviews] = useState([]);
+  const [savingTeamMembers, setSavingTeamMembers] = useState(false);
   const [announcementForm, setAnnouncementForm] = useState({
     title: "",
     message: "",
@@ -231,7 +234,6 @@ const AdminDashboard = () => {
     },
   ];
   const defaultHealthPriorityImages = ["", "", "", ""];
-
   const resolveMediaUrl = (url) => {
     if (!url) return "";
     if (url.startsWith("http://") || url.startsWith("https://")) return url;
@@ -295,7 +297,9 @@ const AdminDashboard = () => {
       setWhyNutrifactorImage(result?.data?.whyNutrifactorImage || "");
       setWhyNutrifactorImageFile(null);
       setWhyNutrifactorImagePreview("");
-      setMissionHeading(result?.data?.missionHeading?.trim() || defaultMissionHeading);
+      setMissionHeading(
+        result?.data?.missionHeading?.trim() || defaultMissionHeading,
+      );
       setMissionDescription(
         result?.data?.missionDescription?.trim() || defaultMissionDescription,
       );
@@ -313,7 +317,9 @@ const AdminDashboard = () => {
         : [];
       setHealthPriorityItems(
         [0, 1, 2].map(
-          (index) => remoteHealthPriorityItems[index] || defaultHealthPriorityItems[index],
+          (index) =>
+            remoteHealthPriorityItems[index] ||
+            defaultHealthPriorityItems[index],
         ),
       );
       const remoteHealthPriorityImages = Array.isArray(
@@ -326,6 +332,16 @@ const AdminDashboard = () => {
       );
       setHealthPriorityImageFiles([null, null, null, null]);
       setHealthPriorityImagePreviews(["", "", "", ""]);
+      const remoteTeamMembers = Array.isArray(result?.data?.teamMembers)
+        ? result.data.teamMembers
+        : [];
+      setTeamMembers(remoteTeamMembers);
+      setTeamMemberImageFiles(
+        new Array(remoteTeamMembers.length).fill(null),
+      );
+      setTeamMemberImagePreviews(
+        new Array(remoteTeamMembers.length).fill(""),
+      );
     } catch {
       setAboutVideoUrl("");
       setAboutSectionHeading(defaultFacilityHeading);
@@ -356,6 +372,9 @@ const AdminDashboard = () => {
       setHealthPriorityImages(defaultHealthPriorityImages);
       setHealthPriorityImageFiles([null, null, null, null]);
       setHealthPriorityImagePreviews(["", "", "", ""]);
+      setTeamMembers([]);
+      setTeamMemberImageFiles([]);
+      setTeamMemberImagePreviews([]);
     } finally {
       setLoadingAboutVideo(false);
     }
@@ -817,7 +836,9 @@ const AdminDashboard = () => {
       const result = await response.json();
 
       if (!response.ok) {
-        throw new Error(result?.error || "Failed to save Why Nutrifactor section");
+        throw new Error(
+          result?.error || "Failed to save Why Nutrifactor section",
+        );
       }
 
       setWhyNutrifactorImage(uploadedWhyImage);
@@ -1027,7 +1048,9 @@ const AdminDashboard = () => {
       const result = await response.json();
 
       if (!response.ok) {
-        throw new Error(result?.error || "Failed to save Health Priority section");
+        throw new Error(
+          result?.error || "Failed to save Health Priority section",
+        );
       }
 
       setHealthPriorityImages([
@@ -1043,6 +1066,177 @@ const AdminDashboard = () => {
       toast.error(error.message || "Failed to save Health Priority section");
     } finally {
       setSavingHealthPrioritySection(false);
+    }
+  };
+
+  const handleTeamMemberChange = (index, field, value) => {
+    setTeamMembers((prev) => {
+      const next = [...prev];
+      next[index] = {
+        ...next[index],
+        [field]: value,
+      };
+      return next;
+    });
+  };
+
+  const handleTeamMemberImageChange = (index, file) => {
+    if (!file) {
+      return;
+    }
+
+    setTeamMemberImageFiles((prev) => {
+      const next = [...prev];
+      next[index] = file;
+      return next;
+    });
+
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      setTeamMemberImagePreviews((prev) => {
+        const next = [...prev];
+        next[index] = event.target?.result || "";
+        return next;
+      });
+    };
+    reader.readAsDataURL(file);
+  };
+
+  const handleRemoveTeamMemberImage = (index) => {
+    setTeamMembers((prev) => {
+      const next = [...prev];
+      next[index] = {
+        ...next[index],
+        image: "",
+      };
+      return next;
+    });
+
+    setTeamMemberImageFiles((prev) => {
+      const next = [...prev];
+      next[index] = null;
+      return next;
+    });
+
+    setTeamMemberImagePreviews((prev) => {
+      const next = [...prev];
+      next[index] = "";
+      return next;
+    });
+  };
+
+  const handleAddTeamMember = () => {
+    if (teamMembers.length >= 12) {
+      toast.error("Maximum 12 team members are allowed");
+      return;
+    }
+
+    setTeamMembers((prev) => [
+      ...prev,
+      { name: "", role: "", bio: "", image: "" },
+    ]);
+    setTeamMemberImageFiles((prev) => [...prev, null]);
+    setTeamMemberImagePreviews((prev) => [...prev, ""]);
+  };
+
+  const handleRemoveTeamMember = (index) => {
+    setTeamMembers((prev) => prev.filter((_, i) => i !== index));
+
+    setTeamMemberImageFiles((prev) => {
+      return prev.filter((_, i) => i !== index);
+    });
+
+    setTeamMemberImagePreviews((prev) => {
+      return prev.filter((_, i) => i !== index);
+    });
+  };
+
+  const handleResetTeamMembersDefaults = () => {
+    setTeamMembers([]);
+    setTeamMemberImageFiles([]);
+    setTeamMemberImagePreviews([]);
+  };
+
+  const handleSaveTeamMembers = async (e) => {
+    e.preventDefault();
+
+    try {
+      setSavingTeamMembers(true);
+
+      const uploadedMembers = [...teamMembers];
+
+      for (let index = 0; index < uploadedMembers.length; index += 1) {
+        if (teamMemberImageFiles[index]) {
+          const uploadedUrl = await uploadDashboardImage(
+            teamMemberImageFiles[index],
+          );
+          uploadedMembers[index] = {
+            ...uploadedMembers[index],
+            image: uploadedUrl,
+          };
+        }
+      }
+
+      const normalizedMembers = uploadedMembers
+        .map((member) => ({
+          name: member.name?.trim() || "",
+          role: member.role?.trim() || "",
+          bio: member.bio?.trim() || "",
+          image: member.image?.trim() || "",
+        }))
+        .filter(
+          (member) => member.name || member.role || member.bio || member.image,
+        )
+        .slice(0, 12);
+
+      if (normalizedMembers.length < 1) {
+        toast.error("Please add at least one team member");
+        setSavingTeamMembers(false);
+        return;
+      }
+
+      if (
+        normalizedMembers.some(
+          (member) => !member.name || !member.role || !member.bio,
+        )
+      ) {
+        toast.error("Please complete name, role, and bio for each team member");
+        setSavingTeamMembers(false);
+        return;
+      }
+
+      if (normalizedMembers.some((member) => !member.image)) {
+        toast.error("Please upload one image for each team member");
+        setSavingTeamMembers(false);
+        return;
+      }
+
+      const token = getAuthToken();
+      const response = await fetch(`${API_URL}/about-content`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          teamMembers: normalizedMembers,
+        }),
+      });
+
+      const result = await response.json();
+
+      if (!response.ok) {
+        throw new Error(result?.error || "Failed to save team members");
+      }
+
+      setTeamMembers(normalizedMembers);
+      setTeamMemberImageFiles(new Array(normalizedMembers.length).fill(null));
+      setTeamMemberImagePreviews(new Array(normalizedMembers.length).fill(""));
+      toast.success("Team members updated successfully");
+    } catch (error) {
+      toast.error(error.message || "Failed to save team members");
+    } finally {
+      setSavingTeamMembers(false);
     }
   };
 
@@ -2525,7 +2719,9 @@ const AdminDashboard = () => {
 
             <div className="rounded-xl border bg-white p-6 shadow-sm">
               <div className="mb-6 flex flex-wrap items-center justify-between gap-3">
-                <h2 className="text-2xl font-semibold">Why Nutrifactor Section</h2>
+                <h2 className="text-2xl font-semibold">
+                  Why Nutrifactor Section
+                </h2>
                 <button
                   type="button"
                   onClick={handleResetWhyNutrifactorSectionDefaults}
@@ -2535,7 +2731,10 @@ const AdminDashboard = () => {
                 </button>
               </div>
 
-              <form className="space-y-6" onSubmit={handleSaveWhyNutrifactorSection}>
+              <form
+                className="space-y-6"
+                onSubmit={handleSaveWhyNutrifactorSection}
+              >
                 <div>
                   <label className="mb-2 block text-sm font-medium text-gray-700">
                     Heading
@@ -2556,7 +2755,9 @@ const AdminDashboard = () => {
                   </label>
                   <textarea
                     value={whyNutrifactorDescription}
-                    onChange={(e) => setWhyNutrifactorDescription(e.target.value)}
+                    onChange={(e) =>
+                      setWhyNutrifactorDescription(e.target.value)
+                    }
                     className="w-full rounded border border-gray-300 px-3 py-2 text-sm"
                     rows={5}
                     maxLength={1400}
@@ -2668,7 +2869,9 @@ const AdminDashboard = () => {
                   <input
                     type="file"
                     accept="image/*"
-                    onChange={(e) => handleMissionImageChange(e.target.files[0])}
+                    onChange={(e) =>
+                      handleMissionImageChange(e.target.files[0])
+                    }
                     className="w-full max-w-sm rounded border border-gray-300 px-3 py-2 text-sm"
                   />
 
@@ -2687,7 +2890,9 @@ const AdminDashboard = () => {
                   className="inline-flex items-center space-x-2 rounded bg-[#68a300] px-4 py-2 text-white hover:bg-[#5f9600] disabled:opacity-60"
                 >
                   <FaCheck />
-                  <span>{savingMissionSection ? "Saving..." : "Save Section"}</span>
+                  <span>
+                    {savingMissionSection ? "Saving..." : "Save Section"}
+                  </span>
                 </button>
               </form>
             </div>
@@ -2706,7 +2911,10 @@ const AdminDashboard = () => {
                 </button>
               </div>
 
-              <form className="space-y-6" onSubmit={handleSaveHealthPrioritySection}>
+              <form
+                className="space-y-6"
+                onSubmit={handleSaveHealthPrioritySection}
+              >
                 <div>
                   <label className="mb-2 block text-sm font-medium text-gray-700">
                     Heading
@@ -2722,7 +2930,10 @@ const AdminDashboard = () => {
                 </div>
 
                 {[0, 1, 2].map((index) => (
-                  <div key={`health-item-${index}`} className="rounded-lg border bg-gray-50 p-4">
+                  <div
+                    key={`health-item-${index}`}
+                    className="rounded-lg border bg-gray-50 p-4"
+                  >
                     <p className="mb-3 text-sm font-semibold text-gray-700">
                       Text Block {index + 1}
                     </p>
@@ -2730,7 +2941,11 @@ const AdminDashboard = () => {
                       type="text"
                       value={healthPriorityItems[index]?.title || ""}
                       onChange={(e) =>
-                        handleHealthPriorityItemChange(index, "title", e.target.value)
+                        handleHealthPriorityItemChange(
+                          index,
+                          "title",
+                          e.target.value,
+                        )
                       }
                       className="mb-3 w-full rounded border border-gray-300 px-3 py-2 text-sm"
                       maxLength={180}
@@ -2786,13 +3001,18 @@ const AdminDashboard = () => {
                             type="file"
                             accept="image/*"
                             onChange={(e) =>
-                              handleHealthPriorityImageChange(index, e.target.files[0])
+                              handleHealthPriorityImageChange(
+                                index,
+                                e.target.files[0],
+                              )
                             }
                             className="w-full rounded border border-gray-300 px-2 py-2 text-xs"
                           />
                           <button
                             type="button"
-                            onClick={() => handleRemoveHealthPriorityImage(index)}
+                            onClick={() =>
+                              handleRemoveHealthPriorityImage(index)
+                            }
                             className="mt-2 w-full rounded border border-red-200 px-2 py-2 text-xs text-red-600 hover:bg-red-50"
                           >
                             Clear
@@ -2811,6 +3031,137 @@ const AdminDashboard = () => {
                   <FaCheck />
                   <span>
                     {savingHealthPrioritySection ? "Saving..." : "Save Section"}
+                  </span>
+                </button>
+              </form>
+            </div>
+
+            <div className="rounded-xl border bg-white p-6 shadow-sm">
+              <div className="mb-6 flex flex-wrap items-center justify-between gap-3">
+                <h2 className="text-2xl font-semibold">
+                  Meet Our Team Members
+                </h2>
+                <div className="flex items-center gap-3">
+                  <button
+                    type="button"
+                    onClick={handleResetTeamMembersDefaults}
+                    className="rounded border border-gray-300 px-3 py-2 text-sm text-gray-700 hover:bg-gray-50"
+                  >
+                    Clear All
+                  </button>
+                  <button
+                    type="button"
+                    onClick={handleAddTeamMember}
+                    className="rounded bg-[#68a300] px-3 py-2 text-sm text-white hover:bg-[#5f9600]"
+                  >
+                    Add Member
+                  </button>
+                </div>
+              </div>
+
+              <form className="space-y-5" onSubmit={handleSaveTeamMembers}>
+                {teamMembers.length === 0 && (
+                  <div className="rounded-lg border border-dashed border-gray-300 bg-gray-50 p-4 text-sm text-gray-500">
+                    No team members added yet. Click Add Member to start.
+                  </div>
+                )}
+
+                {teamMembers.map((member, index) => (
+                  <div
+                    key={`team-member-${index}`}
+                    className="rounded-lg border bg-gray-50 p-4"
+                  >
+                    <div className="mb-3 flex items-center justify-between">
+                      <p className="text-sm font-semibold text-gray-700">
+                        Member {index + 1}
+                      </p>
+                      <button
+                        type="button"
+                        onClick={() => handleRemoveTeamMember(index)}
+                        className="rounded border border-red-200 px-3 py-1 text-xs text-red-600 hover:bg-red-50"
+                      >
+                        Remove
+                      </button>
+                    </div>
+
+                    <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
+                      <input
+                        type="text"
+                        value={member.name || ""}
+                        onChange={(e) =>
+                          handleTeamMemberChange(index, "name", e.target.value)
+                        }
+                        className="w-full rounded border border-gray-300 px-3 py-2 text-sm"
+                        placeholder="Name"
+                        maxLength={120}
+                      />
+                      <input
+                        type="text"
+                        value={member.role || ""}
+                        onChange={(e) =>
+                          handleTeamMemberChange(index, "role", e.target.value)
+                        }
+                        className="w-full rounded border border-gray-300 px-3 py-2 text-sm"
+                        placeholder="Role"
+                        maxLength={180}
+                      />
+                    </div>
+
+                    <div className="mt-3 grid grid-cols-1 gap-3 md:grid-cols-[1fr,260px]">
+                      <textarea
+                        value={member.bio || ""}
+                        onChange={(e) =>
+                          handleTeamMemberChange(index, "bio", e.target.value)
+                        }
+                        className="w-full rounded border border-gray-300 px-3 py-2 text-sm"
+                        rows={3}
+                        placeholder="Bio"
+                        maxLength={1000}
+                      />
+
+                      <div className="rounded border bg-white p-2">
+                        <p className="mb-2 text-xs font-semibold uppercase text-gray-500">
+                          Member Image
+                        </p>
+                        {(teamMemberImagePreviews[index] || member.image) && (
+                          <img
+                            src={
+                              teamMemberImagePreviews[index] ||
+                              resolveMediaUrl(member.image)
+                            }
+                            alt={`Team member ${index + 1} preview`}
+                            className="mb-2 h-24 w-full rounded object-cover"
+                          />
+                        )}
+
+                        <input
+                          type="file"
+                          accept="image/*"
+                          onChange={(e) =>
+                            handleTeamMemberImageChange(index, e.target.files[0])
+                          }
+                          className="w-full rounded border border-gray-300 px-2 py-2 text-xs"
+                        />
+                        <button
+                          type="button"
+                          onClick={() => handleRemoveTeamMemberImage(index)}
+                          className="mt-2 w-full rounded border border-red-200 px-2 py-2 text-xs text-red-600 hover:bg-red-50"
+                        >
+                          Clear Image
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+
+                <button
+                  type="submit"
+                  disabled={savingTeamMembers}
+                  className="inline-flex items-center space-x-2 rounded bg-[#68a300] px-4 py-2 text-white hover:bg-[#5f9600] disabled:opacity-60"
+                >
+                  <FaCheck />
+                  <span>
+                    {savingTeamMembers ? "Saving..." : "Save Team Members"}
                   </span>
                 </button>
               </form>

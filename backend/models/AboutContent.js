@@ -127,6 +127,40 @@ const aboutContentSchema = new mongoose.Schema(
         message: "You can store up to 4 health priority images",
       },
     },
+    teamMembers: {
+      type: [
+        {
+          name: {
+            type: String,
+            trim: true,
+            default: "",
+            maxlength: [120, "Team member name too long"],
+          },
+          role: {
+            type: String,
+            trim: true,
+            default: "",
+            maxlength: [180, "Team member role too long"],
+          },
+          bio: {
+            type: String,
+            trim: true,
+            default: "",
+            maxlength: [1000, "Team member bio too long"],
+          },
+          image: {
+            type: String,
+            trim: true,
+            default: "",
+          },
+        },
+      ],
+      default: [],
+      validate: {
+        validator: (value) => Array.isArray(value) && value.length <= 12,
+        message: "You can store up to 12 team members",
+      },
+    },
     updatedBy: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",

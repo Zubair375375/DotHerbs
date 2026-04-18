@@ -47,19 +47,43 @@ app.use(
 );
 
 // Rate limiting
+const isProduction = process.env.NODE_ENV === "production";
+const rateLimitWindowMs = Number(
+  process.env.RATE_LIMIT_WINDOW_MS || 15 * 60 * 1000,
+);
+const rateLimitMax = Number(
+  process.env.RATE_LIMIT_MAX || (isProduction ? 300 : 5000),
+);
+
 const limiter = rateLimit({
-  windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 100, // limit each IP to 100 requests per windowMs
+  windowMs: rateLimitWindowMs,
+  max: rateLimitMax,
+  standardHeaders: true,
+  legacyHeaders: false,
   message: "Too many requests from this IP, please try again later.",
   skip: (req) => {
-    if (req.method !== "GET") {
-      return false;
+    // In local development, dashboard prefetch + StrictMode can create bursts.
+    // Skip throttling to keep dev UX stable.
+    if (!isProduction) {
+      return true;
     }
 
-    return (
-      req.originalUrl.startsWith("/api/categories") ||
-      req.originalUrl.startsWith("/api/auth/me")
-    );
+    // Public/admin read endpoints can produce clustered GET requests.
+    if (req.method === "GET") {
+      return (
+        req.originalUrl.startsWith("/api/categories") ||
+        req.originalUrl.startsWith("/api/auth/me") ||
+        req.originalUrl.startsWith("/api/about-content") ||
+        req.originalUrl.startsWith("/api/announcements") ||
+        req.originalUrl.startsWith("/api/products") ||
+        req.originalUrl.startsWith("/api/orders") ||
+        req.originalUrl.startsWith("/api/users") ||
+        req.originalUrl.startsWith("/api/hero-slides") ||
+        req.originalUrl.startsWith("/api/product-banners")
+      );
+    }
+
+    return false;
   },
 });
 app.use("/api/", limiter);

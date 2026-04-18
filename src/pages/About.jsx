@@ -47,27 +47,6 @@ const stats = [
   { value: "10+", label: "Years of Expertise" },
 ];
 
-const team = [
-  {
-    name: "Dr. Sarah Al-Rashid",
-    role: "Founder & Chief Herbalist",
-    bio: "With a PhD in Ethnobotany and 15 years of field research, Sarah built Dot-Herbs to bring the world's most powerful plants to your doorstep.",
-    avatar: "SR",
-  },
-  {
-    name: "Omar Khalil",
-    role: "Head of Quality Assurance",
-    bio: "Omar oversees every batch from source to shelf, ensuring our lab-testing standards remain the highest in the industry.",
-    avatar: "OK",
-  },
-  {
-    name: "Lina Haddad",
-    role: "Wellness Consultant",
-    bio: "A certified naturopath, Lina develops our product guides and works directly with customers to craft personalised wellness plans.",
-    avatar: "LH",
-  },
-];
-
 const certifications = [
   { icon: <MdVerified className="w-6 h-6" />, label: "ISO 22000 Certified" },
   { icon: <MdEco className="w-6 h-6" />, label: "Organic Certified" },
@@ -161,6 +140,7 @@ const About = () => {
   const [healthPrioritySection, setHealthPrioritySection] = useState(
     defaultHealthPrioritySection,
   );
+  const [teamMembers, setTeamMembers] = useState([]);
   const API_URL = import.meta.env.VITE_API_URL || "http://localhost:5000/api";
   const API_ORIGIN = API_URL.replace(/\/api\/?$/, "");
 
@@ -228,19 +208,23 @@ const About = () => {
 
         setMissionSection({
           heading:
-            result?.data?.missionHeading?.trim() || defaultMissionSection.heading,
+            result?.data?.missionHeading?.trim() ||
+            defaultMissionSection.heading,
           description:
             result?.data?.missionDescription?.trim() ||
             defaultMissionSection.description,
           image: result?.data?.missionImage || "",
         });
 
-        const remoteHealthItems = Array.isArray(result?.data?.healthPriorityItems)
+        const remoteHealthItems = Array.isArray(
+          result?.data?.healthPriorityItems,
+        )
           ? result.data.healthPriorityItems
           : [];
         const normalizedHealthItems = [0, 1, 2].map(
           (index) =>
-            remoteHealthItems[index] || defaultHealthPrioritySection.items[index],
+            remoteHealthItems[index] ||
+            defaultHealthPrioritySection.items[index],
         );
 
         setHealthPrioritySection({
@@ -252,6 +236,12 @@ const About = () => {
             ? result.data.healthPriorityImages
             : [],
         });
+
+        const remoteTeamMembers = Array.isArray(result?.data?.teamMembers)
+          ? result.data.teamMembers
+          : [];
+
+        setTeamMembers(remoteTeamMembers);
       } catch {
         setAboutVideoUrl("");
         setFacilitySection(defaultFacilitySection);
@@ -259,6 +249,7 @@ const About = () => {
         setWhyNutrifactorSection(defaultWhyNutrifactorSection);
         setMissionSection(defaultMissionSection);
         setHealthPrioritySection(defaultHealthPrioritySection);
+        setTeamMembers([]);
       }
     };
 
@@ -586,7 +577,7 @@ const About = () => {
               ))}
             </div>
 
-              <div className="grid min-h-[340px] grid-cols-3 grid-rows-2 gap-3 lg:h-full lg:min-h-0">
+            <div className="grid min-h-[340px] grid-cols-3 grid-rows-2 gap-3 lg:h-full lg:min-h-0">
               {[0, 1, 2, 3].map((index) => {
                 const slotClass =
                   index === 0
@@ -625,13 +616,13 @@ const About = () => {
       </section>
 
       {/* Values */}
-      <section className="bg-[#68a300] py-20">
+      <section className="bg-gray-50 py-20">
         <div className="max-w-6xl mx-auto px-6">
           <div className="text-center mb-14">
-            <span className="inline-block bg-[#ffffff] text-[#4a7a00] text-sm font-semibold px-4 py-1.5 rounded-full mb-4">
+            <span className="inline-block bg-[#68a300]/10 text-[#4a7a00] text-sm font-semibold px-4 py-1.5 rounded-full mb-4">
               What We Stand For
             </span>
-            <h2 className="text-4xl font-bold text-white">
+            <h2 className="text-4xl font-bold text-gray-900">
               Our Core Values
             </h2>
           </div>
@@ -664,24 +655,43 @@ const About = () => {
           </span>
           <h2 className="text-4xl font-bold text-gray-900">Meet Our Team</h2>
         </div>
-        <div className="grid md:grid-cols-3 gap-10">
-          {team.map((member) => (
-            <div key={member.name} className="text-center group">
-              <div className="w-24 h-24 bg-gradient-to-br from-[#68a300] to-[#4a7a00] rounded-full flex items-center justify-center mx-auto mb-5 shadow-medium">
-                <span className="text-white text-2xl font-bold">
-                  {member.avatar}
-                </span>
+        {teamMembers.length > 0 ? (
+          <div className="flex flex-wrap justify-center gap-10">
+            {teamMembers.map((member, index) => (
+              <div
+                key={`${member.name}-${index}`}
+                className="w-full text-center group sm:w-[calc(50%-1.25rem)] lg:w-[calc(33.333%-1.75rem)]"
+              >
+                <div className="w-24 h-24 rounded-full overflow-hidden mx-auto mb-5 shadow-medium border border-[#d8e6bf] bg-[#f3f8ea]">
+                  {member.image ? (
+                    <img
+                      src={resolveMediaUrl(member.image)}
+                      alt={`${member.name || "Team member"} profile`}
+                      className="h-full w-full object-cover"
+                    />
+                  ) : (
+                    <div className="h-full w-full flex items-center justify-center text-[11px] font-semibold text-[#4a7a00]">
+                      No Image
+                    </div>
+                  )}
+                </div>
+                <h3 className="text-xl font-bold text-gray-900">
+                  {member.name || "No Content"}
+                </h3>
+                <p className="text-[#68a300] font-semibold text-sm mb-3">
+                  {member.role || "No Content"}
+                </p>
+                <p className="mx-auto max-w-[18rem] px-1 text-gray-500 leading-relaxed text-sm">
+                  {member.bio || "Team member bio is not available right now."}
+                </p>
               </div>
-              <h3 className="text-xl font-bold text-gray-900">{member.name}</h3>
-              <p className="text-[#68a300] font-semibold text-sm mb-3">
-                {member.role}
-              </p>
-              <p className="text-gray-500 leading-relaxed text-sm">
-                {member.bio}
-              </p>
-            </div>
-          ))}
-        </div>
+            ))}
+          </div>
+        ) : (
+          <div className="rounded-2xl border border-dashed border-gray-300 bg-gray-50 px-6 py-10 text-center text-gray-500">
+            No team members added yet.
+          </div>
+        )}
       </section>
 
       {/* Certifications */}

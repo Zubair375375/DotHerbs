@@ -81,6 +81,7 @@ export const getAboutContent = async (req, res) => {
             ? content.healthPriorityItems
             : DEFAULT_HEALTH_PRIORITY_ITEMS,
         healthPriorityImages: content?.healthPriorityImages || [],
+        teamMembers: content?.teamMembers || [],
         updatedAt: content?.updatedAt || null,
       },
     });
@@ -162,6 +163,10 @@ export const updateAboutContent = async (req, res) => {
       req.body,
       "healthPriorityImages",
     );
+    const hasTeamMembers = Object.prototype.hasOwnProperty.call(
+      req.body,
+      "teamMembers",
+    );
 
     if (
       !hasVideoUrl &&
@@ -180,7 +185,8 @@ export const updateAboutContent = async (req, res) => {
       !hasMissionImage &&
       !hasHealthPriorityHeading &&
       !hasHealthPriorityItems &&
-      !hasHealthPriorityImages
+      !hasHealthPriorityImages &&
+      !hasTeamMembers
     ) {
       return res.status(400).json({
         success: false,
@@ -338,7 +344,8 @@ export const updateAboutContent = async (req, res) => {
     }
 
     if (hasHealthPriorityHeading) {
-      content.healthPriorityHeading = req.body.healthPriorityHeading?.trim() || "";
+      content.healthPriorityHeading =
+        req.body.healthPriorityHeading?.trim() || "";
     }
 
     if (hasHealthPriorityItems) {
@@ -377,6 +384,48 @@ export const updateAboutContent = async (req, res) => {
         .forEach((oldImage) => deleteUploadedFileIfExists(oldImage));
 
       content.healthPriorityImages = nextImages;
+    }
+
+    if (hasTeamMembers) {
+      const rawMembers = Array.isArray(req.body.teamMembers)
+        ? req.body.teamMembers
+        : [];
+
+      const previousMemberImages = Array.isArray(content.teamMembers)
+        ? content.teamMembers
+            .map((member) =>
+              member && typeof member.image === "string"
+                ? member.image.trim()
+                : "",
+            )
+            .filter(Boolean)
+        : [];
+
+      const normalizedMembers = rawMembers
+        .map((member) => ({
+          name:
+            member && typeof member.name === "string" ? member.name.trim() : "",
+          role:
+            member && typeof member.role === "string" ? member.role.trim() : "",
+          bio:
+            member && typeof member.bio === "string" ? member.bio.trim() : "",
+          image:
+            member && typeof member.image === "string"
+              ? member.image.trim()
+              : "",
+        }))
+        .filter((member) => member.name || member.role || member.bio || member.image)
+        .slice(0, 12);
+
+      const nextMemberImages = normalizedMembers
+        .map((member) => member.image)
+        .filter(Boolean);
+
+      previousMemberImages
+        .filter((oldImage) => !nextMemberImages.includes(oldImage))
+        .forEach((oldImage) => deleteUploadedFileIfExists(oldImage));
+
+      content.teamMembers = normalizedMembers;
     }
 
     content.updatedBy = req.user?._id || null;
