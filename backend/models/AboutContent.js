@@ -90,6 +90,43 @@ const aboutContentSchema = new mongoose.Schema(
       trim: true,
       default: "",
     },
+    healthPriorityHeading: {
+      type: String,
+      trim: true,
+      default: "YOUR HEALTH, OUR PRIORITY",
+      maxlength: [180, "Health priority heading too long"],
+    },
+    healthPriorityItems: {
+      type: [
+        {
+          title: {
+            type: String,
+            trim: true,
+            default: "",
+            maxlength: [180, "Health priority item title too long"],
+          },
+          description: {
+            type: String,
+            trim: true,
+            default: "",
+            maxlength: [1000, "Health priority item description too long"],
+          },
+        },
+      ],
+      default: [],
+      validate: {
+        validator: (value) => Array.isArray(value) && value.length <= 3,
+        message: "You can store up to 3 health priority text items",
+      },
+    },
+    healthPriorityImages: {
+      type: [String],
+      default: [],
+      validate: {
+        validator: (value) => Array.isArray(value) && value.length <= 4,
+        message: "You can store up to 4 health priority images",
+      },
+    },
     updatedBy: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",

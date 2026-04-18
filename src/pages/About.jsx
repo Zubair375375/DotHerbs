@@ -115,6 +115,28 @@ const defaultMissionSection = {
   image: "",
 };
 
+const defaultHealthPrioritySection = {
+  heading: "YOUR HEALTH, OUR PRIORITY",
+  items: [
+    {
+      title: "SUPERIOR MANUFACTURING",
+      description:
+        "Nutrifactor establishes high-quality manufacturing standards for nutraceutical products, maintaining control over the entire production process with stringent adherence to cGMPs. Our commitment extends to thorough documentation to ensure the traceability of every step.",
+    },
+    {
+      title: "RESEARCH & DEVELOPMENT",
+      description:
+        "Our research pilot plant stays up-to-date with the latest findings about the natural ingredients and nutraceuticals, which are further supported by our laboratory studies. We rely on scientific research to ensure the authenticity and accuracy of our health-related claims.",
+    },
+    {
+      title: "CURRENT HEALTH CONCERNS",
+      description:
+        "We focus on the health issues of our consumers by placing their needs at the core of our formulations. Upon identifying current health concerns, we promptly conduct research to develop top-quality natural healthcare products that meet the identified health needs.",
+    },
+  ],
+  images: [],
+};
+
 const defaultFacilitySection = {
   heading: "Pakistan's Largest Nutraceutical Manufacturing Facility",
   description:
@@ -136,6 +158,9 @@ const About = () => {
     defaultWhyNutrifactorSection,
   );
   const [missionSection, setMissionSection] = useState(defaultMissionSection);
+  const [healthPrioritySection, setHealthPrioritySection] = useState(
+    defaultHealthPrioritySection,
+  );
   const API_URL = import.meta.env.VITE_API_URL || "http://localhost:5000/api";
   const API_ORIGIN = API_URL.replace(/\/api\/?$/, "");
 
@@ -209,12 +234,31 @@ const About = () => {
             defaultMissionSection.description,
           image: result?.data?.missionImage || "",
         });
+
+        const remoteHealthItems = Array.isArray(result?.data?.healthPriorityItems)
+          ? result.data.healthPriorityItems
+          : [];
+        const normalizedHealthItems = [0, 1, 2].map(
+          (index) =>
+            remoteHealthItems[index] || defaultHealthPrioritySection.items[index],
+        );
+
+        setHealthPrioritySection({
+          heading:
+            result?.data?.healthPriorityHeading?.trim() ||
+            defaultHealthPrioritySection.heading,
+          items: normalizedHealthItems,
+          images: Array.isArray(result?.data?.healthPriorityImages)
+            ? result.data.healthPriorityImages
+            : [],
+        });
       } catch {
         setAboutVideoUrl("");
         setFacilitySection(defaultFacilitySection);
         setScienceSection(defaultScienceSection);
         setWhyNutrifactorSection(defaultWhyNutrifactorSection);
         setMissionSection(defaultMissionSection);
+        setHealthPrioritySection(defaultHealthPrioritySection);
       }
     };
 
@@ -349,7 +393,7 @@ const About = () => {
 
       {/* Facility Detail */}
       <section className="bg-[#ffffff] py-16">
-        <div className="mx-auto max-w-7xl px-6">
+        <div className="mx-auto max-w-6xl px-6">
           <div className="grid items-center gap-8 lg:grid-cols-12">
             <div className="grid gap-4 sm:grid-cols-2 lg:col-span-6">
               <div className="overflow-hidden rounded-2xl sm:col-span-2">
@@ -514,14 +558,80 @@ const About = () => {
         </div>
       </section>
 
+      {/* Health Priority */}
+      <section className="bg-[#ffffff] py-20">
+        <div className="mx-auto max-w-7xl px-6">
+          <div className="text-center">
+            <h3 className="text-3xl font-extrabold uppercase tracking-[0.08em] text-[#152238] sm:text-4xl">
+              {healthPrioritySection.heading}
+            </h3>
+            <div className="mx-auto mt-5 h-1 w-44 rounded-full bg-[#5b3f95]" />
+          </div>
+
+          <div className="mt-12 grid grid-cols-1 gap-16 lg:grid-cols-2 lg:items-stretch">
+            <div className="space-y-4">
+              {healthPrioritySection.items.map((item, index) => (
+                <article
+                  key={`${item.title}-${index}`}
+                  className="rounded-2xl bg-gray-50 p-6"
+                >
+                  <h4 className="text-lg font-extrabold uppercase tracking-[0.04em] text-[#152238]">
+                    {item.title || "No Content"}
+                  </h4>
+                  <p className="mt-3 text-lg leading-relaxed text-[#2d3648]">
+                    {item.description ||
+                      "Section description is not available right now."}
+                  </p>
+                </article>
+              ))}
+            </div>
+
+              <div className="grid min-h-[340px] grid-cols-3 grid-rows-2 gap-3 lg:h-full lg:min-h-0">
+              {[0, 1, 2, 3].map((index) => {
+                const slotClass =
+                  index === 0
+                    ? "col-span-2 row-span-1"
+                    : index === 1
+                      ? "col-span-1 row-span-1"
+                      : index === 2
+                        ? "col-span-1 row-span-1"
+                        : "col-span-2 row-span-1";
+                const imageUrl = healthPrioritySection.images[index];
+
+                return (
+                  <div
+                    key={`health-priority-image-${index}`}
+                    className={`${slotClass} overflow-hidden rounded-3xl border border-[#e5e7eb] bg-white`}
+                  >
+                    {imageUrl ? (
+                      <img
+                        src={resolveMediaUrl(imageUrl)}
+                        alt={`Health priority visual ${index + 1}`}
+                        className="h-full w-full object-cover"
+                      />
+                    ) : (
+                      <div className="grid h-full place-items-center px-3 text-center">
+                        <p className="text-sm font-semibold text-[#61718c]">
+                          No Content
+                        </p>
+                      </div>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        </div>
+      </section>
+
       {/* Values */}
-      <section className="bg-gray-50 py-20">
+      <section className="bg-[#68a300] py-20">
         <div className="max-w-6xl mx-auto px-6">
           <div className="text-center mb-14">
-            <span className="inline-block bg-[#68a300]/10 text-[#4a7a00] text-sm font-semibold px-4 py-1.5 rounded-full mb-4">
+            <span className="inline-block bg-[#ffffff] text-[#4a7a00] text-sm font-semibold px-4 py-1.5 rounded-full mb-4">
               What We Stand For
             </span>
-            <h2 className="text-4xl font-bold text-gray-900">
+            <h2 className="text-4xl font-bold text-white">
               Our Core Values
             </h2>
           </div>

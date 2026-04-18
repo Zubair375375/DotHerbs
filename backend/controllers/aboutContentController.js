@@ -6,6 +6,24 @@ import AboutContent from "../models/AboutContent.js";
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
+const DEFAULT_HEALTH_PRIORITY_ITEMS = [
+  {
+    title: "SUPERIOR MANUFACTURING",
+    description:
+      "Nutrifactor establishes high-quality manufacturing standards for nutraceutical products, maintaining control over the entire production process with stringent adherence to cGMPs. Our commitment extends to thorough documentation to ensure the traceability of every step.",
+  },
+  {
+    title: "RESEARCH & DEVELOPMENT",
+    description:
+      "Our research pilot plant stays up-to-date with the latest findings about the natural ingredients and nutraceuticals, which are further supported by our laboratory studies. We rely on scientific research to ensure the authenticity and accuracy of our health-related claims.",
+  },
+  {
+    title: "CURRENT HEALTH CONCERNS",
+    description:
+      "We focus on the health issues of our consumers by placing their needs at the core of our formulations. Upon identifying current health concerns, we promptly conduct research to develop top-quality natural healthcare products that meet the identified health needs.",
+  },
+];
+
 const deleteUploadedFileIfExists = (fileUrl) => {
   if (!fileUrl || !fileUrl.startsWith("/uploads/")) {
     return;
@@ -56,6 +74,13 @@ export const getAboutContent = async (req, res) => {
           content?.missionDescription ||
           "For centuries, herbal traditions have guided communities toward balance and vitality. At Dot-Herbs, we honour that heritage by making it accessible, transparent, and trustworthy for the modern world. From the highland farms of Morocco to the tropical forests of Sri Lanka, we trace every ingredient back to its origin and share that journey with you because you deserve to know exactly what you're putting in your body.",
         missionImage: content?.missionImage || "",
+        healthPriorityHeading:
+          content?.healthPriorityHeading || "YOUR HEALTH, OUR PRIORITY",
+        healthPriorityItems:
+          content?.healthPriorityItems?.length >= 1
+            ? content.healthPriorityItems
+            : DEFAULT_HEALTH_PRIORITY_ITEMS,
+        healthPriorityImages: content?.healthPriorityImages || [],
         updatedAt: content?.updatedAt || null,
       },
     });
@@ -125,6 +150,18 @@ export const updateAboutContent = async (req, res) => {
       req.body,
       "missionImage",
     );
+    const hasHealthPriorityHeading = Object.prototype.hasOwnProperty.call(
+      req.body,
+      "healthPriorityHeading",
+    );
+    const hasHealthPriorityItems = Object.prototype.hasOwnProperty.call(
+      req.body,
+      "healthPriorityItems",
+    );
+    const hasHealthPriorityImages = Object.prototype.hasOwnProperty.call(
+      req.body,
+      "healthPriorityImages",
+    );
 
     if (
       !hasVideoUrl &&
@@ -140,7 +177,10 @@ export const updateAboutContent = async (req, res) => {
       !hasWhyNutrifactorImage &&
       !hasMissionHeading &&
       !hasMissionDescription &&
-      !hasMissionImage
+      !hasMissionImage &&
+      !hasHealthPriorityHeading &&
+      !hasHealthPriorityItems &&
+      !hasHealthPriorityImages
     ) {
       return res.status(400).json({
         success: false,
@@ -295,6 +335,48 @@ export const updateAboutContent = async (req, res) => {
       }
 
       content.missionImage = nextMissionImage;
+    }
+
+    if (hasHealthPriorityHeading) {
+      content.healthPriorityHeading = req.body.healthPriorityHeading?.trim() || "";
+    }
+
+    if (hasHealthPriorityItems) {
+      const rawItems = Array.isArray(req.body.healthPriorityItems)
+        ? req.body.healthPriorityItems
+        : [];
+
+      content.healthPriorityItems = rawItems
+        .map((item) => ({
+          title:
+            item && typeof item.title === "string" ? item.title.trim() : "",
+          description:
+            item && typeof item.description === "string"
+              ? item.description.trim()
+              : "",
+        }))
+        .filter((item) => item.title || item.description)
+        .slice(0, 3);
+    }
+
+    if (hasHealthPriorityImages) {
+      const rawImages = Array.isArray(req.body.healthPriorityImages)
+        ? req.body.healthPriorityImages
+        : [];
+      const nextImages = rawImages
+        .map((item) => (typeof item === "string" ? item.trim() : ""))
+        .filter(Boolean)
+        .slice(0, 4);
+
+      const previousImages = Array.isArray(content.healthPriorityImages)
+        ? content.healthPriorityImages
+        : [];
+
+      previousImages
+        .filter((oldImage) => oldImage && !nextImages.includes(oldImage))
+        .forEach((oldImage) => deleteUploadedFileIfExists(oldImage));
+
+      content.healthPriorityImages = nextImages;
     }
 
     content.updatedBy = req.user?._id || null;

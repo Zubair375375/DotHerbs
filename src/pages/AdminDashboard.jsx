@@ -157,6 +157,28 @@ const AdminDashboard = () => {
   const [missionImageFile, setMissionImageFile] = useState(null);
   const [missionImagePreview, setMissionImagePreview] = useState("");
   const [savingMissionSection, setSavingMissionSection] = useState(false);
+  const [healthPriorityHeading, setHealthPriorityHeading] = useState("");
+  const [healthPriorityItems, setHealthPriorityItems] = useState([
+    { title: "", description: "" },
+    { title: "", description: "" },
+    { title: "", description: "" },
+  ]);
+  const [healthPriorityImages, setHealthPriorityImages] = useState([
+    "",
+    "",
+    "",
+    "",
+  ]);
+  const [healthPriorityImageFiles, setHealthPriorityImageFiles] = useState([
+    null,
+    null,
+    null,
+    null,
+  ]);
+  const [healthPriorityImagePreviews, setHealthPriorityImagePreviews] =
+    useState(["", "", "", ""]);
+  const [savingHealthPrioritySection, setSavingHealthPrioritySection] =
+    useState(false);
   const [announcementForm, setAnnouncementForm] = useState({
     title: "",
     message: "",
@@ -190,6 +212,25 @@ const AdminDashboard = () => {
   const defaultMissionDescription =
     "For centuries, herbal traditions have guided communities toward balance and vitality. At Dot-Herbs, we honour that heritage by making it accessible, transparent, and trustworthy for the modern world. From the highland farms of Morocco to the tropical forests of Sri Lanka, we trace every ingredient back to its origin and share that journey with you because you deserve to know exactly what you're putting in your body.";
   const defaultMissionImage = "";
+  const defaultHealthPriorityHeading = "YOUR HEALTH, OUR PRIORITY";
+  const defaultHealthPriorityItems = [
+    {
+      title: "SUPERIOR MANUFACTURING",
+      description:
+        "Nutrifactor establishes high-quality manufacturing standards for nutraceutical products, maintaining control over the entire production process with stringent adherence to cGMPs. Our commitment extends to thorough documentation to ensure the traceability of every step.",
+    },
+    {
+      title: "RESEARCH & DEVELOPMENT",
+      description:
+        "Our research pilot plant stays up-to-date with the latest findings about the natural ingredients and nutraceuticals, which are further supported by our laboratory studies. We rely on scientific research to ensure the authenticity and accuracy of our health-related claims.",
+    },
+    {
+      title: "CURRENT HEALTH CONCERNS",
+      description:
+        "We focus on the health issues of our consumers by placing their needs at the core of our formulations. Upon identifying current health concerns, we promptly conduct research to develop top-quality natural healthcare products that meet the identified health needs.",
+    },
+  ];
+  const defaultHealthPriorityImages = ["", "", "", ""];
 
   const resolveMediaUrl = (url) => {
     if (!url) return "";
@@ -261,6 +302,30 @@ const AdminDashboard = () => {
       setMissionImage(result?.data?.missionImage || "");
       setMissionImageFile(null);
       setMissionImagePreview("");
+      setHealthPriorityHeading(
+        result?.data?.healthPriorityHeading?.trim() ||
+          defaultHealthPriorityHeading,
+      );
+      const remoteHealthPriorityItems = Array.isArray(
+        result?.data?.healthPriorityItems,
+      )
+        ? result.data.healthPriorityItems
+        : [];
+      setHealthPriorityItems(
+        [0, 1, 2].map(
+          (index) => remoteHealthPriorityItems[index] || defaultHealthPriorityItems[index],
+        ),
+      );
+      const remoteHealthPriorityImages = Array.isArray(
+        result?.data?.healthPriorityImages,
+      )
+        ? result.data.healthPriorityImages
+        : [];
+      setHealthPriorityImages(
+        [0, 1, 2, 3].map((index) => remoteHealthPriorityImages[index] || ""),
+      );
+      setHealthPriorityImageFiles([null, null, null, null]);
+      setHealthPriorityImagePreviews(["", "", "", ""]);
     } catch {
       setAboutVideoUrl("");
       setAboutSectionHeading(defaultFacilityHeading);
@@ -286,6 +351,11 @@ const AdminDashboard = () => {
       setMissionImage(defaultMissionImage);
       setMissionImageFile(null);
       setMissionImagePreview("");
+      setHealthPriorityHeading(defaultHealthPriorityHeading);
+      setHealthPriorityItems(defaultHealthPriorityItems);
+      setHealthPriorityImages(defaultHealthPriorityImages);
+      setHealthPriorityImageFiles([null, null, null, null]);
+      setHealthPriorityImagePreviews(["", "", "", ""]);
     } finally {
       setLoadingAboutVideo(false);
     }
@@ -844,6 +914,135 @@ const AdminDashboard = () => {
       toast.error(error.message || "Failed to save Mission section");
     } finally {
       setSavingMissionSection(false);
+    }
+  };
+
+  const handleHealthPriorityItemChange = (index, field, value) => {
+    setHealthPriorityItems((prev) => {
+      const next = [...prev];
+      next[index] = {
+        ...next[index],
+        [field]: value,
+      };
+      return next;
+    });
+  };
+
+  const handleHealthPriorityImageChange = (index, file) => {
+    if (!file) {
+      return;
+    }
+
+    setHealthPriorityImageFiles((prev) => {
+      const next = [...prev];
+      next[index] = file;
+      return next;
+    });
+
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      setHealthPriorityImagePreviews((prev) => {
+        const next = [...prev];
+        next[index] = event.target?.result || "";
+        return next;
+      });
+    };
+    reader.readAsDataURL(file);
+  };
+
+  const handleRemoveHealthPriorityImage = (index) => {
+    setHealthPriorityImages((prev) => {
+      const next = [...prev];
+      next[index] = "";
+      return next;
+    });
+
+    setHealthPriorityImageFiles((prev) => {
+      const next = [...prev];
+      next[index] = null;
+      return next;
+    });
+
+    setHealthPriorityImagePreviews((prev) => {
+      const next = [...prev];
+      next[index] = "";
+      return next;
+    });
+  };
+
+  const handleResetHealthPrioritySectionDefaults = () => {
+    setHealthPriorityHeading(defaultHealthPriorityHeading);
+    setHealthPriorityItems(defaultHealthPriorityItems);
+    setHealthPriorityImages(defaultHealthPriorityImages);
+    setHealthPriorityImageFiles([null, null, null, null]);
+    setHealthPriorityImagePreviews(["", "", "", ""]);
+  };
+
+  const handleSaveHealthPrioritySection = async (e) => {
+    e.preventDefault();
+
+    if (!healthPriorityHeading.trim()) {
+      toast.error("Health priority heading is required");
+      return;
+    }
+
+    const normalizedItems = healthPriorityItems.map((item) => ({
+      title: item.title?.trim() || "",
+      description: item.description?.trim() || "",
+    }));
+
+    if (normalizedItems.some((item) => !item.title || !item.description)) {
+      toast.error("Please complete all three text blocks");
+      return;
+    }
+
+    try {
+      setSavingHealthPrioritySection(true);
+
+      const uploadedImages = [...healthPriorityImages];
+      for (let index = 0; index < 4; index += 1) {
+        if (healthPriorityImageFiles[index]) {
+          uploadedImages[index] = await uploadDashboardImage(
+            healthPriorityImageFiles[index],
+          );
+        }
+      }
+
+      const payloadImages = uploadedImages.filter(Boolean).slice(0, 4);
+
+      const token = getAuthToken();
+      const response = await fetch(`${API_URL}/about-content`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          healthPriorityHeading: healthPriorityHeading.trim(),
+          healthPriorityItems: normalizedItems,
+          healthPriorityImages: payloadImages,
+        }),
+      });
+
+      const result = await response.json();
+
+      if (!response.ok) {
+        throw new Error(result?.error || "Failed to save Health Priority section");
+      }
+
+      setHealthPriorityImages([
+        payloadImages[0] || "",
+        payloadImages[1] || "",
+        payloadImages[2] || "",
+        payloadImages[3] || "",
+      ]);
+      setHealthPriorityImageFiles([null, null, null, null]);
+      setHealthPriorityImagePreviews(["", "", "", ""]);
+      toast.success("Health Priority section updated successfully");
+    } catch (error) {
+      toast.error(error.message || "Failed to save Health Priority section");
+    } finally {
+      setSavingHealthPrioritySection(false);
     }
   };
 
@@ -2489,6 +2688,130 @@ const AdminDashboard = () => {
                 >
                   <FaCheck />
                   <span>{savingMissionSection ? "Saving..." : "Save Section"}</span>
+                </button>
+              </form>
+            </div>
+
+            <div className="rounded-xl border bg-white p-6 shadow-sm">
+              <div className="mb-6 flex flex-wrap items-center justify-between gap-3">
+                <h2 className="text-2xl font-semibold">
+                  Your Health, Our Priority Section
+                </h2>
+                <button
+                  type="button"
+                  onClick={handleResetHealthPrioritySectionDefaults}
+                  className="rounded border border-gray-300 px-3 py-2 text-sm text-gray-700 hover:bg-gray-50"
+                >
+                  Reset Defaults
+                </button>
+              </div>
+
+              <form className="space-y-6" onSubmit={handleSaveHealthPrioritySection}>
+                <div>
+                  <label className="mb-2 block text-sm font-medium text-gray-700">
+                    Heading
+                  </label>
+                  <input
+                    type="text"
+                    value={healthPriorityHeading}
+                    onChange={(e) => setHealthPriorityHeading(e.target.value)}
+                    className="w-full rounded border border-gray-300 px-3 py-2 text-sm"
+                    maxLength={180}
+                    placeholder="e.g. YOUR HEALTH, OUR PRIORITY"
+                  />
+                </div>
+
+                {[0, 1, 2].map((index) => (
+                  <div key={`health-item-${index}`} className="rounded-lg border bg-gray-50 p-4">
+                    <p className="mb-3 text-sm font-semibold text-gray-700">
+                      Text Block {index + 1}
+                    </p>
+                    <input
+                      type="text"
+                      value={healthPriorityItems[index]?.title || ""}
+                      onChange={(e) =>
+                        handleHealthPriorityItemChange(index, "title", e.target.value)
+                      }
+                      className="mb-3 w-full rounded border border-gray-300 px-3 py-2 text-sm"
+                      maxLength={180}
+                      placeholder="Title"
+                    />
+                    <textarea
+                      value={healthPriorityItems[index]?.description || ""}
+                      onChange={(e) =>
+                        handleHealthPriorityItemChange(
+                          index,
+                          "description",
+                          e.target.value,
+                        )
+                      }
+                      className="w-full rounded border border-gray-300 px-3 py-2 text-sm"
+                      rows={3}
+                      maxLength={1000}
+                      placeholder="Description"
+                    />
+                  </div>
+                ))}
+
+                <div>
+                  <p className="mb-3 text-sm font-medium text-gray-700">
+                    Image Grid (upload up to 4 images)
+                  </p>
+                  <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+                    {[0, 1, 2, 3].map((index) => {
+                      const preview =
+                        healthPriorityImagePreviews[index] ||
+                        resolveMediaUrl(healthPriorityImages[index]);
+
+                      return (
+                        <div
+                          key={`health-image-${index}`}
+                          className="rounded-lg border bg-gray-50 p-3"
+                        >
+                          <p className="mb-2 text-xs font-semibold uppercase text-gray-500">
+                            Image {index + 1}
+                          </p>
+                          {preview ? (
+                            <img
+                              src={preview}
+                              alt={`Health Priority preview ${index + 1}`}
+                              className="mb-3 h-32 w-full rounded object-cover"
+                            />
+                          ) : (
+                            <div className="mb-3 flex h-32 items-center justify-center rounded border-2 border-dashed border-gray-300 text-xs text-gray-400">
+                              No image selected
+                            </div>
+                          )}
+                          <input
+                            type="file"
+                            accept="image/*"
+                            onChange={(e) =>
+                              handleHealthPriorityImageChange(index, e.target.files[0])
+                            }
+                            className="w-full rounded border border-gray-300 px-2 py-2 text-xs"
+                          />
+                          <button
+                            type="button"
+                            onClick={() => handleRemoveHealthPriorityImage(index)}
+                            className="mt-2 w-full rounded border border-red-200 px-2 py-2 text-xs text-red-600 hover:bg-red-50"
+                          >
+                            Clear
+                          </button>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+
+                <button
+                  type="submit"
+                  disabled={savingHealthPrioritySection}
+                  className="inline-flex items-center space-x-2 rounded bg-[#68a300] px-4 py-2 text-white hover:bg-[#5f9600] disabled:opacity-60"
+                >
+                  <FaCheck />
+                  <span>
+                    {savingHealthPrioritySection ? "Saving..." : "Save Section"}
+                  </span>
                 </button>
               </form>
             </div>
