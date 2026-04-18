@@ -43,6 +43,19 @@ export const getAboutContent = async (req, res) => {
           "Dot-Herbs delivers high-quality, safe products crafted under expert supervision and aligned with global standards. Committed to GMP, HACCP, ISO systems, and compliance-driven quality controls, we ensure excellence at every stage.",
         scienceBadgeImages: content?.scienceBadgeImages || [],
         scienceImage: content?.scienceImage || "",
+        whyNutrifactorHeading:
+          content?.whyNutrifactorHeading || "WHY NUTRIFACTOR!",
+        whyNutrifactorDescription:
+          content?.whyNutrifactorDescription ||
+          "Nutrifactor stands out from other nutraceutical brands due to our values of transparency and traceability in delivering high-quality natural healthcare products. Our commitment to excellence encompasses sustainable sourcing, integrity across all levels, and rigorous testing methods exceeding usual standard practices. We strive to bridge the gap between consumers and nutraceuticals science by being transparent in our labels. All the health benefits listed on our products are strictly in accordance with the scientific research.",
+        whyNutrifactorImage: content?.whyNutrifactorImage || "",
+        missionHeading:
+          content?.missionHeading ||
+          "Bridging Ancient Wisdom with Modern Wellness",
+        missionDescription:
+          content?.missionDescription ||
+          "For centuries, herbal traditions have guided communities toward balance and vitality. At Dot-Herbs, we honour that heritage by making it accessible, transparent, and trustworthy for the modern world. From the highland farms of Morocco to the tropical forests of Sri Lanka, we trace every ingredient back to its origin and share that journey with you because you deserve to know exactly what you're putting in your body.",
+        missionImage: content?.missionImage || "",
         updatedAt: content?.updatedAt || null,
       },
     });
@@ -88,6 +101,30 @@ export const updateAboutContent = async (req, res) => {
       req.body,
       "scienceImage",
     );
+    const hasWhyNutrifactorHeading = Object.prototype.hasOwnProperty.call(
+      req.body,
+      "whyNutrifactorHeading",
+    );
+    const hasWhyNutrifactorDescription = Object.prototype.hasOwnProperty.call(
+      req.body,
+      "whyNutrifactorDescription",
+    );
+    const hasWhyNutrifactorImage = Object.prototype.hasOwnProperty.call(
+      req.body,
+      "whyNutrifactorImage",
+    );
+    const hasMissionHeading = Object.prototype.hasOwnProperty.call(
+      req.body,
+      "missionHeading",
+    );
+    const hasMissionDescription = Object.prototype.hasOwnProperty.call(
+      req.body,
+      "missionDescription",
+    );
+    const hasMissionImage = Object.prototype.hasOwnProperty.call(
+      req.body,
+      "missionImage",
+    );
 
     if (
       !hasVideoUrl &&
@@ -97,7 +134,13 @@ export const updateAboutContent = async (req, res) => {
       !hasScienceHeading &&
       !hasScienceDescription &&
       !hasScienceBadgeImages &&
-      !hasScienceImage
+      !hasScienceImage &&
+      !hasWhyNutrifactorHeading &&
+      !hasWhyNutrifactorDescription &&
+      !hasWhyNutrifactorImage &&
+      !hasMissionHeading &&
+      !hasMissionDescription &&
+      !hasMissionImage
     ) {
       return res.status(400).json({
         success: false,
@@ -197,6 +240,61 @@ export const updateAboutContent = async (req, res) => {
       }
 
       content.scienceImage = nextScienceImage;
+    }
+
+    if (hasWhyNutrifactorHeading) {
+      content.whyNutrifactorHeading =
+        req.body.whyNutrifactorHeading?.trim() || "";
+    }
+
+    if (hasWhyNutrifactorDescription) {
+      content.whyNutrifactorDescription =
+        req.body.whyNutrifactorDescription?.trim() || "";
+    }
+
+    if (hasWhyNutrifactorImage) {
+      const nextWhyImage = req.body.whyNutrifactorImage?.trim() || "";
+
+      if (!nextWhyImage) {
+        return res.status(400).json({
+          success: false,
+          error: "Please upload one image for Why Nutrifactor section",
+        });
+      }
+
+      if (
+        content.whyNutrifactorImage &&
+        content.whyNutrifactorImage !== nextWhyImage
+      ) {
+        deleteUploadedFileIfExists(content.whyNutrifactorImage);
+      }
+
+      content.whyNutrifactorImage = nextWhyImage;
+    }
+
+    if (hasMissionHeading) {
+      content.missionHeading = req.body.missionHeading?.trim() || "";
+    }
+
+    if (hasMissionDescription) {
+      content.missionDescription = req.body.missionDescription?.trim() || "";
+    }
+
+    if (hasMissionImage) {
+      const nextMissionImage = req.body.missionImage?.trim() || "";
+
+      if (!nextMissionImage) {
+        return res.status(400).json({
+          success: false,
+          error: "Please upload one image for Mission section",
+        });
+      }
+
+      if (content.missionImage && content.missionImage !== nextMissionImage) {
+        deleteUploadedFileIfExists(content.missionImage);
+      }
+
+      content.missionImage = nextMissionImage;
     }
 
     content.updatedBy = req.user?._id || null;

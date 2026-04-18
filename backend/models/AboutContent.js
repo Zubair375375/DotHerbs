@@ -54,6 +54,42 @@ const aboutContentSchema = new mongoose.Schema(
       trim: true,
       default: "",
     },
+    whyNutrifactorHeading: {
+      type: String,
+      trim: true,
+      default: "WHY NUTRIFACTOR!",
+      maxlength: [180, "Why section heading too long"],
+    },
+    whyNutrifactorDescription: {
+      type: String,
+      trim: true,
+      default:
+        "Nutrifactor stands out from other nutraceutical brands due to our values of transparency and traceability in delivering high-quality natural healthcare products. Our commitment to excellence encompasses sustainable sourcing, integrity across all levels, and rigorous testing methods exceeding usual standard practices. We strive to bridge the gap between consumers and nutraceuticals science by being transparent in our labels. All the health benefits listed on our products are strictly in accordance with the scientific research.",
+      maxlength: [1400, "Why section description too long"],
+    },
+    whyNutrifactorImage: {
+      type: String,
+      trim: true,
+      default: "",
+    },
+    missionHeading: {
+      type: String,
+      trim: true,
+      default: "Bridging Ancient Wisdom with Modern Wellness",
+      maxlength: [180, "Mission heading too long"],
+    },
+    missionDescription: {
+      type: String,
+      trim: true,
+      default:
+        "For centuries, herbal traditions have guided communities toward balance and vitality. At Dot-Herbs, we honour that heritage by making it accessible, transparent, and trustworthy for the modern world. From the highland farms of Morocco to the tropical forests of Sri Lanka, we trace every ingredient back to its origin and share that journey with you because you deserve to know exactly what you're putting in your body.",
+      maxlength: [1500, "Mission description too long"],
+    },
+    missionImage: {
+      type: String,
+      trim: true,
+      default: "",
+    },
     updatedBy: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",

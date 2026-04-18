@@ -101,6 +101,20 @@ const defaultScienceSection = {
   image: "",
 };
 
+const defaultWhyNutrifactorSection = {
+  heading: "WHY NUTRIFACTOR!",
+  description:
+    "Nutrifactor stands out from other nutraceutical brands due to our values of transparency and traceability in delivering high-quality natural healthcare products. Our commitment to excellence encompasses sustainable sourcing, integrity across all levels, and rigorous testing methods exceeding usual standard practices. We strive to bridge the gap between consumers and nutraceuticals science by being transparent in our labels. All the health benefits listed on our products are strictly in accordance with the scientific research.",
+  image: "",
+};
+
+const defaultMissionSection = {
+  heading: "Bridging Ancient Wisdom with Modern Wellness",
+  description:
+    "For centuries, herbal traditions have guided communities toward balance and vitality. At Dot-Herbs, we honour that heritage by making it accessible, transparent, and trustworthy for the modern world. From the highland farms of Morocco to the tropical forests of Sri Lanka, we trace every ingredient back to its origin and share that journey with you because you deserve to know exactly what you're putting in your body.",
+  image: "",
+};
+
 const defaultFacilitySection = {
   heading: "Pakistan's Largest Nutraceutical Manufacturing Facility",
   description:
@@ -118,6 +132,10 @@ const About = () => {
     defaultFacilitySection,
   );
   const [scienceSection, setScienceSection] = useState(defaultScienceSection);
+  const [whyNutrifactorSection, setWhyNutrifactorSection] = useState(
+    defaultWhyNutrifactorSection,
+  );
+  const [missionSection, setMissionSection] = useState(defaultMissionSection);
   const API_URL = import.meta.env.VITE_API_URL || "http://localhost:5000/api";
   const API_ORIGIN = API_URL.replace(/\/api\/?$/, "");
 
@@ -172,10 +190,31 @@ const About = () => {
           badgeImages: remoteBadgeImages,
           image: result?.data?.scienceImage || "",
         });
+
+        setWhyNutrifactorSection({
+          heading:
+            result?.data?.whyNutrifactorHeading?.trim() ||
+            defaultWhyNutrifactorSection.heading,
+          description:
+            result?.data?.whyNutrifactorDescription?.trim() ||
+            defaultWhyNutrifactorSection.description,
+          image: result?.data?.whyNutrifactorImage || "",
+        });
+
+        setMissionSection({
+          heading:
+            result?.data?.missionHeading?.trim() || defaultMissionSection.heading,
+          description:
+            result?.data?.missionDescription?.trim() ||
+            defaultMissionSection.description,
+          image: result?.data?.missionImage || "",
+        });
       } catch {
         setAboutVideoUrl("");
         setFacilitySection(defaultFacilitySection);
         setScienceSection(defaultScienceSection);
+        setWhyNutrifactorSection(defaultWhyNutrifactorSection);
+        setMissionSection(defaultMissionSection);
       }
     };
 
@@ -400,6 +439,42 @@ const About = () => {
         </div>
       </section>
 
+      {/* Why Nutrifactor */}
+      <section className="bg-[#ffffff] py-16">
+        <div className="mx-auto max-w-7xl px-6">
+          <div className="mx-auto max-w-5xl text-center">
+            <h3 className="text-4xl font-extrabold uppercase tracking-[0.08em] text-[#152238]">
+              {whyNutrifactorSection.heading}
+            </h3>
+            <div className="mx-auto mt-5 h-1 w-44 rounded-full bg-[#5b3f95]" />
+            <p className="mt-6 text-xl leading-relaxed text-[#2d3648]">
+              {whyNutrifactorSection.description}
+            </p>
+          </div>
+
+          <div className="mt-10 overflow-hidden rounded-3xl bg-white shadow-sm">
+            {whyNutrifactorSection.image ? (
+              <img
+                src={resolveMediaUrl(whyNutrifactorSection.image)}
+                alt="Why Nutrifactor products"
+                className="h-[360px] w-full object-contain sm:h-[430px] lg:h-[520px]"
+              />
+            ) : (
+              <div className="grid h-[360px] place-items-center sm:h-[430px] lg:h-[520px]">
+                <div className="text-center">
+                  <p className="text-2xl font-bold text-[#1f2d44]">
+                    No Content
+                  </p>
+                  <p className="mt-2 text-sm font-medium text-[#61718c]">
+                    Why Nutrifactor image is not available right now.
+                  </p>
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+      </section>
+
       {/* Mission */}
       <section className="max-w-6xl mx-auto px-6 py-20 grid md:grid-cols-2 gap-16 items-center">
         <div>
@@ -407,28 +482,32 @@ const About = () => {
             Our Mission
           </span>
           <h2 className="text-4xl font-bold text-gray-900 mb-6 leading-snug">
-            Bridging Ancient Wisdom with Modern Wellness
+            {missionSection.heading}
           </h2>
-          <p className="text-gray-600 text-lg leading-relaxed mb-5">
-            For centuries, herbal traditions have guided communities toward
-            balance and vitality. At Dot-Herbs, we honour that heritage by
-            making it accessible, transparent, and trustworthy for the modern
-            world.
-          </p>
           <p className="text-gray-600 text-lg leading-relaxed">
-            From the highland farms of Morocco to the tropical forests of Sri
-            Lanka, we trace every ingredient back to its origin and share that
-            journey with you — because you deserve to know exactly what you're
-            putting in your body.
+            {missionSection.description}
           </p>
         </div>
         <div className="relative">
-          <div className="bg-gradient-to-br from-[#f0f7e6] to-[#d4edaa] rounded-3xl p-10 text-center">
-            <FaLeaf className="w-24 h-24 text-[#68a300] mx-auto mb-4 opacity-80" />
-            <blockquote className="text-xl font-serif italic text-gray-700 leading-relaxed">
-              "Let food be thy medicine and medicine be thy food."
-            </blockquote>
-            <p className="text-sm text-gray-500 mt-4">— Hippocrates</p>
+          <div className="overflow-hidden rounded-3xl border border-[#e5e7eb] bg-white">
+            {missionSection.image ? (
+              <img
+                src={resolveMediaUrl(missionSection.image)}
+                alt="Our mission visual"
+                className="h-[340px] w-full object-cover sm:h-[420px]"
+              />
+            ) : (
+              <div className="grid h-[340px] place-items-center bg-gradient-to-br from-[#f0f7e6] to-[#d4edaa] sm:h-[420px]">
+                <div className="text-center">
+                  <p className="text-2xl font-bold text-[#1f2d44]">
+                    No Content
+                  </p>
+                  <p className="mt-2 text-sm font-medium text-[#61718c]">
+                    Mission image is not available right now.
+                  </p>
+                </div>
+              </div>
+            )}
           </div>
           <div className="absolute -bottom-4 -right-4 w-24 h-24 bg-[#68a300]/10 rounded-2xl -z-10" />
           <div className="absolute -top-4 -left-4 w-16 h-16 bg-[#68a300]/10 rounded-xl -z-10" />

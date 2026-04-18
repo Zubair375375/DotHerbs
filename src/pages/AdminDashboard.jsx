@@ -141,6 +141,22 @@ const AdminDashboard = () => {
   const [scienceImageFile, setScienceImageFile] = useState(null);
   const [scienceImagePreview, setScienceImagePreview] = useState("");
   const [savingScienceSection, setSavingScienceSection] = useState(false);
+  const [whyNutrifactorHeading, setWhyNutrifactorHeading] = useState("");
+  const [whyNutrifactorDescription, setWhyNutrifactorDescription] =
+    useState("");
+  const [whyNutrifactorImage, setWhyNutrifactorImage] = useState("");
+  const [whyNutrifactorImageFile, setWhyNutrifactorImageFile] =
+    useState(null);
+  const [whyNutrifactorImagePreview, setWhyNutrifactorImagePreview] =
+    useState("");
+  const [savingWhyNutrifactorSection, setSavingWhyNutrifactorSection] =
+    useState(false);
+  const [missionHeading, setMissionHeading] = useState("");
+  const [missionDescription, setMissionDescription] = useState("");
+  const [missionImage, setMissionImage] = useState("");
+  const [missionImageFile, setMissionImageFile] = useState(null);
+  const [missionImagePreview, setMissionImagePreview] = useState("");
+  const [savingMissionSection, setSavingMissionSection] = useState(false);
   const [announcementForm, setAnnouncementForm] = useState({
     title: "",
     message: "",
@@ -166,6 +182,14 @@ const AdminDashboard = () => {
     "Dot-Herbs delivers high-quality, safe products crafted under expert supervision and aligned with global standards. Committed to GMP, HACCP, ISO systems, and compliance-driven quality controls, we ensure excellence at every stage.";
   const defaultScienceBadgeImages = [];
   const defaultScienceImage = "";
+  const defaultWhyNutrifactorHeading = "WHY NUTRIFACTOR!";
+  const defaultWhyNutrifactorDescription =
+    "Nutrifactor stands out from other nutraceutical brands due to our values of transparency and traceability in delivering high-quality natural healthcare products. Our commitment to excellence encompasses sustainable sourcing, integrity across all levels, and rigorous testing methods exceeding usual standard practices. We strive to bridge the gap between consumers and nutraceuticals science by being transparent in our labels. All the health benefits listed on our products are strictly in accordance with the scientific research.";
+  const defaultWhyNutrifactorImage = "";
+  const defaultMissionHeading = "Bridging Ancient Wisdom with Modern Wellness";
+  const defaultMissionDescription =
+    "For centuries, herbal traditions have guided communities toward balance and vitality. At Dot-Herbs, we honour that heritage by making it accessible, transparent, and trustworthy for the modern world. From the highland farms of Morocco to the tropical forests of Sri Lanka, we trace every ingredient back to its origin and share that journey with you because you deserve to know exactly what you're putting in your body.";
+  const defaultMissionImage = "";
 
   const resolveMediaUrl = (url) => {
     if (!url) return "";
@@ -219,6 +243,24 @@ const AdminDashboard = () => {
       setScienceImage(result?.data?.scienceImage || "");
       setScienceImageFile(null);
       setScienceImagePreview("");
+      setWhyNutrifactorHeading(
+        result?.data?.whyNutrifactorHeading?.trim() ||
+          defaultWhyNutrifactorHeading,
+      );
+      setWhyNutrifactorDescription(
+        result?.data?.whyNutrifactorDescription?.trim() ||
+          defaultWhyNutrifactorDescription,
+      );
+      setWhyNutrifactorImage(result?.data?.whyNutrifactorImage || "");
+      setWhyNutrifactorImageFile(null);
+      setWhyNutrifactorImagePreview("");
+      setMissionHeading(result?.data?.missionHeading?.trim() || defaultMissionHeading);
+      setMissionDescription(
+        result?.data?.missionDescription?.trim() || defaultMissionDescription,
+      );
+      setMissionImage(result?.data?.missionImage || "");
+      setMissionImageFile(null);
+      setMissionImagePreview("");
     } catch {
       setAboutVideoUrl("");
       setAboutSectionHeading(defaultFacilityHeading);
@@ -234,6 +276,16 @@ const AdminDashboard = () => {
       setScienceImage(defaultScienceImage);
       setScienceImageFile(null);
       setScienceImagePreview("");
+      setWhyNutrifactorHeading(defaultWhyNutrifactorHeading);
+      setWhyNutrifactorDescription(defaultWhyNutrifactorDescription);
+      setWhyNutrifactorImage(defaultWhyNutrifactorImage);
+      setWhyNutrifactorImageFile(null);
+      setWhyNutrifactorImagePreview("");
+      setMissionHeading(defaultMissionHeading);
+      setMissionDescription(defaultMissionDescription);
+      setMissionImage(defaultMissionImage);
+      setMissionImageFile(null);
+      setMissionImagePreview("");
     } finally {
       setLoadingAboutVideo(false);
     }
@@ -621,6 +673,178 @@ const AdminDashboard = () => {
     setScienceImage("");
     setScienceImageFile(null);
     setScienceImagePreview("");
+  };
+
+  const handleWhyNutrifactorImageChange = (file) => {
+    if (!file) {
+      return;
+    }
+
+    setWhyNutrifactorImageFile(file);
+
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      setWhyNutrifactorImagePreview(event.target?.result || "");
+    };
+    reader.readAsDataURL(file);
+  };
+
+  const handleRemoveWhyNutrifactorImage = () => {
+    setWhyNutrifactorImage("");
+    setWhyNutrifactorImageFile(null);
+    setWhyNutrifactorImagePreview("");
+  };
+
+  const handleResetWhyNutrifactorSectionDefaults = () => {
+    setWhyNutrifactorHeading(defaultWhyNutrifactorHeading);
+    setWhyNutrifactorDescription(defaultWhyNutrifactorDescription);
+    setWhyNutrifactorImage(defaultWhyNutrifactorImage);
+    setWhyNutrifactorImageFile(null);
+    setWhyNutrifactorImagePreview("");
+  };
+
+  const handleSaveWhyNutrifactorSection = async (e) => {
+    e.preventDefault();
+
+    if (!whyNutrifactorHeading.trim()) {
+      toast.error("Why Nutrifactor heading is required");
+      return;
+    }
+
+    if (!whyNutrifactorDescription.trim()) {
+      toast.error("Why Nutrifactor description is required");
+      return;
+    }
+
+    try {
+      setSavingWhyNutrifactorSection(true);
+
+      let uploadedWhyImage = whyNutrifactorImage;
+      if (whyNutrifactorImageFile) {
+        uploadedWhyImage = await uploadDashboardImage(whyNutrifactorImageFile);
+      }
+
+      if (!uploadedWhyImage) {
+        toast.error("Please upload one image for this section");
+        setSavingWhyNutrifactorSection(false);
+        return;
+      }
+
+      const token = getAuthToken();
+      const response = await fetch(`${API_URL}/about-content`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          whyNutrifactorHeading: whyNutrifactorHeading.trim(),
+          whyNutrifactorDescription: whyNutrifactorDescription.trim(),
+          whyNutrifactorImage: uploadedWhyImage,
+        }),
+      });
+
+      const result = await response.json();
+
+      if (!response.ok) {
+        throw new Error(result?.error || "Failed to save Why Nutrifactor section");
+      }
+
+      setWhyNutrifactorImage(uploadedWhyImage);
+      setWhyNutrifactorImageFile(null);
+      setWhyNutrifactorImagePreview("");
+      toast.success("Why Nutrifactor section updated successfully");
+    } catch (error) {
+      toast.error(error.message || "Failed to save Why Nutrifactor section");
+    } finally {
+      setSavingWhyNutrifactorSection(false);
+    }
+  };
+
+  const handleMissionImageChange = (file) => {
+    if (!file) {
+      return;
+    }
+
+    setMissionImageFile(file);
+
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      setMissionImagePreview(event.target?.result || "");
+    };
+    reader.readAsDataURL(file);
+  };
+
+  const handleRemoveMissionImage = () => {
+    setMissionImage("");
+    setMissionImageFile(null);
+    setMissionImagePreview("");
+  };
+
+  const handleResetMissionSectionDefaults = () => {
+    setMissionHeading(defaultMissionHeading);
+    setMissionDescription(defaultMissionDescription);
+    setMissionImage(defaultMissionImage);
+    setMissionImageFile(null);
+    setMissionImagePreview("");
+  };
+
+  const handleSaveMissionSection = async (e) => {
+    e.preventDefault();
+
+    if (!missionHeading.trim()) {
+      toast.error("Mission heading is required");
+      return;
+    }
+
+    if (!missionDescription.trim()) {
+      toast.error("Mission description is required");
+      return;
+    }
+
+    try {
+      setSavingMissionSection(true);
+
+      let uploadedMissionImage = missionImage;
+      if (missionImageFile) {
+        uploadedMissionImage = await uploadDashboardImage(missionImageFile);
+      }
+
+      if (!uploadedMissionImage) {
+        toast.error("Please upload one image for this section");
+        setSavingMissionSection(false);
+        return;
+      }
+
+      const token = getAuthToken();
+      const response = await fetch(`${API_URL}/about-content`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          missionHeading: missionHeading.trim(),
+          missionDescription: missionDescription.trim(),
+          missionImage: uploadedMissionImage,
+        }),
+      });
+
+      const result = await response.json();
+
+      if (!response.ok) {
+        throw new Error(result?.error || "Failed to save Mission section");
+      }
+
+      setMissionImage(uploadedMissionImage);
+      setMissionImageFile(null);
+      setMissionImagePreview("");
+      toast.success("Mission section updated successfully");
+    } catch (error) {
+      toast.error(error.message || "Failed to save Mission section");
+    } finally {
+      setSavingMissionSection(false);
+    }
   };
 
   const handleScienceBadgeImageSelection = (files) => {
@@ -2096,6 +2320,175 @@ const AdminDashboard = () => {
                   <span>
                     {savingScienceSection ? "Saving..." : "Save Section"}
                   </span>
+                </button>
+              </form>
+            </div>
+
+            <div className="rounded-xl border bg-white p-6 shadow-sm">
+              <div className="mb-6 flex flex-wrap items-center justify-between gap-3">
+                <h2 className="text-2xl font-semibold">Why Nutrifactor Section</h2>
+                <button
+                  type="button"
+                  onClick={handleResetWhyNutrifactorSectionDefaults}
+                  className="rounded border border-gray-300 px-3 py-2 text-sm text-gray-700 hover:bg-gray-50"
+                >
+                  Reset Defaults
+                </button>
+              </div>
+
+              <form className="space-y-6" onSubmit={handleSaveWhyNutrifactorSection}>
+                <div>
+                  <label className="mb-2 block text-sm font-medium text-gray-700">
+                    Heading
+                  </label>
+                  <input
+                    type="text"
+                    value={whyNutrifactorHeading}
+                    onChange={(e) => setWhyNutrifactorHeading(e.target.value)}
+                    className="w-full rounded border border-gray-300 px-3 py-2 text-sm"
+                    maxLength={180}
+                    placeholder="e.g. WHY NUTRIFACTOR!"
+                  />
+                </div>
+
+                <div>
+                  <label className="mb-2 block text-sm font-medium text-gray-700">
+                    Descriptive Paragraph
+                  </label>
+                  <textarea
+                    value={whyNutrifactorDescription}
+                    onChange={(e) => setWhyNutrifactorDescription(e.target.value)}
+                    className="w-full rounded border border-gray-300 px-3 py-2 text-sm"
+                    rows={5}
+                    maxLength={1400}
+                    placeholder="Enter Why Nutrifactor paragraph"
+                  />
+                </div>
+
+                <div>
+                  <p className="mb-3 text-sm font-medium text-gray-700">
+                    Section Image (upload 1 image)
+                  </p>
+
+                  {(whyNutrifactorImagePreview || whyNutrifactorImage) && (
+                    <img
+                      src={
+                        whyNutrifactorImagePreview ||
+                        resolveMediaUrl(whyNutrifactorImage)
+                      }
+                      alt="Why Nutrifactor preview"
+                      className="mb-3 h-44 w-full max-w-2xl rounded-lg border object-cover"
+                    />
+                  )}
+
+                  <input
+                    type="file"
+                    accept="image/*"
+                    onChange={(e) =>
+                      handleWhyNutrifactorImageChange(e.target.files[0])
+                    }
+                    className="w-full max-w-sm rounded border border-gray-300 px-3 py-2 text-sm"
+                  />
+
+                  <button
+                    type="button"
+                    onClick={handleRemoveWhyNutrifactorImage}
+                    className="mt-2 rounded border border-red-200 px-3 py-2 text-xs text-red-600 hover:bg-red-50"
+                  >
+                    Clear Section Image
+                  </button>
+                </div>
+
+                <button
+                  type="submit"
+                  disabled={savingWhyNutrifactorSection}
+                  className="inline-flex items-center space-x-2 rounded bg-[#68a300] px-4 py-2 text-white hover:bg-[#5f9600] disabled:opacity-60"
+                >
+                  <FaCheck />
+                  <span>
+                    {savingWhyNutrifactorSection ? "Saving..." : "Save Section"}
+                  </span>
+                </button>
+              </form>
+            </div>
+
+            <div className="rounded-xl border bg-white p-6 shadow-sm">
+              <div className="mb-6 flex flex-wrap items-center justify-between gap-3">
+                <h2 className="text-2xl font-semibold">Our Mission Section</h2>
+                <button
+                  type="button"
+                  onClick={handleResetMissionSectionDefaults}
+                  className="rounded border border-gray-300 px-3 py-2 text-sm text-gray-700 hover:bg-gray-50"
+                >
+                  Reset Defaults
+                </button>
+              </div>
+
+              <form className="space-y-6" onSubmit={handleSaveMissionSection}>
+                <div>
+                  <label className="mb-2 block text-sm font-medium text-gray-700">
+                    Heading
+                  </label>
+                  <input
+                    type="text"
+                    value={missionHeading}
+                    onChange={(e) => setMissionHeading(e.target.value)}
+                    className="w-full rounded border border-gray-300 px-3 py-2 text-sm"
+                    maxLength={180}
+                    placeholder="Enter mission heading"
+                  />
+                </div>
+
+                <div>
+                  <label className="mb-2 block text-sm font-medium text-gray-700">
+                    Descriptive Paragraph
+                  </label>
+                  <textarea
+                    value={missionDescription}
+                    onChange={(e) => setMissionDescription(e.target.value)}
+                    className="w-full rounded border border-gray-300 px-3 py-2 text-sm"
+                    rows={5}
+                    maxLength={1500}
+                    placeholder="Enter mission paragraph"
+                  />
+                </div>
+
+                <div>
+                  <p className="mb-3 text-sm font-medium text-gray-700">
+                    Section Image (upload 1 image)
+                  </p>
+
+                  {(missionImagePreview || missionImage) && (
+                    <img
+                      src={missionImagePreview || resolveMediaUrl(missionImage)}
+                      alt="Mission section preview"
+                      className="mb-3 h-44 w-full max-w-2xl rounded-lg border object-cover"
+                    />
+                  )}
+
+                  <input
+                    type="file"
+                    accept="image/*"
+                    onChange={(e) => handleMissionImageChange(e.target.files[0])}
+                    className="w-full max-w-sm rounded border border-gray-300 px-3 py-2 text-sm"
+                  />
+
+                  <button
+                    type="button"
+                    onClick={handleRemoveMissionImage}
+                    className="mt-2 rounded border border-red-200 px-3 py-2 text-xs text-red-600 hover:bg-red-50"
+                  >
+                    Clear Section Image
+                  </button>
+                </div>
+
+                <button
+                  type="submit"
+                  disabled={savingMissionSection}
+                  className="inline-flex items-center space-x-2 rounded bg-[#68a300] px-4 py-2 text-white hover:bg-[#5f9600] disabled:opacity-60"
+                >
+                  <FaCheck />
+                  <span>{savingMissionSection ? "Saving..." : "Save Section"}</span>
                 </button>
               </form>
             </div>
