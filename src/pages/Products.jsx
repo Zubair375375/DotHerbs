@@ -282,8 +282,8 @@ const Products = () => {
         </div>
       </section>
 
-      <div className="container mx-auto px-4 py-8">
-        <div className="grid grid-cols-1 gap-8 lg:grid-cols-[260px,1fr]">
+      <div className="w-full px-3 py-8 lg:px-4 xl:px-6 2xl:px-8">
+        <div className="grid grid-cols-1 gap-6 xl:grid-cols-[210px,minmax(0,1fr)] 2xl:grid-cols-[220px,minmax(0,1fr)]">
           <aside className="space-y-6">
             <div className="bg-white lg:sticky lg:top-24">
               <div className="mb-5 flex items-center justify-between border-b border-gray-300 pb-4">
@@ -475,7 +475,7 @@ const Products = () => {
                       ? "grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4"
                       : viewMode === "tiny"
                         ? "grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-3"
-                        : "grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 gap-6"
+                        : "grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 2xl:grid-cols-5 gap-6"
                 }
               >
                 {sortedProducts.map((product) => (

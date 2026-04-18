@@ -9,16 +9,23 @@ import {
 } from "../store/slices/authSlice";
 import { selectCartItemCount, resetCart } from "../store/slices/cartSlice";
 import {
+  fetchCategories,
+  selectCategories,
+} from "../store/slices/productSlice";
+import {
   MdShoppingCart,
   MdPerson,
   MdMenu,
   MdClose,
   MdSearch,
+  MdKeyboardArrowDown,
+  MdChevronRight,
 } from "react-icons/md";
 
 const Header = () => {
   const [isProfileMenuOpen, setIsProfileMenuOpen] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [isProductsMenuOpen, setIsProductsMenuOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [scrolled, setScrolled] = useState(false);
   const location = useLocation();
@@ -32,12 +39,17 @@ const Header = () => {
 
   const dispatch = useDispatch();
   const user = useSelector(selectAuthUser);
+  const categories = useSelector(selectCategories);
   const accessToken = useSelector((state) => state.auth.accessToken);
   const authChecked = useSelector(selectAuthChecked);
   const authLoading = useSelector(selectAuthIsLoading);
   const cartItemCount = useSelector(selectCartItemCount);
   const showAuthPendingState =
     !!accessToken && (!authChecked || (authLoading && !user));
+
+  useEffect(() => {
+    dispatch(fetchCategories());
+  }, [dispatch]);
 
   const handleLogout = () => {
     dispatch(logoutUser());
@@ -68,6 +80,16 @@ const Header = () => {
     navigate("/products", { replace: true, state: { search: value } });
   };
 
+  const handleCategoryNavigate = (categoryValue) => {
+    navigate(
+      categoryValue
+        ? `/products?category=${encodeURIComponent(categoryValue)}`
+        : "/products",
+    );
+    setIsProductsMenuOpen(false);
+    setIsMobileMenuOpen(false);
+  };
+
   const navLinks = [
     { to: "/", label: "Home" },
     { to: "/products", label: "All Products" },
@@ -75,6 +97,92 @@ const Header = () => {
     { to: "/contact", label: "Contact" },
     ...(user?.role === "admin" ? [{ to: "/admin", label: "Admin" }] : []),
   ];
+  const visibleCategoryLinks = categories.slice(0, 7);
+
+  const renderNavItem = ({ to, label, compact = false }) => {
+    if (to !== "/products") {
+      return (
+        <NavLink
+          key={`${compact ? "compact" : "default"}-${to}`}
+          to={to}
+          className={({ isActive }) =>
+            compact
+              ? `text-sm font-medium transition-colors ${
+                  isActive
+                    ? "text-[#68a300]"
+                    : "text-gray-700 hover:text-[#68a300]"
+                }`
+              : `pb-0.5 transition-colors font-medium text-sm ${
+                  isActive
+                    ? "text-[#68a300] border-b-2 border-[#68a300]"
+                    : "text-gray-700 hover:text-[#68a300]"
+                }`
+          }
+        >
+          {label}
+        </NavLink>
+      );
+    }
+
+    return (
+      <div
+        key={`${compact ? "compact" : "default"}-${to}`}
+        className="relative"
+        onMouseEnter={() => setIsProductsMenuOpen(true)}
+        onMouseLeave={() => setIsProductsMenuOpen(false)}
+      >
+        <NavLink
+          to={to}
+          className={({ isActive }) =>
+            compact
+              ? `inline-flex items-center text-sm font-medium transition-colors ${
+                  isActive || isProductsMenuOpen
+                    ? "text-[#68a300]"
+                    : "text-gray-700 hover:text-[#68a300]"
+                }`
+              : `inline-flex items-center pb-0.5 transition-colors font-medium text-sm ${
+                  isActive || isProductsMenuOpen
+                    ? "text-[#68a300] border-b-2 border-[#68a300]"
+                    : "text-gray-700 hover:text-[#68a300]"
+                }`
+          }
+        >
+          {label}
+          <MdKeyboardArrowDown className="ml-1 text-base" />
+        </NavLink>
+
+        <div
+          className={`absolute left-0 top-full z-[80] mt-2 w-60 border border-gray-200 bg-white shadow-[0_8px_24px_rgba(15,23,42,0.12)] transition-all duration-200 ${
+            isProductsMenuOpen
+              ? "pointer-events-auto visible opacity-100"
+              : "pointer-events-none invisible opacity-0"
+          }`}
+        >
+          <div className="bg-white">
+            {visibleCategoryLinks.map((category) => (
+              <button
+                key={category._id || category.value}
+                type="button"
+                onClick={() => handleCategoryNavigate(category.value)}
+                className="flex w-full items-center justify-between border-b border-gray-200 px-4 py-3 text-left text-[15px] text-gray-700 transition hover:bg-gray-50 hover:text-[#68a300]"
+              >
+                <span>{category.name}</span>
+                <MdChevronRight className="text-lg text-gray-500" />
+              </button>
+            ))}
+            <button
+              type="button"
+              onClick={() => handleCategoryNavigate("")}
+              className="flex w-full items-center justify-between px-4 py-3 text-left text-[15px] text-gray-700 transition hover:bg-gray-50 hover:text-[#68a300]"
+            >
+              <span>More</span>
+              <MdChevronRight className="text-lg text-gray-500" />
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  };
 
   const rightIcons = (
     <div className="flex items-center space-x-3">
@@ -205,7 +313,9 @@ const Header = () => {
         {/* ── Compact row: logo + nav + icons (only when scrolled) ── */}
         <div
           className={`flex items-center transition-all duration-300 ease-in-out ${
-            isProfileMenuOpen ? "overflow-visible" : "overflow-hidden"
+            isProfileMenuOpen || isProductsMenuOpen
+              ? "overflow-visible"
+              : "overflow-hidden"
           } ${
             scrolled ? "h-12 opacity-100" : "h-0 opacity-0 pointer-events-none"
           }`}
@@ -221,21 +331,7 @@ const Header = () => {
           </div>
 
           <nav className="hidden md:flex w-2/4 items-center justify-center space-x-6">
-            {navLinks.map(({ to, label }) => (
-              <NavLink
-                key={to}
-                to={to}
-                className={({ isActive }) =>
-                  `text-sm font-medium transition-colors ${
-                    isActive
-                      ? "text-[#68a300]"
-                      : "text-gray-700 hover:text-[#68a300]"
-                  }`
-                }
-              >
-                {label}
-              </NavLink>
-            ))}
+            {navLinks.map((link) => renderNavItem({ ...link, compact: true }))}
           </nav>
 
           <div className="flex w-1/4 items-center justify-end">
@@ -245,26 +341,14 @@ const Header = () => {
 
         {/* ── Nav links row (shown at top, hidden when scrolled) ── */}
         <div
-          className={`hidden md:block border-t border-gray-100 overflow-hidden transition-all duration-300 ease-in-out ${
+          className={`hidden md:block border-t border-gray-100 transition-all duration-300 ease-in-out ${
+            isProductsMenuOpen ? "overflow-visible" : "overflow-hidden"
+          } ${
             scrolled ? "h-0 opacity-0" : "h-11 opacity-100"
           }`}
         >
           <nav className="flex justify-center items-center space-x-8 h-11">
-            {navLinks.map(({ to, label }) => (
-              <NavLink
-                key={to}
-                to={to}
-                className={({ isActive }) =>
-                  `pb-0.5 transition-colors font-medium text-sm ${
-                    isActive
-                      ? "text-[#68a300] border-b-2 border-[#68a300]"
-                      : "text-gray-700 hover:text-[#68a300]"
-                  }`
-                }
-              >
-                {label}
-              </NavLink>
-            ))}
+            {navLinks.map((link) => renderNavItem(link))}
           </nav>
         </div>
       </div>
