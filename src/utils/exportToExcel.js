@@ -102,8 +102,9 @@ export function formatOrdersForExport(orders) {
       ];
     }
 
-    return items.map((item) => ({
+    return items.map((item, index) => ({
       ...baseRow,
+      "Total Order Value (PKR)": index === 0 ? totalOrderValue : "",
       "Product Name": item.name || item.product?.name || "—",
       Quantity: Number(item.quantity || 0),
       "Price Per Item (PKR)": Number(item.price || 0),
