@@ -1,7 +1,7 @@
 import { useState, useEffect, useMemo } from "react";
 import { useLocation, useNavigate, useSearchParams } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
-import { FaChevronLeft, FaChevronRight } from "react-icons/fa";
+import { FaChevronLeft, FaChevronRight, FaChevronUp } from "react-icons/fa";
 import {
   MdGridView,
   MdFormatListBulleted,
@@ -283,183 +283,230 @@ const Products = () => {
       </section>
 
       <div className="container mx-auto px-4 py-8">
-        <div className="mb-8">
-          {/* Filters */}
-          <div className="bg-white p-6 rounded-lg shadow-md mb-6">
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              {/* Category */}
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Category
-                </label>
-                <select
-                  value={filters.category}
-                  onChange={(e) =>
-                    handleFilterChange("category", e.target.value)
-                  }
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
+        <div className="grid grid-cols-1 gap-8 lg:grid-cols-[260px,1fr]">
+          <aside className="space-y-6">
+            <div className="bg-white lg:sticky lg:top-24">
+              <div className="mb-5 flex items-center justify-between border-b border-gray-300 pb-4">
+                <h2 className="text-sm font-bold uppercase tracking-[0.12em] text-gray-900">
+                  Categories
+                </h2>
+                <FaChevronUp className="text-xs text-gray-500" />
+              </div>
+
+              <div className="space-y-1">
+                <button
+                  type="button"
+                  onClick={() => handleFilterChange("category", "")}
+                  className={`group flex w-full items-center gap-3 border-0 py-2 text-left text-[15px] outline-none ring-0 transition hover:border-0 hover:outline-none hover:ring-0 focus:outline-none focus:ring-0 ${
+                    !filters.category
+                      ? "font-medium text-[#c3832d]"
+                      : "text-gray-900 hover:text-[#c3832d]"
+                  }`}
                 >
-                  <option value="">All Categories</option>
-                  {categories.map((category) => (
-                    <option
-                      key={category._id || category.value}
-                      value={category.value}
+                  <span
+                    className={`text-[10px] ${
+                      !filters.category ? "text-gray-500" : "text-transparent"
+                    }`}
+                    aria-hidden="true"
+                  >
+                    <FaChevronRight />
+                  </span>
+                  <span
+                    className={`relative inline-block after:absolute after:bottom-[-2px] after:left-0 after:h-px after:bg-current after:transition-all after:duration-300 ${
+                      !filters.category
+                        ? "after:w-full"
+                        : "after:w-0 group-hover:after:w-full"
+                    }`}
+                  >
+                    All products
+                  </span>
+                </button>
+                {categories.map((category) => (
+                  <button
+                    key={category._id || category.value}
+                    type="button"
+                    onClick={() => handleFilterChange("category", category.value)}
+                    className={`group flex w-full items-center gap-3 border-0 py-2 text-left text-[15px] outline-none ring-0 transition hover:border-0 hover:outline-none hover:ring-0 focus:outline-none focus:ring-0 ${
+                      filters.category === category.value
+                        ? "font-medium text-[#c3832d]"
+                        : "text-gray-900 hover:text-[#c3832d]"
+                    }`}
+                  >
+                    <span
+                      className={`text-[10px] ${
+                        filters.category === category.value
+                          ? "text-gray-500"
+                          : "text-transparent"
+                      }`}
+                      aria-hidden="true"
+                    >
+                      <FaChevronRight />
+                    </span>
+                    <span
+                      className={`relative inline-block after:absolute after:bottom-[-2px] after:left-0 after:h-px after:bg-current after:transition-all after:duration-300 ${
+                        filters.category === category.value
+                          ? "after:w-full"
+                          : "after:w-0 group-hover:after:w-full"
+                      }`}
                     >
                       {category.name}
-                    </option>
-                  ))}
-                </select>
-              </div>
-
-              {/* Price Range */}
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Price Range
-                </label>
-                <select
-                  value={filters.priceRange}
-                  onChange={(e) =>
-                    handleFilterChange("priceRange", e.target.value)
-                  }
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
-                >
-                  <option value="">All Prices</option>
-                  <option value="0-25">$0 - $25</option>
-                  <option value="25-50">$25 - $50</option>
-                  <option value="50-100">$50 - $100</option>
-                  <option value="100">$100+</option>
-                </select>
-              </div>
-
-              {/* Sort By */}
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Sort By
-                </label>
-                <select
-                  value={filters.sortBy}
-                  onChange={(e) => handleFilterChange("sortBy", e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
-                >
-                  <option value="name">Name</option>
-                  <option value="price-low">Price: Low to High</option>
-                  <option value="price-high">Price: High to Low</option>
-                  <option value="rating">Rating</option>
-                  <option value="newest">Newest</option>
-                </select>
+                    </span>
+                  </button>
+                ))}
               </div>
             </div>
-          </div>
+          </aside>
 
-          {/* Results + View Controls */}
-          <div className="mb-4 flex items-center justify-between gap-3">
-            <p className="text-gray-600">
-              {sortedProducts.length} products found
-            </p>
-            <div className="flex items-center gap-2 rounded-md border border-gray-200 bg-white p-1">
-              <span className="px-2 text-xs font-medium text-gray-500">
-                View as
-              </span>
-              <button
-                type="button"
-                onClick={() => handleViewModeChange("grid")}
-                className={`inline-flex items-center gap-1 rounded px-3 py-2 text-xs font-medium transition ${
-                  viewMode === "grid"
-                    ? "bg-[#68a300] text-white"
-                    : "text-gray-600 hover:bg-gray-100"
-                }`}
-                aria-pressed={viewMode === "grid"}
-                aria-label="Grid view"
-                title="Grid view"
-              >
-                <MdGridView className="text-base" />
-              </button>
-              <button
-                type="button"
-                onClick={() => handleViewModeChange("list")}
-                className={`inline-flex items-center gap-1 rounded px-3 py-2 text-xs font-medium transition ${
+          <div className="mb-8 min-w-0">
+            <div className="mb-6 rounded-lg bg-white p-6 shadow-md">
+              <div className="flex flex-col gap-4 xl:flex-row xl:items-center xl:justify-between">
+                <div>
+                  <p className="text-gray-600">
+                    {sortedProducts.length} products found
+                  </p>
+                </div>
+
+                <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-end">
+                  <div>
+                    <label className="mb-1 block text-sm font-medium text-gray-700 sm:hidden">
+                      Price Range
+                    </label>
+                    <select
+                      value={filters.priceRange}
+                      onChange={(e) => handleFilterChange("priceRange", e.target.value)}
+                      className="w-full rounded-md border border-gray-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-green-500 sm:w-[180px]"
+                    >
+                      <option value="">All Prices</option>
+                      <option value="0-25">$0 - $25</option>
+                      <option value="25-50">$25 - $50</option>
+                      <option value="50-100">$50 - $100</option>
+                      <option value="100">$100+</option>
+                    </select>
+                  </div>
+
+                  <div>
+                    <label className="mb-1 block text-sm font-medium text-gray-700 sm:hidden">
+                      Sort By
+                    </label>
+                    <select
+                      value={filters.sortBy}
+                      onChange={(e) => handleFilterChange("sortBy", e.target.value)}
+                      className="w-full rounded-md border border-gray-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-green-500 sm:w-[220px]"
+                    >
+                      <option value="name">Name</option>
+                      <option value="price-low">Price: Low to High</option>
+                      <option value="price-high">Price: High to Low</option>
+                      <option value="rating">Rating</option>
+                      <option value="newest">Newest</option>
+                    </select>
+                  </div>
+
+                  <div className="flex items-center gap-2 rounded-md border border-gray-200 bg-white p-1">
+                    <span className="px-2 text-xs font-medium text-gray-500">
+                      View as
+                    </span>
+                    <button
+                      type="button"
+                      onClick={() => handleViewModeChange("grid")}
+                      className={`inline-flex items-center gap-1 rounded px-3 py-2 text-xs font-medium transition ${
+                        viewMode === "grid"
+                          ? "bg-[#68a300] text-white"
+                          : "text-gray-600 hover:bg-gray-100"
+                      }`}
+                      aria-pressed={viewMode === "grid"}
+                      aria-label="Grid view"
+                      title="Grid view"
+                    >
+                      <MdGridView className="text-base" />
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => handleViewModeChange("list")}
+                      className={`inline-flex items-center gap-1 rounded px-3 py-2 text-xs font-medium transition ${
+                        viewMode === "list"
+                          ? "bg-[#68a300] text-white"
+                          : "text-gray-600 hover:bg-gray-100"
+                      }`}
+                      aria-pressed={viewMode === "list"}
+                      aria-label="List view"
+                      title="List view"
+                    >
+                      <MdFormatListBulleted className="text-base" />
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => handleViewModeChange("compact")}
+                      className={`inline-flex items-center gap-1 rounded px-3 py-2 text-xs font-medium transition ${
+                        viewMode === "compact"
+                          ? "bg-[#68a300] text-white"
+                          : "text-gray-600 hover:bg-gray-100"
+                      }`}
+                      aria-pressed={viewMode === "compact"}
+                      aria-label="Compact view"
+                      title="Compact view"
+                    >
+                      <MdGridOn className="text-base" />
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => handleViewModeChange("tiny")}
+                      className={`inline-flex items-center gap-1 rounded px-3 py-2 text-xs font-medium transition ${
+                        viewMode === "tiny"
+                          ? "bg-[#68a300] text-white"
+                          : "text-gray-600 hover:bg-gray-100"
+                      }`}
+                      aria-pressed={viewMode === "tiny"}
+                      aria-label="Tiny view"
+                      title="Tiny view"
+                    >
+                      <MdApps className="text-base" />
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {sortedProducts.length > 0 ? (
+              <div
+                className={
                   viewMode === "list"
-                    ? "bg-[#68a300] text-white"
-                    : "text-gray-600 hover:bg-gray-100"
-                }`}
-                aria-pressed={viewMode === "list"}
-                aria-label="List view"
-                title="List view"
-              >
-                <MdFormatListBulleted className="text-base" />
-              </button>
-              <button
-                type="button"
-                onClick={() => handleViewModeChange("compact")}
-                className={`inline-flex items-center gap-1 rounded px-3 py-2 text-xs font-medium transition ${
-                  viewMode === "compact"
-                    ? "bg-[#68a300] text-white"
-                    : "text-gray-600 hover:bg-gray-100"
-                }`}
-                aria-pressed={viewMode === "compact"}
-                aria-label="Compact view"
-                title="Compact view"
-              >
-                <MdGridOn className="text-base" />
-              </button>
-              <button
-                type="button"
-                onClick={() => handleViewModeChange("tiny")}
-                className={`inline-flex items-center gap-1 rounded px-3 py-2 text-xs font-medium transition ${
-                  viewMode === "tiny"
-                    ? "bg-[#68a300] text-white"
-                    : "text-gray-600 hover:bg-gray-100"
-                }`}
-                aria-pressed={viewMode === "tiny"}
-                aria-label="Tiny view"
-                title="Tiny view"
-              >
-                <MdApps className="text-base" />
-              </button>
-            </div>
-          </div>
-
-          {/* Products Grid */}
-          {sortedProducts.length > 0 ? (
-            <div
-              className={
-                viewMode === "list"
-                  ? "space-y-4"
-                  : viewMode === "compact"
-                    ? "grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4"
-                    : viewMode === "tiny"
-                      ? "grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-3"
-                      : "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6"
-              }
-            >
-              {sortedProducts.map((product) => (
-                <ProductCard
-                  key={product._id}
-                  product={product}
-                  viewMode={viewMode}
-                />
-              ))}
-            </div>
-          ) : (
-            <div className="text-center py-12">
-              <p className="text-gray-500 text-lg">
-                No products found matching your criteria.
-              </p>
-              <button
-                onClick={() =>
-                  setFilters({
-                    category: "",
-                    priceRange: "",
-                    search: "",
-                    sortBy: "name",
-                  })
+                    ? "space-y-4"
+                    : viewMode === "compact"
+                      ? "grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4"
+                      : viewMode === "tiny"
+                        ? "grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-3"
+                        : "grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 gap-6"
                 }
-                className="mt-4 bg-[#68a300] text-white px-4 py-2 rounded hover:bg-[#5f9600]"
               >
-                Clear Filters
-              </button>
-            </div>
-          )}
+                {sortedProducts.map((product) => (
+                  <ProductCard
+                    key={product._id}
+                    product={product}
+                    viewMode={viewMode}
+                  />
+                ))}
+              </div>
+            ) : (
+              <div className="py-12 text-center">
+                <p className="text-lg text-gray-500">
+                  No products found matching your criteria.
+                </p>
+                <button
+                  onClick={() =>
+                    setFilters({
+                      category: "",
+                      priceRange: "",
+                      search: "",
+                      sortBy: "name",
+                    })
+                  }
+                  className="mt-4 rounded bg-[#68a300] px-4 py-2 text-white hover:bg-[#5f9600]"
+                >
+                  Clear Filters
+                </button>
+              </div>
+            )}
+          </div>
         </div>
       </div>
     </div>
