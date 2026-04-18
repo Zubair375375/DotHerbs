@@ -343,9 +343,7 @@ const Header = () => {
         <div
           className={`hidden md:block border-t border-gray-100 transition-all duration-300 ease-in-out ${
             isProductsMenuOpen ? "overflow-visible" : "overflow-hidden"
-          } ${
-            scrolled ? "h-0 opacity-0" : "h-11 opacity-100"
-          }`}
+          } ${scrolled ? "h-0 opacity-0" : "h-11 opacity-100"}`}
         >
           <nav className="flex justify-center items-center space-x-8 h-11">
             {navLinks.map((link) => renderNavItem(link))}

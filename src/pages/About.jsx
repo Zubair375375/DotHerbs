@@ -93,7 +93,13 @@ const factoryLines = [
   "Softgels",
 ];
 
-const scienceBadges = ["GMP", "HACCP", "ISO 9001:2015", "U.S. FDA"];
+const defaultScienceSection = {
+  heading: "We Are Backed By Science",
+  description:
+    "Dot-Herbs delivers high-quality, safe products crafted under expert supervision and aligned with global standards. Committed to GMP, HACCP, ISO systems, and compliance-driven quality controls, we ensure excellence at every stage.",
+  badgeImages: [],
+  image: "",
+};
 
 const defaultFacilitySection = {
   heading: "Pakistan's Largest Nutraceutical Manufacturing Facility",
@@ -108,7 +114,10 @@ const defaultFacilitySection = {
 
 const About = () => {
   const [aboutVideoUrl, setAboutVideoUrl] = useState("");
-  const [facilitySection, setFacilitySection] = useState(defaultFacilitySection);
+  const [facilitySection, setFacilitySection] = useState(
+    defaultFacilitySection,
+  );
+  const [scienceSection, setScienceSection] = useState(defaultScienceSection);
   const API_URL = import.meta.env.VITE_API_URL || "http://localhost:5000/api";
   const API_ORIGIN = API_URL.replace(/\/api\/?$/, "");
 
@@ -134,7 +143,8 @@ const About = () => {
           : [];
 
         const normalizedImages = [0, 1, 2].map(
-          (index) => remoteImages[index] || defaultFacilitySection.images[index],
+          (index) =>
+            remoteImages[index] || defaultFacilitySection.images[index],
         );
 
         setFacilitySection({
@@ -146,9 +156,26 @@ const About = () => {
             defaultFacilitySection.description,
           images: normalizedImages,
         });
+
+        const remoteBadgeImages = Array.isArray(
+          result?.data?.scienceBadgeImages,
+        )
+          ? result.data.scienceBadgeImages
+          : [];
+        setScienceSection({
+          heading:
+            result?.data?.scienceHeading?.trim() ||
+            defaultScienceSection.heading,
+          description:
+            result?.data?.scienceDescription?.trim() ||
+            defaultScienceSection.description,
+          badgeImages: remoteBadgeImages,
+          image: result?.data?.scienceImage || "",
+        });
       } catch {
         setAboutVideoUrl("");
         setFacilitySection(defaultFacilitySection);
+        setScienceSection(defaultScienceSection);
       }
     };
 
@@ -327,44 +354,48 @@ const About = () => {
         <div className="mx-auto grid max-w-7xl items-center gap-10 px-6 lg:grid-cols-2">
           <div>
             <h3 className="text-3xl font-extrabold uppercase tracking-wide text-[#152238] sm:text-4xl">
-              We Are Backed By Science
+              {scienceSection.heading}
             </h3>
             <div className="mt-5 h-1 w-28 rounded-full bg-[#5b3f95]" />
             <p className="mt-6 max-w-xl text-lg leading-relaxed text-[#2d3648]">
-              Dot-Herbs delivers high-quality, safe products crafted under
-              expert supervision and aligned with global standards.
-              Committed to GMP, HACCP, ISO systems, and compliance-driven
-              quality controls, we ensure excellence at every stage.
+              {scienceSection.description}
             </p>
 
             <div className="mt-8 flex flex-wrap gap-4">
-              {scienceBadges.map((badge) => (
+              {scienceSection.badgeImages.map((badgeImage, index) => (
                 <div
-                  key={badge}
-                  className="flex h-20 w-20 items-center justify-center rounded-full border-2 border-[#c8ceda] bg-white text-center text-xs font-extrabold uppercase text-[#1f2d44] shadow-sm"
+                  key={`${badgeImage}-${index}`}
+                  className="flex h-20 w-20 items-center justify-center overflow-hidden rounded-full border-2 border-[#c8ceda] bg-white shadow-sm"
                 >
-                  {badge}
+                  <img
+                    src={resolveMediaUrl(badgeImage)}
+                    alt={`Certification badge ${index + 1}`}
+                    className="h-full w-full object-cover"
+                  />
                 </div>
               ))}
             </div>
           </div>
 
-          <div className="relative overflow-hidden rounded-3xl border border-[#e1e6ef] bg-gradient-to-br from-[#f4f7fb] to-[#e9eef8] p-8">
-            <div className="absolute -right-8 -top-8 h-40 w-40 rounded-full bg-[#dbe5f5]" />
-            <div className="absolute -bottom-10 -left-10 h-44 w-44 rounded-full bg-[#e4ebf8]" />
-            <div className="relative z-10 grid min-h-[280px] place-items-center">
-              <div className="text-center">
-                <div className="mx-auto mb-4 flex h-20 w-20 items-center justify-center rounded-full bg-white text-[#5b3f95] shadow-md">
-                  <FaFlask className="h-10 w-10" />
+          <div className="relative overflow-hidden rounded-3xl border border-[#e1e6ef] bg-gradient-to-br from-[#f4f7fb] to-[#e9eef8] p-2">
+            {scienceSection.image ? (
+              <img
+                src={resolveMediaUrl(scienceSection.image)}
+                alt="Science section visual"
+                className="h-full min-h-[280px] w-full rounded-2xl object-cover"
+              />
+            ) : (
+              <div className="grid min-h-[280px] place-items-center p-8">
+                <div className="text-center">
+                  <p className="text-2xl font-bold text-[#1f2d44]">
+                    No Content
+                  </p>
+                  <p className="mt-2 text-sm font-medium text-[#61718c]">
+                    Section image is not available right now.
+                  </p>
                 </div>
-                <p className="text-2xl font-bold text-[#1f2d44]">
-                  Certified Lab Ecosystem
-                </p>
-                <p className="mt-2 text-sm font-medium uppercase tracking-[0.15em] text-[#61718c]">
-                  Research . Testing . Validation
-                </p>
               </div>
-            </div>
+            )}
           </div>
         </div>
       </section>

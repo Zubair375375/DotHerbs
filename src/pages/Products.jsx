@@ -325,7 +325,9 @@ const Products = () => {
                   <button
                     key={category._id || category.value}
                     type="button"
-                    onClick={() => handleFilterChange("category", category.value)}
+                    onClick={() =>
+                      handleFilterChange("category", category.value)
+                    }
                     className={`group flex w-full items-center gap-3 border-0 py-2 text-left text-[15px] outline-none ring-0 transition hover:border-0 hover:outline-none hover:ring-0 focus:outline-none focus:ring-0 ${
                       filters.category === category.value
                         ? "font-medium text-[#c3832d]"
@@ -373,7 +375,9 @@ const Products = () => {
                     </label>
                     <select
                       value={filters.priceRange}
-                      onChange={(e) => handleFilterChange("priceRange", e.target.value)}
+                      onChange={(e) =>
+                        handleFilterChange("priceRange", e.target.value)
+                      }
                       className="w-full rounded-md border border-gray-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-green-500 sm:w-[180px]"
                     >
                       <option value="">All Prices</option>
@@ -390,7 +394,9 @@ const Products = () => {
                     </label>
                     <select
                       value={filters.sortBy}
-                      onChange={(e) => handleFilterChange("sortBy", e.target.value)}
+                      onChange={(e) =>
+                        handleFilterChange("sortBy", e.target.value)
+                      }
                       className="w-full rounded-md border border-gray-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-green-500 sm:w-[220px]"
                     >
                       <option value="name">Name</option>

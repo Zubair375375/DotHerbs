@@ -248,7 +248,8 @@ const Profile = () => {
                       Thank you for placing your order!
                     </h3>
                     <p className="mt-1 text-sm text-green-700">
-                      Your order has been received successfully and is now visible in your order history.
+                      Your order has been received successfully and is now
+                      visible in your order history.
                     </p>
                     {location.state?.orderId && (
                       <p className="mt-2 text-sm font-medium text-green-800">

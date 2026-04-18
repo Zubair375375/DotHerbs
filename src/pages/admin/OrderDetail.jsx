@@ -27,7 +27,11 @@ const formatCurrency = (amount) => `$${Number(amount || 0).toFixed(2)}`;
 const getOrderItemImage = (item) => {
   const storedImage = item.image;
 
-  if (typeof storedImage === "string" && storedImage && storedImage !== "[object Object]") {
+  if (
+    typeof storedImage === "string" &&
+    storedImage &&
+    storedImage !== "[object Object]"
+  ) {
     return storedImage.startsWith("/")
       ? `http://localhost:5000${storedImage}`
       : storedImage;
@@ -46,7 +50,8 @@ const getOrderItemImage = (item) => {
       : productImage;
   }
 
-  const galleryImage = item.product?.images?.[0]?.url || item.product?.images?.[0];
+  const galleryImage =
+    item.product?.images?.[0]?.url || item.product?.images?.[0];
   if (typeof galleryImage === "string" && galleryImage) {
     return galleryImage.startsWith("/")
       ? `http://localhost:5000${galleryImage}`
@@ -148,7 +153,9 @@ const OrderDetail = () => {
               Back to Admin Dashboard
             </button>
             <div className="text-right">
-              <h1 className="text-2xl font-bold text-gray-900">Order Details</h1>
+              <h1 className="text-2xl font-bold text-gray-900">
+                Order Details
+              </h1>
               <p className="text-sm text-gray-600">ID: {order._id}</p>
             </div>
           </div>
@@ -189,18 +196,28 @@ const OrderDetail = () => {
             <div className="rounded-lg bg-white p-6 shadow">
               <div className="mb-4 flex items-center">
                 <FaUser className="mr-2 text-blue-600" />
-                <h2 className="text-xl font-semibold text-gray-900">Customer</h2>
+                <h2 className="text-xl font-semibold text-gray-900">
+                  Customer
+                </h2>
               </div>
               <div className="space-y-2 text-sm text-gray-700">
-                <p><span className="font-medium">Name:</span> {order.user?.name || "N/A"}</p>
-                <p><span className="font-medium">Email:</span> {order.user?.email || "N/A"}</p>
+                <p>
+                  <span className="font-medium">Name:</span>{" "}
+                  {order.user?.name || "N/A"}
+                </p>
+                <p>
+                  <span className="font-medium">Email:</span>{" "}
+                  {order.user?.email || "N/A"}
+                </p>
               </div>
             </div>
 
             <div className="rounded-lg bg-white p-6 shadow">
               <div className="mb-4 flex items-center">
                 <FaMapMarkerAlt className="mr-2 text-red-500" />
-                <h2 className="text-xl font-semibold text-gray-900">Shipping</h2>
+                <h2 className="text-xl font-semibold text-gray-900">
+                  Shipping
+                </h2>
               </div>
               <div className="space-y-2 text-sm text-gray-700">
                 <p>{order.shippingAddress?.street}</p>
@@ -208,7 +225,8 @@ const OrderDetail = () => {
                   {order.shippingAddress?.city}, {order.shippingAddress?.state}
                 </p>
                 <p>
-                  {order.shippingAddress?.zipCode}, {order.shippingAddress?.country}
+                  {order.shippingAddress?.zipCode},{" "}
+                  {order.shippingAddress?.country}
                 </p>
               </div>
             </div>
@@ -219,16 +237,40 @@ const OrderDetail = () => {
                 <h2 className="text-xl font-semibold text-gray-900">Summary</h2>
               </div>
               <div className="space-y-2 text-sm text-gray-700">
-                <p><span className="font-medium">Status:</span> {order.status}</p>
-                <p><span className="font-medium">Payment:</span> {order.paymentMethod === "demo" ? "Demo Order" : order.paymentMethod}</p>
-                <p><span className="font-medium">Paid:</span> {order.isPaid ? "Yes" : "No"}</p>
-                <p><span className="font-medium">Subtotal:</span> {formatCurrency(order.totalPrice - order.taxPrice - order.shippingPrice)}</p>
-                <p><span className="font-medium">Shipping:</span> {formatCurrency(order.shippingPrice)}</p>
-                <p><span className="font-medium">Tax:</span> {formatCurrency(order.taxPrice)}</p>
+                <p>
+                  <span className="font-medium">Status:</span> {order.status}
+                </p>
+                <p>
+                  <span className="font-medium">Payment:</span>{" "}
+                  {order.paymentMethod === "demo"
+                    ? "Demo Order"
+                    : order.paymentMethod}
+                </p>
+                <p>
+                  <span className="font-medium">Paid:</span>{" "}
+                  {order.isPaid ? "Yes" : "No"}
+                </p>
+                <p>
+                  <span className="font-medium">Subtotal:</span>{" "}
+                  {formatCurrency(
+                    order.totalPrice - order.taxPrice - order.shippingPrice,
+                  )}
+                </p>
+                <p>
+                  <span className="font-medium">Shipping:</span>{" "}
+                  {formatCurrency(order.shippingPrice)}
+                </p>
+                <p>
+                  <span className="font-medium">Tax:</span>{" "}
+                  {formatCurrency(order.taxPrice)}
+                </p>
                 <p className="pt-2 text-base font-semibold text-gray-900">
                   Total: {formatCurrency(order.totalPrice)}
                 </p>
-                <p><span className="font-medium">Placed:</span> {new Date(order.createdAt).toLocaleString()}</p>
+                <p>
+                  <span className="font-medium">Placed:</span>{" "}
+                  {new Date(order.createdAt).toLocaleString()}
+                </p>
               </div>
             </div>
           </div>

@@ -88,7 +88,9 @@ export function formatOrdersForExport(orders) {
       "Discount Applied (PKR)": discountApplied,
       "Shipping Cost (PKR)": shippingCost,
       "Payment Method": o.paymentMethod || "—",
-      "Placed At": o.createdAt ? new Date(o.createdAt).toLocaleDateString() : "",
+      "Placed At": o.createdAt
+        ? new Date(o.createdAt).toLocaleDateString()
+        : "",
     };
 
     if (items.length === 0) {

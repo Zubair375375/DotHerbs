@@ -37,6 +37,12 @@ export const getAboutContent = async (req, res) => {
           content?.facilityDescription ||
           "With over a decade of experience, Dot-Herbs specializes in manufacturing nutraceutical and natural healthcare products. Backed by modern laboratories, strict quality protocols, and scalable production systems, we continue to set standards in safety, consistency, and product innovation.",
         facilityImages: content?.facilityImages || [],
+        scienceHeading: content?.scienceHeading || "We Are Backed By Science",
+        scienceDescription:
+          content?.scienceDescription ||
+          "Dot-Herbs delivers high-quality, safe products crafted under expert supervision and aligned with global standards. Committed to GMP, HACCP, ISO systems, and compliance-driven quality controls, we ensure excellence at every stage.",
+        scienceBadgeImages: content?.scienceBadgeImages || [],
+        scienceImage: content?.scienceImage || "",
         updatedAt: content?.updatedAt || null,
       },
     });
@@ -50,7 +56,10 @@ export const getAboutContent = async (req, res) => {
 // @access  Private/Admin
 export const updateAboutContent = async (req, res) => {
   try {
-    const hasVideoUrl = Object.prototype.hasOwnProperty.call(req.body, "videoUrl");
+    const hasVideoUrl = Object.prototype.hasOwnProperty.call(
+      req.body,
+      "videoUrl",
+    );
     const hasFacilityHeading = Object.prototype.hasOwnProperty.call(
       req.body,
       "facilityHeading",
@@ -63,12 +72,32 @@ export const updateAboutContent = async (req, res) => {
       req.body,
       "facilityImages",
     );
+    const hasScienceHeading = Object.prototype.hasOwnProperty.call(
+      req.body,
+      "scienceHeading",
+    );
+    const hasScienceDescription = Object.prototype.hasOwnProperty.call(
+      req.body,
+      "scienceDescription",
+    );
+    const hasScienceBadgeImages = Object.prototype.hasOwnProperty.call(
+      req.body,
+      "scienceBadgeImages",
+    );
+    const hasScienceImage = Object.prototype.hasOwnProperty.call(
+      req.body,
+      "scienceImage",
+    );
 
     if (
       !hasVideoUrl &&
       !hasFacilityHeading &&
       !hasFacilityDescription &&
-      !hasFacilityImages
+      !hasFacilityImages &&
+      !hasScienceHeading &&
+      !hasScienceDescription &&
+      !hasScienceBadgeImages &&
+      !hasScienceImage
     ) {
       return res.status(400).json({
         success: false,
@@ -116,6 +145,58 @@ export const updateAboutContent = async (req, res) => {
         .forEach((oldImage) => deleteUploadedFileIfExists(oldImage));
 
       content.facilityImages = nextImages;
+    }
+
+    if (hasScienceHeading) {
+      content.scienceHeading = req.body.scienceHeading?.trim() || "";
+    }
+
+    if (hasScienceDescription) {
+      content.scienceDescription = req.body.scienceDescription?.trim() || "";
+    }
+
+    if (hasScienceBadgeImages) {
+      const rawBadgeImages = Array.isArray(req.body.scienceBadgeImages)
+        ? req.body.scienceBadgeImages
+        : [];
+      const nextBadgeImages = rawBadgeImages
+        .map((item) => (typeof item === "string" ? item.trim() : ""))
+        .filter(Boolean)
+        .slice(0, 8);
+
+      if (nextBadgeImages.length < 1) {
+        return res.status(400).json({
+          success: false,
+          error: "Please upload at least one certification badge image",
+        });
+      }
+
+      const previousBadgeImages = Array.isArray(content.scienceBadgeImages)
+        ? content.scienceBadgeImages
+        : [];
+
+      previousBadgeImages
+        .filter((oldImage) => oldImage && !nextBadgeImages.includes(oldImage))
+        .forEach((oldImage) => deleteUploadedFileIfExists(oldImage));
+
+      content.scienceBadgeImages = nextBadgeImages;
+    }
+
+    if (hasScienceImage) {
+      const nextScienceImage = req.body.scienceImage?.trim() || "";
+
+      if (!nextScienceImage) {
+        return res.status(400).json({
+          success: false,
+          error: "Please upload one science section image",
+        });
+      }
+
+      if (content.scienceImage && content.scienceImage !== nextScienceImage) {
+        deleteUploadedFileIfExists(content.scienceImage);
+      }
+
+      content.scienceImage = nextScienceImage;
     }
 
     content.updatedBy = req.user?._id || null;

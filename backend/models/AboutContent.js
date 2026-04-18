@@ -28,6 +28,32 @@ const aboutContentSchema = new mongoose.Schema(
         message: "You can store up to 3 facility images",
       },
     },
+    scienceHeading: {
+      type: String,
+      trim: true,
+      default: "We Are Backed By Science",
+      maxlength: [180, "Science heading too long"],
+    },
+    scienceDescription: {
+      type: String,
+      trim: true,
+      default:
+        "Dot-Herbs delivers high-quality, safe products crafted under expert supervision and aligned with global standards. Committed to GMP, HACCP, ISO systems, and compliance-driven quality controls, we ensure excellence at every stage.",
+      maxlength: [1200, "Science description too long"],
+    },
+    scienceBadgeImages: {
+      type: [String],
+      default: [],
+      validate: {
+        validator: (value) => Array.isArray(value) && value.length <= 8,
+        message: "You can store up to 8 badge images",
+      },
+    },
+    scienceImage: {
+      type: String,
+      trim: true,
+      default: "",
+    },
     updatedBy: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",

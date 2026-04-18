@@ -130,6 +130,17 @@ const AdminDashboard = () => {
     "",
   ]);
   const [savingAboutSection, setSavingAboutSection] = useState(false);
+  const [scienceHeading, setScienceHeading] = useState("");
+  const [scienceDescription, setScienceDescription] = useState("");
+  const [scienceBadgeImages, setScienceBadgeImages] = useState([]);
+  const [scienceBadgeImageFiles, setScienceBadgeImageFiles] = useState([]);
+  const [scienceBadgeImagePreviews, setScienceBadgeImagePreviews] = useState(
+    [],
+  );
+  const [scienceImage, setScienceImage] = useState("");
+  const [scienceImageFile, setScienceImageFile] = useState(null);
+  const [scienceImagePreview, setScienceImagePreview] = useState("");
+  const [savingScienceSection, setSavingScienceSection] = useState(false);
   const [announcementForm, setAnnouncementForm] = useState({
     title: "",
     message: "",
@@ -150,6 +161,11 @@ const AdminDashboard = () => {
     "/images/banners/hero_banner1.jpg",
     "/images/banners/hero_banner1.jpg",
   ];
+  const defaultScienceHeading = "We Are Backed By Science";
+  const defaultScienceDescription =
+    "Dot-Herbs delivers high-quality, safe products crafted under expert supervision and aligned with global standards. Committed to GMP, HACCP, ISO systems, and compliance-driven quality controls, we ensure excellence at every stage.";
+  const defaultScienceBadgeImages = [];
+  const defaultScienceImage = "";
 
   const resolveMediaUrl = (url) => {
     if (!url) return "";
@@ -182,10 +198,27 @@ const AdminDashboard = () => {
         ? result.data.facilityImages
         : [];
       setAboutSectionImages(
-        [0, 1, 2].map((index) => remoteImages[index] || defaultFacilityImages[index]),
+        [0, 1, 2].map(
+          (index) => remoteImages[index] || defaultFacilityImages[index],
+        ),
       );
       setAboutSectionImageFiles([null, null, null]);
       setAboutSectionImagePreviews(["", "", ""]);
+      const remoteBadgeImages = Array.isArray(result?.data?.scienceBadgeImages)
+        ? result.data.scienceBadgeImages
+        : [];
+      setScienceHeading(
+        result?.data?.scienceHeading?.trim() || defaultScienceHeading,
+      );
+      setScienceDescription(
+        result?.data?.scienceDescription?.trim() || defaultScienceDescription,
+      );
+      setScienceBadgeImages(remoteBadgeImages);
+      setScienceBadgeImageFiles([]);
+      setScienceBadgeImagePreviews([]);
+      setScienceImage(result?.data?.scienceImage || "");
+      setScienceImageFile(null);
+      setScienceImagePreview("");
     } catch {
       setAboutVideoUrl("");
       setAboutSectionHeading(defaultFacilityHeading);
@@ -193,6 +226,14 @@ const AdminDashboard = () => {
       setAboutSectionImages(defaultFacilityImages);
       setAboutSectionImageFiles([null, null, null]);
       setAboutSectionImagePreviews(["", "", ""]);
+      setScienceHeading(defaultScienceHeading);
+      setScienceDescription(defaultScienceDescription);
+      setScienceBadgeImages(defaultScienceBadgeImages);
+      setScienceBadgeImageFiles([]);
+      setScienceBadgeImagePreviews([]);
+      setScienceImage(defaultScienceImage);
+      setScienceImageFile(null);
+      setScienceImagePreview("");
     } finally {
       setLoadingAboutVideo(false);
     }
@@ -465,6 +506,162 @@ const AdminDashboard = () => {
     const nextPreviews = [...aboutSectionImagePreviews];
     nextPreviews[index] = "";
     setAboutSectionImagePreviews(nextPreviews);
+  };
+
+  const handleSaveScienceSection = async (e) => {
+    e.preventDefault();
+
+    if (!scienceHeading.trim()) {
+      toast.error("Science section heading is required");
+      return;
+    }
+
+    if (!scienceDescription.trim()) {
+      toast.error("Science section description is required");
+      return;
+    }
+
+    try {
+      setSavingScienceSection(true);
+
+      let uploadedBadgeImages = [...scienceBadgeImages];
+
+      if (scienceBadgeImageFiles.length > 0) {
+        const newlyUploaded = [];
+        for (const file of scienceBadgeImageFiles) {
+          const uploadedUrl = await uploadDashboardImage(file);
+          newlyUploaded.push(uploadedUrl);
+        }
+        uploadedBadgeImages = [...uploadedBadgeImages, ...newlyUploaded].slice(
+          0,
+          8,
+        );
+      }
+
+      if (uploadedBadgeImages.length < 1) {
+        toast.error("Please upload at least one certification badge image");
+        setSavingScienceSection(false);
+        return;
+      }
+
+      let uploadedScienceImage = scienceImage;
+
+      if (scienceImageFile) {
+        uploadedScienceImage = await uploadDashboardImage(scienceImageFile);
+      }
+
+      if (!uploadedScienceImage) {
+        toast.error("Please upload one image for this section");
+        setSavingScienceSection(false);
+        return;
+      }
+
+      const token = getAuthToken();
+      const response = await fetch(`${API_URL}/about-content`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          scienceHeading: scienceHeading.trim(),
+          scienceDescription: scienceDescription.trim(),
+          scienceBadgeImages: uploadedBadgeImages,
+          scienceImage: uploadedScienceImage,
+        }),
+      });
+
+      const result = await response.json();
+
+      if (!response.ok) {
+        throw new Error(result?.error || "Failed to save science section");
+      }
+
+      setScienceBadgeImages(uploadedBadgeImages);
+      setScienceBadgeImageFiles([]);
+      setScienceBadgeImagePreviews([]);
+      setScienceImage(uploadedScienceImage);
+      setScienceImageFile(null);
+      setScienceImagePreview("");
+
+      toast.success("Science section updated successfully");
+    } catch (error) {
+      toast.error(error.message || "Failed to save science section");
+    } finally {
+      setSavingScienceSection(false);
+    }
+  };
+
+  const handleResetScienceSectionDefaults = () => {
+    setScienceHeading(defaultScienceHeading);
+    setScienceDescription(defaultScienceDescription);
+    setScienceBadgeImages(defaultScienceBadgeImages);
+    setScienceBadgeImageFiles([]);
+    setScienceBadgeImagePreviews([]);
+    setScienceImage(defaultScienceImage);
+    setScienceImageFile(null);
+    setScienceImagePreview("");
+  };
+
+  const handleScienceImageChange = (file) => {
+    if (!file) {
+      return;
+    }
+
+    setScienceImageFile(file);
+
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      setScienceImagePreview(event.target?.result || "");
+    };
+    reader.readAsDataURL(file);
+  };
+
+  const handleRemoveScienceImage = () => {
+    setScienceImage("");
+    setScienceImageFile(null);
+    setScienceImagePreview("");
+  };
+
+  const handleScienceBadgeImageSelection = (files) => {
+    if (!files?.length) {
+      return;
+    }
+
+    const allowedCount = Math.max(0, 8 - scienceBadgeImages.length);
+    const selectedFiles = Array.from(files).slice(0, allowedCount);
+
+    if (selectedFiles.length < files.length) {
+      toast.error("Maximum 8 certification badges are allowed");
+    }
+
+    if (!selectedFiles.length) {
+      return;
+    }
+
+    setScienceBadgeImageFiles((prev) => [...prev, ...selectedFiles]);
+
+    selectedFiles.forEach((file) => {
+      const reader = new FileReader();
+      reader.onload = (event) => {
+        setScienceBadgeImagePreviews((prev) => [
+          ...prev,
+          event.target?.result || "",
+        ]);
+      };
+      reader.readAsDataURL(file);
+    });
+  };
+
+  const handleRemoveSavedScienceBadge = (index) => {
+    const next = [...scienceBadgeImages];
+    next.splice(index, 1);
+    setScienceBadgeImages(next);
+  };
+
+  const handleRemovePendingScienceBadge = (index) => {
+    setScienceBadgeImageFiles((prev) => prev.filter((_, i) => i !== index));
+    setScienceBadgeImagePreviews((prev) => prev.filter((_, i) => i !== index));
   };
 
   const handleDeleteProduct = async (productId) => {
@@ -1552,7 +1749,9 @@ const AdminDashboard = () => {
           <div className="p-6 space-y-8">
             <div className="grid grid-cols-1 gap-8 lg:grid-cols-[380px,1fr]">
               <div className="rounded-lg border bg-gray-50 p-5">
-                <h2 className="mb-4 text-2xl font-semibold">About Page Video</h2>
+                <h2 className="mb-4 text-2xl font-semibold">
+                  About Page Video
+                </h2>
                 <form className="space-y-4" onSubmit={handleUploadAboutVideo}>
                   <div>
                     <label className="mb-2 block text-sm font-medium text-gray-700">
@@ -1614,7 +1813,9 @@ const AdminDashboard = () => {
 
               <div>
                 <div className="mb-6 flex items-center justify-between">
-                  <h2 className="text-2xl font-semibold">Current About Video</h2>
+                  <h2 className="text-2xl font-semibold">
+                    Current About Video
+                  </h2>
                   <div className="flex items-center gap-2 text-sm text-gray-500">
                     <FaVideo />
                     <span>{aboutVideoUrl ? "Configured" : "Not Set"}</span>
@@ -1695,7 +1896,10 @@ const AdminDashboard = () => {
                         resolveMediaUrl(aboutSectionImages[index]);
 
                       return (
-                        <div key={index} className="rounded-lg border bg-gray-50 p-3">
+                        <div
+                          key={index}
+                          className="rounded-lg border bg-gray-50 p-3"
+                        >
                           <p className="mb-2 text-xs font-semibold uppercase text-gray-500">
                             Image {index + 1}
                           </p>
@@ -1714,7 +1918,10 @@ const AdminDashboard = () => {
                             type="file"
                             accept="image/*"
                             onChange={(e) =>
-                              handleAboutSectionImageChange(index, e.target.files[0])
+                              handleAboutSectionImageChange(
+                                index,
+                                e.target.files[0],
+                              )
                             }
                             className="w-full rounded border border-gray-300 px-2 py-2 text-xs"
                           />
@@ -1737,7 +1944,158 @@ const AdminDashboard = () => {
                   className="inline-flex items-center space-x-2 rounded bg-[#68a300] px-4 py-2 text-white hover:bg-[#5f9600] disabled:opacity-60"
                 >
                   <FaCheck />
-                  <span>{savingAboutSection ? "Saving..." : "Save Section"}</span>
+                  <span>
+                    {savingAboutSection ? "Saving..." : "Save Section"}
+                  </span>
+                </button>
+              </form>
+            </div>
+
+            <div className="rounded-xl border bg-white p-6 shadow-sm">
+              <div className="mb-6 flex flex-wrap items-center justify-between gap-3">
+                <h2 className="text-2xl font-semibold">
+                  "Backed by Science" Section Content
+                </h2>
+                <button
+                  type="button"
+                  onClick={handleResetScienceSectionDefaults}
+                  className="rounded border border-gray-300 px-3 py-2 text-sm text-gray-700 hover:bg-gray-50"
+                >
+                  Reset Defaults
+                </button>
+              </div>
+
+              <form className="space-y-6" onSubmit={handleSaveScienceSection}>
+                <div>
+                  <label className="mb-2 block text-sm font-medium text-gray-700">
+                    Heading
+                  </label>
+                  <input
+                    type="text"
+                    value={scienceHeading}
+                    onChange={(e) => setScienceHeading(e.target.value)}
+                    className="w-full rounded border border-gray-300 px-3 py-2 text-sm"
+                    maxLength={180}
+                    placeholder="e.g. We Are Backed By Science"
+                  />
+                </div>
+
+                <div>
+                  <label className="mb-2 block text-sm font-medium text-gray-700">
+                    Descriptive Paragraph
+                  </label>
+                  <textarea
+                    value={scienceDescription}
+                    onChange={(e) => setScienceDescription(e.target.value)}
+                    className="w-full rounded border border-gray-300 px-3 py-2 text-sm"
+                    rows={4}
+                    maxLength={1200}
+                    placeholder="Enter descriptive paragraph"
+                  />
+                </div>
+
+                <div>
+                  <p className="mb-3 text-sm font-medium text-gray-700">
+                    Certification Badges (upload 1 or more)
+                  </p>
+
+                  <input
+                    type="file"
+                    accept="image/*"
+                    multiple
+                    onChange={(e) =>
+                      handleScienceBadgeImageSelection(e.target.files)
+                    }
+                    className="w-full rounded border border-gray-300 px-3 py-2 text-sm"
+                  />
+
+                  <div className="mt-4 grid grid-cols-2 gap-3 md:grid-cols-4">
+                    {scienceBadgeImages.map((badge, index) => (
+                      <div
+                        key={`${badge}-${index}`}
+                        className="rounded border p-2"
+                      >
+                        <img
+                          src={resolveMediaUrl(badge)}
+                          alt={`Saved badge ${index + 1}`}
+                          className="h-20 w-full rounded object-cover"
+                        />
+                        <button
+                          type="button"
+                          onClick={() => handleRemoveSavedScienceBadge(index)}
+                          className="mt-2 w-full rounded border border-red-200 px-2 py-1 text-xs text-red-600 hover:bg-red-50"
+                        >
+                          Remove
+                        </button>
+                      </div>
+                    ))}
+
+                    {scienceBadgeImagePreviews.map((preview, index) => (
+                      <div
+                        key={`pending-${index}`}
+                        className="rounded border border-[#68a300]/40 bg-[#f4faeb] p-2"
+                      >
+                        <img
+                          src={preview}
+                          alt={`Pending badge ${index + 1}`}
+                          className="h-20 w-full rounded object-cover"
+                        />
+                        <button
+                          type="button"
+                          onClick={() => handleRemovePendingScienceBadge(index)}
+                          className="mt-2 w-full rounded border border-red-200 px-2 py-1 text-xs text-red-600 hover:bg-red-50"
+                        >
+                          Remove
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+
+                  <p className="mt-2 text-xs text-gray-400">
+                    You can keep up to 8 badge images.
+                  </p>
+                </div>
+
+                <div>
+                  <p className="mb-3 text-sm font-medium text-gray-700">
+                    Section Image (upload 1 image)
+                  </p>
+
+                  {(scienceImagePreview || scienceImage) && (
+                    <img
+                      src={scienceImagePreview || resolveMediaUrl(scienceImage)}
+                      alt="Science section preview"
+                      className="mb-3 h-40 w-full max-w-sm rounded-lg border object-cover"
+                    />
+                  )}
+
+                  <input
+                    type="file"
+                    accept="image/*"
+                    onChange={(e) =>
+                      handleScienceImageChange(e.target.files[0])
+                    }
+                    className="w-full max-w-sm rounded border border-gray-300 px-3 py-2 text-sm"
+                  />
+
+                  <button
+                    type="button"
+                    onClick={handleRemoveScienceImage}
+                    className="mt-2 rounded border border-red-200 px-3 py-2 text-xs text-red-600 hover:bg-red-50"
+                  >
+                    Clear Section Image
+                  </button>
+                </div>
+
+                <button
+                  type="submit"
+                  disabled={savingScienceSection}
+                  className="inline-flex items-center space-x-2 rounded bg-[#68a300] px-4 py-2 text-white hover:bg-[#5f9600] disabled:opacity-60"
+                >
+                  <FaCheck />
+                  <span>
+                    {savingScienceSection ? "Saving..." : "Save Section"}
+                  </span>
                 </button>
               </form>
             </div>
