@@ -106,8 +106,18 @@ const CreateProduct = ({ onClose, onSuccess }) => {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    const { name, description, price, category, sku, stock, weight, origin, image, isActive } =
-      formData;
+    const {
+      name,
+      description,
+      price,
+      category,
+      sku,
+      stock,
+      weight,
+      origin,
+      image,
+      isActive,
+    } = formData;
 
     // Frontend validation matching backend requirements
     if (!name || name.trim().length < 2 || name.length > 100) {

@@ -138,8 +138,18 @@ const EditProduct = ({ onClose, onSuccess, product: productProp }) => {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    const { name, description, price, category, sku, stock, weight, origin, image, isActive } =
-      formData;
+    const {
+      name,
+      description,
+      price,
+      category,
+      sku,
+      stock,
+      weight,
+      origin,
+      image,
+      isActive,
+    } = formData;
 
     if (!name || !description || !price || !category || !sku || stock === "") {
       toast.error("Please fill in all required fields.");
