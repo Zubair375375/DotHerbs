@@ -32,6 +32,7 @@ const EditProduct = ({ onClose, onSuccess, product: productProp }) => {
     name: "",
     description: "",
     price: "",
+    costPrice: "",
     category: "",
     sku: "",
     stock: "0",
@@ -76,6 +77,7 @@ const EditProduct = ({ onClose, onSuccess, product: productProp }) => {
         name: product.name || "",
         description: product.description || "",
         price: product.price?.toString() || "",
+        costPrice: product.costPrice?.toString() || "",
         category: product.category || categories[0]?.value || "",
         sku: product.sku || "",
         stock: product.stock?.toString() || "0",
@@ -142,6 +144,7 @@ const EditProduct = ({ onClose, onSuccess, product: productProp }) => {
       name,
       description,
       price,
+      costPrice,
       category,
       sku,
       stock,
@@ -151,8 +154,22 @@ const EditProduct = ({ onClose, onSuccess, product: productProp }) => {
       isActive,
     } = formData;
 
-    if (!name || !description || !price || !category || !sku || stock === "") {
+    if (
+      !name ||
+      !description ||
+      !price ||
+      !costPrice ||
+      !category ||
+      !sku ||
+      stock === ""
+    ) {
       toast.error("Please fill in all required fields.");
+      return;
+    }
+
+    const costPriceNum = parseFloat(costPrice);
+    if (Number.isNaN(costPriceNum) || costPriceNum < 0) {
+      toast.error("Cost price must be a positive number.");
       return;
     }
 
@@ -193,6 +210,7 @@ const EditProduct = ({ onClose, onSuccess, product: productProp }) => {
         name,
         description,
         price: Number(price),
+        costPrice: Number(costPrice),
         category,
         sku: normalizedSku,
         stock: Number(stock),
@@ -300,6 +318,27 @@ const EditProduct = ({ onClose, onSuccess, product: productProp }) => {
                 min="0"
                 step="0.01"
                 value={formData.price}
+                onChange={handleChange}
+                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500 sm:text-sm"
+                placeholder="0.00"
+                required
+              />
+            </div>
+
+            <div>
+              <label
+                htmlFor="costPrice"
+                className="block text-sm font-medium text-gray-700"
+              >
+                Cost Price
+              </label>
+              <input
+                id="costPrice"
+                name="costPrice"
+                type="number"
+                min="0"
+                step="0.01"
+                value={formData.costPrice}
                 onChange={handleChange}
                 className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500 sm:text-sm"
                 placeholder="0.00"

@@ -25,6 +25,7 @@ const CreateProduct = ({ onClose, onSuccess }) => {
     name: "",
     description: "",
     price: "",
+    costPrice: "",
     category: "",
     sku: "",
     stock: "0",
@@ -110,6 +111,7 @@ const CreateProduct = ({ onClose, onSuccess }) => {
       name,
       description,
       price,
+      costPrice,
       category,
       sku,
       stock,
@@ -140,6 +142,12 @@ const CreateProduct = ({ onClose, onSuccess }) => {
       return;
     }
 
+    const costPriceNum = parseFloat(costPrice);
+    if (!costPrice || isNaN(costPriceNum) || costPriceNum < 0) {
+      toast.error("Cost price must be a positive number.");
+      return;
+    }
+
     if (!category) {
       toast.error("Please select a valid category.");
       return;
@@ -166,6 +174,7 @@ const CreateProduct = ({ onClose, onSuccess }) => {
         name: name.trim(),
         description: description.trim(),
         price: Number(price),
+        costPrice: Number(costPrice),
         category,
         sku: normalizedSku,
         stock: Number(stock),
@@ -270,6 +279,27 @@ const CreateProduct = ({ onClose, onSuccess }) => {
               min="0"
               step="0.01"
               value={formData.price}
+              onChange={handleChange}
+              className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500 sm:text-sm"
+              placeholder="0.00"
+              required
+            />
+          </div>
+
+          <div>
+            <label
+              htmlFor="costPrice"
+              className="block text-sm font-medium text-gray-700"
+            >
+              Cost Price
+            </label>
+            <input
+              id="costPrice"
+              name="costPrice"
+              type="number"
+              min="0"
+              step="0.01"
+              value={formData.costPrice}
               onChange={handleChange}
               className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500 sm:text-sm"
               placeholder="0.00"

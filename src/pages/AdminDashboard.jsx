@@ -1893,6 +1893,9 @@ const AdminDashboard = () => {
                       SKU
                     </th>
                     <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+                      Cost Price
+                    </th>
+                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">
                       Price
                     </th>
                     <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">
@@ -1931,6 +1934,9 @@ const AdminDashboard = () => {
                       </td>
                       <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-900">
                         {product.sku || "N/A"}
+                      </td>
+                      <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-900">
+                        ${Number(product.costPrice || 0).toFixed(2)}
                       </td>
                       <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-900">
                         ${product.price?.toFixed(2)}

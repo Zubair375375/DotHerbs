@@ -57,6 +57,7 @@ export function formatProductsForExport(products) {
     SKU: p.sku || "",
     Name: p.name,
     Category: p.category,
+    "Cost Price (PKR)": p.costPrice ?? "",
     "Weight (g)": p.weight ?? "",
     Origin: p.origin || "",
     "Price (PKR)": p.price,

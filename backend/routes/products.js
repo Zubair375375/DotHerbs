@@ -27,6 +27,9 @@ const createProductValidation = [
   body("price")
     .isFloat({ min: 0 })
     .withMessage("Price must be a positive number"),
+  body("costPrice")
+    .isFloat({ min: 0 })
+    .withMessage("Cost price must be a positive number"),
   body("sku")
     .trim()
     .isLength({ min: 3, max: 64 })
@@ -62,6 +65,10 @@ const updateProductValidation = [
     .optional()
     .isFloat({ min: 0 })
     .withMessage("Price must be a positive number"),
+  body("costPrice")
+    .optional()
+    .isFloat({ min: 0 })
+    .withMessage("Cost price must be a positive number"),
   body("sku")
     .optional()
     .trim()
