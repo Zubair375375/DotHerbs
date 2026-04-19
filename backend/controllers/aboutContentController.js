@@ -414,7 +414,9 @@ export const updateAboutContent = async (req, res) => {
               ? member.image.trim()
               : "",
         }))
-        .filter((member) => member.name || member.role || member.bio || member.image)
+        .filter(
+          (member) => member.name || member.role || member.bio || member.image,
+        )
         .slice(0, 12);
 
       const nextMemberImages = normalizedMembers

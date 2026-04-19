@@ -32,6 +32,7 @@ import {
   FaDollarSign,
   FaEye,
   FaEdit,
+  FaCopy,
   FaTrash,
   FaPlus,
   FaCheck,
@@ -336,12 +337,8 @@ const AdminDashboard = () => {
         ? result.data.teamMembers
         : [];
       setTeamMembers(remoteTeamMembers);
-      setTeamMemberImageFiles(
-        new Array(remoteTeamMembers.length).fill(null),
-      );
-      setTeamMemberImagePreviews(
-        new Array(remoteTeamMembers.length).fill(""),
-      );
+      setTeamMemberImageFiles(new Array(remoteTeamMembers.length).fill(null));
+      setTeamMemberImagePreviews(new Array(remoteTeamMembers.length).fill(""));
     } catch {
       setAboutVideoUrl("");
       setAboutSectionHeading(defaultFacilityHeading);
@@ -1460,6 +1457,38 @@ const AdminDashboard = () => {
     }
   };
 
+  const formatOrderDisplayId = (orderId) => {
+    if (!orderId) return "#--------";
+    return `#${String(orderId).slice(-8).toUpperCase()}`;
+  };
+
+  const handleCopyOrderId = async (orderId) => {
+    if (!orderId) {
+      toast.error("Order ID not available");
+      return;
+    }
+
+    try {
+      if (navigator?.clipboard?.writeText) {
+        await navigator.clipboard.writeText(orderId);
+      } else {
+        const textArea = document.createElement("textarea");
+        textArea.value = orderId;
+        textArea.setAttribute("readonly", "");
+        textArea.style.position = "absolute";
+        textArea.style.left = "-9999px";
+        document.body.appendChild(textArea);
+        textArea.select();
+        document.execCommand("copy");
+        document.body.removeChild(textArea);
+      }
+
+      toast.success("Full order ID copied");
+    } catch {
+      toast.error("Failed to copy order ID");
+    }
+  };
+
   // Calculate dashboard stats
   const totalRevenue = orders.reduce(
     (sum, order) => sum + (order.total || 0),
@@ -1645,9 +1674,19 @@ const AdminDashboard = () => {
                       className="flex items-center justify-between p-4 border rounded"
                     >
                       <div>
-                        <p className="font-medium">
-                          Order #{order._id.slice(-8)}
-                        </p>
+                        <div className="flex items-center gap-2">
+                          <p className="font-medium" title={order._id}>
+                            Order {formatOrderDisplayId(order._id)}
+                          </p>
+                          <button
+                            type="button"
+                            title="Copy full order ID"
+                            onClick={() => handleCopyOrderId(order._id)}
+                            className="text-gray-400 transition hover:text-gray-700"
+                          >
+                            <FaCopy className="text-xs" />
+                          </button>
+                        </div>
                         <p className="text-sm text-gray-600">
                           {order.user?.name} - ${order.total?.toFixed(2)}
                         </p>
@@ -1723,7 +1762,7 @@ const AdminDashboard = () => {
                       },
                     ],
                     "products.xlsx",
-                  )
+                  ).catch(() => toast.error("Export failed"))
                 }
                 className="flex items-center space-x-2 rounded bg-green-700 px-4 py-2 text-white hover:bg-green-800"
               >
@@ -1851,6 +1890,9 @@ const AdminDashboard = () => {
                       Category
                     </th>
                     <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+                      SKU
+                    </th>
+                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">
                       Price
                     </th>
                     <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">
@@ -1886,6 +1928,9 @@ const AdminDashboard = () => {
                       </td>
                       <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-500 capitalize">
                         {product.category}
+                      </td>
+                      <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-900">
+                        {product.sku || "N/A"}
                       </td>
                       <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-900">
                         ${product.price?.toFixed(2)}
@@ -2084,7 +2129,7 @@ const AdminDashboard = () => {
                   exportToExcel(
                     [{ name: "Orders", data: formatOrdersForExport(orders) }],
                     "orders.xlsx",
-                  )
+                  ).catch(() => toast.error("Export failed"))
                 }
                 className="flex items-center space-x-2 rounded bg-green-700 px-4 py-2 text-white hover:bg-green-800"
               >
@@ -2121,7 +2166,19 @@ const AdminDashboard = () => {
                   {orders.map((order) => (
                     <tr key={order._id}>
                       <td className="px-4 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                        #{order._id.slice(-8)}
+                        <div className="flex items-center gap-2">
+                          <span title={order._id}>
+                            {formatOrderDisplayId(order._id)}
+                          </span>
+                          <button
+                            type="button"
+                            title="Copy full order ID"
+                            onClick={() => handleCopyOrderId(order._id)}
+                            className="text-gray-400 transition hover:text-gray-700"
+                          >
+                            <FaCopy className="text-xs" />
+                          </button>
+                        </div>
                       </td>
                       <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-500">
                         {order.user?.name}
@@ -2173,7 +2230,7 @@ const AdminDashboard = () => {
                   exportToExcel(
                     [{ name: "Users", data: formatUsersForExport(users) }],
                     "users.xlsx",
-                  )
+                  ).catch(() => toast.error("Export failed"))
                 }
                 className="flex items-center space-x-2 rounded bg-green-700 px-4 py-2 text-white hover:bg-green-800"
               >
@@ -3138,7 +3195,10 @@ const AdminDashboard = () => {
                           type="file"
                           accept="image/*"
                           onChange={(e) =>
-                            handleTeamMemberImageChange(index, e.target.files[0])
+                            handleTeamMemberImageChange(
+                              index,
+                              e.target.files[0],
+                            )
                           }
                           className="w-full rounded border border-gray-300 px-2 py-2 text-xs"
                         />

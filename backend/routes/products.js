@@ -27,6 +27,14 @@ const createProductValidation = [
   body("price")
     .isFloat({ min: 0 })
     .withMessage("Price must be a positive number"),
+  body("sku")
+    .trim()
+    .isLength({ min: 3, max: 64 })
+    .withMessage("SKU must be between 3 and 64 characters")
+    .matches(/^[A-Za-z0-9_-]+$/)
+    .withMessage(
+      "SKU can only contain letters, numbers, hyphens, and underscores",
+    ),
   body("category").custom(async (value) => {
     const category = await Category.findOne({ value, isActive: true });
     if (!category) {
@@ -54,6 +62,15 @@ const updateProductValidation = [
     .optional()
     .isFloat({ min: 0 })
     .withMessage("Price must be a positive number"),
+  body("sku")
+    .optional()
+    .trim()
+    .isLength({ min: 3, max: 64 })
+    .withMessage("SKU must be between 3 and 64 characters")
+    .matches(/^[A-Za-z0-9_-]+$/)
+    .withMessage(
+      "SKU can only contain letters, numbers, hyphens, and underscores",
+    ),
   body("category")
     .optional()
     .custom(async (value) => {

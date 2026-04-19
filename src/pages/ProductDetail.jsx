@@ -9,7 +9,10 @@ import {
   fetchProduct,
 } from "../store/slices/productSlice";
 import { addToCart } from "../store/slices/cartSlice";
-import { selectAuthUser, selectIsAuthenticated } from "../store/slices/authSlice";
+import {
+  selectAuthUser,
+  selectIsAuthenticated,
+} from "../store/slices/authSlice";
 import Loader from "../components/Loader";
 import toast from "react-hot-toast";
 import {

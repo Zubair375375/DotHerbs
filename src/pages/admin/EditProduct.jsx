@@ -33,6 +33,7 @@ const EditProduct = ({ onClose, onSuccess, product: productProp }) => {
     description: "",
     price: "",
     category: "",
+    sku: "",
     stock: "0",
     image: null,
     isActive: true,
@@ -74,6 +75,7 @@ const EditProduct = ({ onClose, onSuccess, product: productProp }) => {
         description: product.description || "",
         price: product.price?.toString() || "",
         category: product.category || categories[0]?.value || "",
+        sku: product.sku || "",
         stock: product.stock?.toString() || "0",
         image: null, // Don't set image file, just use existing URL for preview
         isActive: product.isActive ?? true,
@@ -132,11 +134,19 @@ const EditProduct = ({ onClose, onSuccess, product: productProp }) => {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    const { name, description, price, category, stock, image, isActive } =
+    const { name, description, price, category, sku, stock, image, isActive } =
       formData;
 
-    if (!name || !description || !price || !category || stock === "") {
+    if (!name || !description || !price || !category || !sku || stock === "") {
       toast.error("Please fill in all required fields.");
+      return;
+    }
+
+    const normalizedSku = sku.trim().toUpperCase();
+    if (!/^[A-Z0-9_-]{3,64}$/.test(normalizedSku)) {
+      toast.error(
+        "SKU must be 3-64 characters and use letters, numbers, hyphen, or underscore.",
+      );
       return;
     }
 
@@ -170,6 +180,7 @@ const EditProduct = ({ onClose, onSuccess, product: productProp }) => {
         description,
         price: Number(price),
         category,
+        sku: normalizedSku,
         stock: Number(stock),
         isActive,
         image: finalImage,
@@ -295,6 +306,27 @@ const EditProduct = ({ onClose, onSuccess, product: productProp }) => {
                 value={formData.stock}
                 onChange={handleChange}
                 className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500 sm:text-sm"
+                required
+              />
+            </div>
+
+            <div>
+              <label
+                htmlFor="sku"
+                className="block text-sm font-medium text-gray-700"
+              >
+                SKU
+              </label>
+              <input
+                id="sku"
+                name="sku"
+                type="text"
+                value={formData.sku}
+                onChange={handleChange}
+                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500 sm:text-sm"
+                placeholder="e.g. DH-ASH-60"
+                minLength={3}
+                maxLength={64}
                 required
               />
             </div>

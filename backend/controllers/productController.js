@@ -3,6 +3,28 @@ import mongoose from "mongoose";
 import Category from "../models/Category.js";
 import Product from "../models/Product.js";
 
+const normalizeSku = (value = "") => String(value).trim().toUpperCase();
+
+const escapeRegex = (value = "") =>
+  String(value).replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+
+const isSkuDuplicate = async (sku, excludeProductId = null) => {
+  if (!sku) return false;
+
+  const query = {
+    sku: {
+      $regex: new RegExp(`^${escapeRegex(sku)}$`, "i"),
+    },
+  };
+
+  if (excludeProductId) {
+    query._id = { $ne: excludeProductId };
+  }
+
+  const existingProduct = await Product.findOne(query).select("_id").lean();
+  return Boolean(existingProduct);
+};
+
 // @desc    Get all products
 // @route   GET /api/products
 // @access  Public
@@ -130,13 +152,32 @@ export const createProduct = async (req, res) => {
   }
 
   try {
-    const product = await Product.create(req.body);
+    const payload = {
+      ...req.body,
+      sku: normalizeSku(req.body.sku),
+    };
+
+    if (await isSkuDuplicate(payload.sku)) {
+      return res.status(409).json({
+        success: false,
+        error: "SKU already exists. Please use a unique SKU.",
+      });
+    }
+
+    const product = await Product.create(payload);
 
     res.status(201).json({
       success: true,
       data: product,
     });
   } catch (error) {
+    if (error?.code === 11000 && error?.keyPattern?.sku) {
+      return res.status(400).json({
+        success: false,
+        error: "SKU already exists. Please use a unique SKU.",
+      });
+    }
+
     console.error("Product creation error:", error);
     res.status(500).json({
       success: false,
@@ -175,9 +216,24 @@ export const updateProduct = async (req, res) => {
       });
     }
 
+    const payload = {
+      ...req.body,
+    };
+
+    if (typeof req.body.sku === "string") {
+      payload.sku = normalizeSku(req.body.sku);
+
+      if (await isSkuDuplicate(payload.sku, req.params.id)) {
+        return res.status(409).json({
+          success: false,
+          error: "SKU already exists. Please use a unique SKU.",
+        });
+      }
+    }
+
     const updatedProduct = await Product.findByIdAndUpdate(
       req.params.id,
-      req.body,
+      payload,
       {
         new: true,
         runValidators: true,
@@ -189,6 +245,13 @@ export const updateProduct = async (req, res) => {
       data: updatedProduct,
     });
   } catch (error) {
+    if (error?.code === 11000 && error?.keyPattern?.sku) {
+      return res.status(400).json({
+        success: false,
+        error: "SKU already exists. Please use a unique SKU.",
+      });
+    }
+
     res.status(500).json({
       success: false,
       error: "Server error",

@@ -14,13 +14,16 @@
  *     "dashboard-export.xlsx",
  *   );
  */
-import * as XLSX from "xlsx";
 
 /**
  * @param {Array<{ name: string, data: object[] }>} sheets
  * @param {string} [filename]
  */
-export function exportToExcel(sheets, filename = "export.xlsx") {
+export async function exportToExcel(sheets, filename = "export.xlsx") {
+  // Dynamically import xlsx so it is NOT included in the initial JS bundle.
+  // It is only downloaded the first time the user clicks Export.
+  const XLSX = await import("xlsx");
+
   const wb = XLSX.utils.book_new();
 
   sheets.forEach(({ name, data }) => {
@@ -51,6 +54,7 @@ export function exportToExcel(sheets, filename = "export.xlsx") {
 export function formatProductsForExport(products) {
   return products.map((p) => ({
     ID: p._id,
+    SKU: p.sku || "",
     Name: p.name,
     Category: p.category,
     "Price (PKR)": p.price,

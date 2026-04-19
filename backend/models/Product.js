@@ -47,6 +47,18 @@ const productSchema = new mongoose.Schema(
       required: [true, "Product category is required"],
       trim: true,
     },
+    sku: {
+      type: String,
+      required: [true, "SKU is required"],
+      unique: true,
+      uppercase: true,
+      trim: true,
+      maxlength: [64, "SKU cannot be more than 64 characters"],
+      match: [
+        /^[A-Z0-9_-]+$/,
+        "SKU can only contain letters, numbers, hyphens, and underscores",
+      ],
+    },
     stock: {
       type: Number,
       required: [true, "Stock quantity is required"],
