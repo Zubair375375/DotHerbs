@@ -285,7 +285,7 @@ const Header = () => {
                 value={searchQuery}
                 onChange={(e) => handleSearchChange(e.target.value)}
                 placeholder="Search products..."
-                className="w-full rounded-md border border-gray-300 bg-gray-50 py-1.5 pl-4 pr-16 text-sm outline-none focus:border-[#68a300] focus:ring-1 focus:ring-[#68a300]"
+                className="w-full rounded-md border border-gray-300 bg-white py-1.5 pl-4 pr-16 text-sm outline-none focus:border-[#68a300] focus:ring-1 focus:ring-[#68a300]"
               />
               {searchQuery && (
                 <button

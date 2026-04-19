@@ -84,6 +84,15 @@ const updateProductValidation = [
     .optional()
     .isInt({ min: 0 })
     .withMessage("Stock must be a non-negative integer"),
+  body("weight")
+    .optional({ nullable: true })
+    .isFloat({ min: 0 })
+    .withMessage("Weight must be a non-negative number"),
+  body("origin")
+    .optional()
+    .trim()
+    .isLength({ max: 120 })
+    .withMessage("Origin cannot be more than 120 characters"),
 ];
 
 const reviewValidation = [

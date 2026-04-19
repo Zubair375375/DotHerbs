@@ -65,6 +65,17 @@ const productSchema = new mongoose.Schema(
       min: [0, "Stock cannot be negative"],
       default: 0,
     },
+    weight: {
+      type: Number,
+      min: [0, "Weight cannot be negative"],
+      default: null,
+    },
+    origin: {
+      type: String,
+      trim: true,
+      maxlength: [120, "Origin cannot be more than 120 characters"],
+      default: "",
+    },
     images: [
       {
         url: {

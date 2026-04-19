@@ -35,6 +35,8 @@ const EditProduct = ({ onClose, onSuccess, product: productProp }) => {
     category: "",
     sku: "",
     stock: "0",
+    weight: "",
+    origin: "",
     image: null,
     isActive: true,
   });
@@ -77,6 +79,8 @@ const EditProduct = ({ onClose, onSuccess, product: productProp }) => {
         category: product.category || categories[0]?.value || "",
         sku: product.sku || "",
         stock: product.stock?.toString() || "0",
+        weight: product.weight != null ? String(product.weight) : "",
+        origin: product.origin || "",
         image: null, // Don't set image file, just use existing URL for preview
         isActive: product.isActive ?? true,
       });
@@ -134,7 +138,7 @@ const EditProduct = ({ onClose, onSuccess, product: productProp }) => {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    const { name, description, price, category, sku, stock, image, isActive } =
+    const { name, description, price, category, sku, stock, weight, origin, image, isActive } =
       formData;
 
     if (!name || !description || !price || !category || !sku || stock === "") {
@@ -182,6 +186,8 @@ const EditProduct = ({ onClose, onSuccess, product: productProp }) => {
         category,
         sku: normalizedSku,
         stock: Number(stock),
+        weight: weight !== "" ? Number(weight) : null,
+        origin: origin.trim(),
         isActive,
         image: finalImage,
         images: finalImages,
@@ -328,6 +334,45 @@ const EditProduct = ({ onClose, onSuccess, product: productProp }) => {
                 minLength={3}
                 maxLength={64}
                 required
+              />
+            </div>
+
+            <div>
+              <label
+                htmlFor="weight"
+                className="block text-sm font-medium text-gray-700"
+              >
+                Weight (g)
+              </label>
+              <input
+                id="weight"
+                name="weight"
+                type="number"
+                min="0"
+                step="0.01"
+                value={formData.weight}
+                onChange={handleChange}
+                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500 sm:text-sm"
+                placeholder="e.g. 250"
+              />
+            </div>
+
+            <div>
+              <label
+                htmlFor="origin"
+                className="block text-sm font-medium text-gray-700"
+              >
+                Origin
+              </label>
+              <input
+                id="origin"
+                name="origin"
+                type="text"
+                value={formData.origin}
+                onChange={handleChange}
+                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500 sm:text-sm"
+                placeholder="e.g. Pakistan"
+                maxLength={120}
               />
             </div>
           </div>

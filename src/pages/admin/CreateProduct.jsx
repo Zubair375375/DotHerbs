@@ -28,6 +28,8 @@ const CreateProduct = ({ onClose, onSuccess }) => {
     category: "",
     sku: "",
     stock: "0",
+    weight: "",
+    origin: "",
     image: null,
     isActive: true,
   });
@@ -104,7 +106,7 @@ const CreateProduct = ({ onClose, onSuccess }) => {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    const { name, description, price, category, sku, stock, image, isActive } =
+    const { name, description, price, category, sku, stock, weight, origin, image, isActive } =
       formData;
 
     // Frontend validation matching backend requirements
@@ -157,6 +159,8 @@ const CreateProduct = ({ onClose, onSuccess }) => {
         category,
         sku: normalizedSku,
         stock: Number(stock),
+        weight: weight !== "" ? Number(weight) : null,
+        origin: origin.trim(),
         isActive,
         image: "",
         images: [],
@@ -300,6 +304,45 @@ const CreateProduct = ({ onClose, onSuccess }) => {
               minLength={3}
               maxLength={64}
               required
+            />
+          </div>
+
+          <div>
+            <label
+              htmlFor="weight"
+              className="block text-sm font-medium text-gray-700"
+            >
+              Weight (g)
+            </label>
+            <input
+              id="weight"
+              name="weight"
+              type="number"
+              min="0"
+              step="0.01"
+              value={formData.weight}
+              onChange={handleChange}
+              className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500 sm:text-sm"
+              placeholder="e.g. 250"
+            />
+          </div>
+
+          <div>
+            <label
+              htmlFor="origin"
+              className="block text-sm font-medium text-gray-700"
+            >
+              Origin
+            </label>
+            <input
+              id="origin"
+              name="origin"
+              type="text"
+              value={formData.origin}
+              onChange={handleChange}
+              className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500 sm:text-sm"
+              placeholder="e.g. Pakistan"
+              maxLength={120}
             />
           </div>
         </div>
