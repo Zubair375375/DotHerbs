@@ -1588,6 +1588,13 @@ const AdminDashboard = () => {
     }
   };
 
+  const getTabButtonClass = (tab) =>
+    `w-full rounded-md border px-3 py-2 text-left text-sm font-medium transition ${
+      activeTab === tab
+        ? "border-green-200 bg-green-50 text-green-700"
+        : "border-transparent text-gray-600 hover:border-gray-200 hover:bg-gray-50 hover:text-gray-900"
+    }`;
+
   const formatOrderDisplayId = (orderId) => {
     if (!orderId) return "#--------";
     return `#${String(orderId).slice(-8).toUpperCase()}`;
@@ -1702,106 +1709,72 @@ const AdminDashboard = () => {
         </div>
       </div>
 
-      {/* Navigation Tabs */}
-      <div className="bg-white rounded-lg shadow-md mb-6">
-        <div className="border-b border-gray-200">
-          <nav className="flex space-x-8 px-6">
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-[240px,1fr]">
+        {/* Navigation Tabs */}
+        <div className="h-fit rounded-lg border bg-white p-4 shadow-md">
+          <h2 className="mb-3 px-2 text-xs font-semibold uppercase tracking-wide text-gray-400">
+            Dashboard Sections
+          </h2>
+          <nav className="space-y-1">
             <button
               onClick={() => setActiveTab("overview")}
-              className={`py-4 px-1 border-b-2 border-t-0 border-l-0 border-r-0 font-medium text-sm ${
-                activeTab === "overview"
-                  ? "border-green-500 text-green-600"
-                  : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
-              }`}
+              className={getTabButtonClass("overview")}
             >
               Overview
             </button>
             <button
               onClick={() => setActiveTab("products")}
-              className={`py-4 px-1 border-b-2 border-t-0 border-l-0 border-r-0 font-medium text-sm ${
-                activeTab === "products"
-                  ? "border-green-500 text-green-600"
-                  : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
-              }`}
+              className={getTabButtonClass("products")}
             >
               Products
             </button>
             <button
               onClick={() => setActiveTab("orders")}
-              className={`py-4 px-1 border-b-2 border-t-0 border-l-0 border-r-0 font-medium text-sm ${
-                activeTab === "orders"
-                  ? "border-green-500 text-green-600"
-                  : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
-              }`}
+              className={getTabButtonClass("orders")}
             >
               Orders
             </button>
             <button
               onClick={() => setActiveTab("users")}
-              className={`py-4 px-1 border-b-2 border-t-0 border-l-0 border-r-0 font-medium text-sm ${
-                activeTab === "users"
-                  ? "border-green-500 text-green-600"
-                  : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
-              }`}
+              className={getTabButtonClass("users")}
             >
               Users
             </button>
             <button
               onClick={() => setActiveTab("categories")}
-              className={`py-4 px-1 border-b-2 border-t-0 border-l-0 border-r-0 font-medium text-sm ${
-                activeTab === "categories"
-                  ? "border-green-500 text-green-600"
-                  : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
-              }`}
+              className={getTabButtonClass("categories")}
             >
               Categories
             </button>
             <button
               onClick={() => setActiveTab("hero")}
-              className={`py-4 px-1 border-b-2 border-t-0 border-l-0 border-r-0 font-medium text-sm ${
-                activeTab === "hero"
-                  ? "border-green-500 text-green-600"
-                  : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
-              }`}
+              className={getTabButtonClass("hero")}
             >
               Hero
             </button>
             <button
               onClick={() => setActiveTab("batches")}
-              className={`py-4 px-1 border-b-2 border-t-0 border-l-0 border-r-0 font-medium text-sm ${
-                activeTab === "batches"
-                  ? "border-green-500 text-green-600"
-                  : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
-              }`}
+              className={getTabButtonClass("batches")}
             >
               Batches
             </button>
             <button
               onClick={() => setActiveTab("about-video")}
-              className={`py-4 px-1 border-b-2 border-t-0 border-l-0 border-r-0 font-medium text-sm ${
-                activeTab === "about-video"
-                  ? "border-green-500 text-green-600"
-                  : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
-              }`}
+              className={getTabButtonClass("about-video")}
             >
               About
             </button>
             <button
               onClick={() => setActiveTab("announcements")}
-              className={`py-4 px-1 border-b-2 border-t-0 border-l-0 border-r-0 font-medium text-sm ${
-                activeTab === "announcements"
-                  ? "border-green-500 text-green-600"
-                  : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
-              }`}
+              className={getTabButtonClass("announcements")}
             >
               Announcements
             </button>
           </nav>
         </div>
-      </div>
 
-      {/* Tab Content */}
-      <div className="bg-white rounded-lg shadow-md">
+        {/* Tab Content */}
+        <div className="bg-white rounded-lg shadow-md">
         {/* Overview Tab */}
         {activeTab === "overview" && (
           <div className="p-6">
@@ -3743,6 +3716,7 @@ const AdminDashboard = () => {
             </div>
           </div>
         )}
+        </div>
       </div>
 
       {/* Announcement Modal */}
