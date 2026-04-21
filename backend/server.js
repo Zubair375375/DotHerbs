@@ -16,6 +16,7 @@ import announcementRoutes from "./routes/announcements.js";
 import heroSlideRoutes from "./routes/heroSlides.js";
 import productBannerRoutes from "./routes/productBanners.js";
 import aboutContentRoutes from "./routes/aboutContent.js";
+import batchRoutes from "./routes/batches.js";
 import { errorHandler } from "./middleware/errorHandler.js";
 
 dotenv.config();
@@ -113,6 +114,7 @@ app.use("/api/announcements", announcementRoutes);
 app.use("/api/hero-slides", heroSlideRoutes);
 app.use("/api/product-banners", productBannerRoutes);
 app.use("/api/about-content", aboutContentRoutes);
+app.use("/api/batches", batchRoutes);
 
 // Health check
 app.get("/api/health", (req, res) => {

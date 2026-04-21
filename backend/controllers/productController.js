@@ -2,6 +2,12 @@ import { validationResult } from "express-validator";
 import mongoose from "mongoose";
 import Category from "../models/Category.js";
 import Product from "../models/Product.js";
+import {
+  adjustStockToTarget,
+  attachComputedStock,
+  createBatchRecord,
+  getStockTotalsByProductIds,
+} from "../services/inventoryService.js";
 
 const normalizeSku = (value = "") => String(value).trim().toUpperCase();
 
@@ -82,11 +88,16 @@ export const getProducts = async (req, res) => {
       .limit(limit)
       .sort(sort);
 
+    const stockMap = await getStockTotalsByProductIds(
+      products.map((product) => product._id),
+    );
+    const productsWithStock = attachComputedStock(products, stockMap);
+
     const total = await Product.countDocuments(query);
 
     res.json({
       success: true,
-      data: products,
+      data: productsWithStock,
       pagination: {
         page,
         limit,
@@ -123,9 +134,12 @@ export const getProduct = async (req, res) => {
       });
     }
 
+    const stockMap = await getStockTotalsByProductIds([product._id]);
+    const productWithStock = attachComputedStock(product, stockMap);
+
     res.json({
       success: true,
-      data: product,
+      data: productWithStock,
     });
   } catch (error) {
     res.status(500).json({
@@ -152,9 +166,13 @@ export const createProduct = async (req, res) => {
   }
 
   try {
+    const session = await mongoose.startSession();
+    let createdProduct;
+
     const payload = {
       ...req.body,
       sku: normalizeSku(req.body.sku),
+      stock: Number(req.body.stock || 0),
     };
 
     if (await isSkuDuplicate(payload.sku)) {
@@ -164,13 +182,49 @@ export const createProduct = async (req, res) => {
       });
     }
 
-    const product = await Product.create(payload);
+    await session.withTransaction(async () => {
+      const product = await Product.create([payload], { session });
+      createdProduct = product[0];
+
+      if (payload.stock > 0) {
+        await createBatchRecord(
+          {
+            productId: createdProduct._id,
+            batchNumber: "INITIAL",
+            quantity: payload.stock,
+            costPrice: payload.costPrice,
+            purchaseDate: new Date(),
+            expiryDate: null,
+          },
+          session,
+        );
+      }
+    });
+
+    session.endSession();
+
+    const stockMap = await getStockTotalsByProductIds([createdProduct._id]);
+    const productWithStock = attachComputedStock(createdProduct, stockMap);
 
     res.status(201).json({
       success: true,
-      data: product,
+      data: productWithStock,
     });
   } catch (error) {
+    if (error?.message === "INSUFFICIENT_STOCK") {
+      return res.status(400).json({
+        success: false,
+        error: "Insufficient stock to apply requested stock change",
+      });
+    }
+
+    if (error?.message === "NEGATIVE_BATCH_STOCK_NOT_ALLOWED") {
+      return res.status(400).json({
+        success: false,
+        error: "Invalid stock operation",
+      });
+    }
+
     if (error?.code === 11000 && error?.keyPattern?.sku) {
       return res.status(400).json({
         success: false,
@@ -231,18 +285,38 @@ export const updateProduct = async (req, res) => {
       }
     }
 
-    const updatedProduct = await Product.findByIdAndUpdate(
-      req.params.id,
-      payload,
-      {
+    const session = await mongoose.startSession();
+    let updatedProduct;
+
+    await session.withTransaction(async () => {
+      if (payload.stock !== undefined) {
+        await adjustStockToTarget(product, Number(payload.stock), {
+          session,
+          costPrice:
+            payload.costPrice !== undefined
+              ? Number(payload.costPrice)
+              : Number(product.costPrice || 0),
+          purchaseDate: new Date(),
+        });
+      }
+
+      delete payload.stock;
+
+      updatedProduct = await Product.findByIdAndUpdate(req.params.id, payload, {
         new: true,
         runValidators: true,
-      },
-    );
+        session,
+      });
+    });
+
+    session.endSession();
+
+    const stockMap = await getStockTotalsByProductIds([updatedProduct._id]);
+    const productWithStock = attachComputedStock(updatedProduct, stockMap);
 
     res.json({
       success: true,
-      data: updatedProduct,
+      data: productWithStock,
     });
   } catch (error) {
     if (error?.code === 11000 && error?.keyPattern?.sku) {

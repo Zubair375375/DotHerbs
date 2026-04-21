@@ -71,6 +71,23 @@ export function formatProductsForExport(products) {
 
 /** Flatten an orders array into export-friendly rows */
 export function formatOrdersForExport(orders) {
+  const formatBatchAllocations = (item) => {
+    const allocations = Array.isArray(item?.batchAllocations)
+      ? item.batchAllocations
+      : [];
+
+    if (allocations.length === 0) {
+      return "—";
+    }
+
+    return allocations
+      .map(
+        (allocation) =>
+          `${allocation.batchNumber || "Unknown"}: ${Number(allocation.quantity || 0)}`,
+      )
+      .join(" | ");
+  };
+
   return orders.flatMap((o) => {
     const items = Array.isArray(o.orderItems) ? o.orderItems : [];
     const subtotal = items.reduce(
@@ -107,6 +124,7 @@ export function formatOrdersForExport(orders) {
           "Product Name": "—",
           Quantity: 0,
           "Price Per Item (PKR)": 0,
+          "Batch Allocations": "—",
         },
       ];
     }
@@ -117,6 +135,7 @@ export function formatOrdersForExport(orders) {
       "Product Name": item.name || item.product?.name || "—",
       Quantity: Number(item.quantity || 0),
       "Price Per Item (PKR)": Number(item.price || 0),
+      "Batch Allocations": formatBatchAllocations(item),
     }));
   });
 }

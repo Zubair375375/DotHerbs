@@ -1,7 +1,12 @@
 import { validationResult } from "express-validator";
+import mongoose from "mongoose";
 import Order from "../models/Order.js";
 import Product from "../models/Product.js";
 import stripe from "stripe";
+import {
+  deductStockFIFO,
+  getStockTotalsByProductIds,
+} from "../services/inventoryService.js";
 
 // @desc    Create new order
 // @route   POST /api/orders
@@ -33,47 +38,91 @@ export const createOrder = async (req, res) => {
       });
     }
 
-    // Check if products exist and have sufficient stock
-    for (const item of orderItems) {
-      const product = await Product.findById(item.product);
-      if (!product) {
-        return res.status(404).json({
-          success: false,
-          error: `Product ${item.name} not found`,
-        });
-      }
-      if (product.stock < item.quantity) {
-        return res.status(400).json({
-          success: false,
-          error: `Insufficient stock for ${product.name}`,
-        });
-      }
-    }
+    const session = await mongoose.startSession();
+    let createdOrder;
 
-    const order = new Order({
-      user: req.user._id,
-      orderItems,
-      shippingAddress,
-      paymentMethod,
-      taxPrice,
-      shippingPrice,
-      totalPrice,
+    await session.withTransaction(async () => {
+      const productIds = orderItems.map((item) => item.product);
+      const products = await Product.find({ _id: { $in: productIds } }).session(
+        session,
+      );
+      const productMap = new Map(
+        products.map((product) => [String(product._id), product]),
+      );
+      const stockMap = await getStockTotalsByProductIds(productIds, session);
+      const allocationMap = new Map();
+
+      for (const item of orderItems) {
+        const product = productMap.get(String(item.product));
+        if (!product) {
+          throw new Error(`PRODUCT_NOT_FOUND:${item.name}`);
+        }
+
+        const availableStock = stockMap.get(String(item.product)) || 0;
+        if (availableStock < Number(item.quantity)) {
+          throw new Error(`INSUFFICIENT_STOCK:${product.name}`);
+        }
+      }
+
+      for (const item of orderItems) {
+        const allocations = await deductStockFIFO(
+          item.product,
+          Number(item.quantity),
+          session,
+        );
+        allocationMap.set(String(item.product), allocations);
+      }
+
+      const orderItemsWithBatches = orderItems.map((item) => {
+        const allocations = allocationMap.get(String(item.product)) || [];
+        return {
+          ...item,
+          batchAllocations: allocations.map((allocation) => ({
+            batchId: allocation.batchId,
+            batchNumber: allocation.batchNumber,
+            quantity: allocation.deducted,
+          })),
+        };
+      });
+
+      const order = new Order({
+        user: req.user._id,
+        orderItems: orderItemsWithBatches,
+        shippingAddress,
+        paymentMethod,
+        taxPrice,
+        shippingPrice,
+        totalPrice,
+      });
+
+      createdOrder = await order.save({ session });
     });
 
-    const createdOrder = await order.save();
-
-    // Update product stock
-    for (const item of orderItems) {
-      const product = await Product.findById(item.product);
-      product.stock -= item.quantity;
-      await product.save();
-    }
+    session.endSession();
 
     res.status(201).json({
       success: true,
       data: createdOrder,
     });
   } catch (error) {
+    if (typeof error?.message === "string") {
+      if (error.message.startsWith("PRODUCT_NOT_FOUND:")) {
+        return res.status(404).json({
+          success: false,
+          error:
+            error.message.replace("PRODUCT_NOT_FOUND:", "Product ") +
+            " not found",
+        });
+      }
+
+      if (error.message.startsWith("INSUFFICIENT_STOCK:")) {
+        return res.status(400).json({
+          success: false,
+          error: `Insufficient stock for ${error.message.replace("INSUFFICIENT_STOCK:", "")}`,
+        });
+      }
+    }
+
     res.status(500).json({
       success: false,
       error: "Server error",

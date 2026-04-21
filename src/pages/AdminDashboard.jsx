@@ -191,6 +191,18 @@ const AdminDashboard = () => {
     startDate: "",
     endDate: "",
   });
+  const [selectedBatchProductId, setSelectedBatchProductId] = useState("");
+  const [productBatches, setProductBatches] = useState([]);
+  const [batchStockTotal, setBatchStockTotal] = useState(0);
+  const [loadingBatches, setLoadingBatches] = useState(false);
+  const [creatingBatch, setCreatingBatch] = useState(false);
+  const [batchForm, setBatchForm] = useState({
+    batchNumber: "",
+    quantity: "",
+    costPrice: "",
+    purchaseDate: "",
+    expiryDate: "",
+  });
   const announcements = useSelector(selectAllAnnouncements);
   const API_URL = import.meta.env.VITE_API_URL || "http://localhost:5000/api";
   const API_ORIGIN = API_URL.replace(/\/api\/?$/, "");
@@ -245,6 +257,109 @@ const AdminDashboard = () => {
   const getAuthToken = () => {
     const rawToken = localStorage.getItem("accessToken");
     return rawToken ? JSON.parse(rawToken) : null;
+  };
+
+  const fetchProductBatches = async (productId) => {
+    if (!productId) {
+      setProductBatches([]);
+      setBatchStockTotal(0);
+      return;
+    }
+
+    try {
+      setLoadingBatches(true);
+      const token = getAuthToken();
+      const response = await fetch(`${API_URL}/batches/product/${productId}`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      const result = await response.json();
+
+      if (!response.ok) {
+        throw new Error(result?.error || "Failed to fetch batches");
+      }
+
+      setProductBatches(
+        Array.isArray(result?.data?.batches) ? result.data.batches : [],
+      );
+      setBatchStockTotal(Number(result?.data?.totalStock || 0));
+    } catch (error) {
+      setProductBatches([]);
+      setBatchStockTotal(0);
+      toast.error(error.message || "Failed to fetch batches");
+    } finally {
+      setLoadingBatches(false);
+    }
+  };
+
+  const handleCreateBatch = async (e) => {
+    e.preventDefault();
+
+    if (!selectedBatchProductId) {
+      toast.error("Please select a product first");
+      return;
+    }
+
+    if (!batchForm.batchNumber.trim()) {
+      toast.error("Batch number is required");
+      return;
+    }
+
+    const quantity = Number(batchForm.quantity);
+    if (!Number.isFinite(quantity) || quantity <= 0) {
+      toast.error("Quantity must be greater than zero");
+      return;
+    }
+
+    const costPrice = Number(batchForm.costPrice);
+    if (!Number.isFinite(costPrice) || costPrice < 0) {
+      toast.error("Cost price must be a non-negative number");
+      return;
+    }
+
+    try {
+      setCreatingBatch(true);
+      const token = getAuthToken();
+      const payload = {
+        productId: selectedBatchProductId,
+        batchNumber: batchForm.batchNumber.trim(),
+        quantity,
+        costPrice,
+        purchaseDate: batchForm.purchaseDate || new Date().toISOString(),
+        expiryDate: batchForm.expiryDate || null,
+      };
+
+      const response = await fetch(`${API_URL}/batches`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify(payload),
+      });
+
+      const result = await response.json();
+      if (!response.ok) {
+        throw new Error(result?.error || "Failed to create batch");
+      }
+
+      toast.success("Batch added successfully");
+      setBatchForm({
+        batchNumber: "",
+        quantity: "",
+        costPrice: "",
+        purchaseDate: "",
+        expiryDate: "",
+      });
+      await fetchProductBatches(selectedBatchProductId);
+      dispatch(fetchProducts({ page: 1, limit: 200 }));
+    } catch (error) {
+      toast.error(error.message || "Failed to create batch");
+    } finally {
+      setCreatingBatch(false);
+    }
   };
 
   const fetchAboutContent = async () => {
@@ -420,10 +535,26 @@ const AdminDashboard = () => {
       dispatch(fetchAllAnnouncements());
     } else if (activeTab === "hero") {
       dispatch(fetchAllHeroSlides());
+    } else if (activeTab === "batches") {
+      dispatch(fetchProducts({ page: 1, limit: 200 }));
     } else if (activeTab === "about-video") {
       fetchAboutContent();
     }
   }, [activeTab, dispatch, isAuthenticated, user]);
+
+  useEffect(() => {
+    if (activeTab !== "batches") return;
+    if (!products.length) return;
+
+    const productId = selectedBatchProductId || products[0]?._id;
+    if (!productId) return;
+
+    if (!selectedBatchProductId) {
+      setSelectedBatchProductId(productId);
+    }
+
+    fetchProductBatches(productId);
+  }, [activeTab, products, selectedBatchProductId]);
 
   useEffect(() => {
     return () => {
@@ -1497,6 +1628,9 @@ const AdminDashboard = () => {
   const totalOrders = orderPagination?.total || orders?.length || 0;
   const totalProducts = productPagination?.total || products?.length || 0;
   const totalUsers = userPagination?.total || users?.length || 0;
+  const selectedBatchProduct = products.find(
+    (product) => product._id === selectedBatchProductId,
+  );
 
   if (!isAuthenticated || user?.role !== "admin") {
     return <Loader />;
@@ -1631,6 +1765,16 @@ const AdminDashboard = () => {
               }`}
             >
               Hero
+            </button>
+            <button
+              onClick={() => setActiveTab("batches")}
+              className={`py-4 px-1 border-b-2 border-t-0 border-l-0 border-r-0 font-medium text-sm ${
+                activeTab === "batches"
+                  ? "border-green-500 text-green-600"
+                  : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
+              }`}
+            >
+              Batches
             </button>
             <button
               onClick={() => setActiveTab("about-video")}
@@ -2419,6 +2563,229 @@ const AdminDashboard = () => {
                     </div>
                   )}
                 </div>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Batches Tab */}
+        {activeTab === "batches" && (
+          <div className="p-6">
+            <div className="mb-6 flex items-center justify-between">
+              <h2 className="text-2xl font-semibold">Batch Management</h2>
+              <p className="text-sm text-gray-500">
+                Total batch stock: {batchStockTotal}
+              </p>
+            </div>
+
+            <div className="mb-8 grid grid-cols-1 gap-8 lg:grid-cols-[360px,1fr]">
+              <div className="rounded-lg border bg-gray-50 p-5">
+                <h3 className="mb-4 text-xl font-semibold">Add New Batch</h3>
+                <form className="space-y-4" onSubmit={handleCreateBatch}>
+                  <div>
+                    <label className="mb-2 block text-sm font-medium text-gray-700">
+                      Product
+                    </label>
+                    <select
+                      value={selectedBatchProductId}
+                      onChange={(e) =>
+                        setSelectedBatchProductId(e.target.value)
+                      }
+                      className="w-full rounded border border-gray-300 px-3 py-2 text-sm"
+                      required
+                    >
+                      {products.map((product) => (
+                        <option key={product._id} value={product._id}>
+                          {product.name}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+
+                  <div>
+                    <label className="mb-2 block text-sm font-medium text-gray-700">
+                      Batch Number
+                    </label>
+                    <input
+                      type="text"
+                      value={batchForm.batchNumber}
+                      onChange={(e) =>
+                        setBatchForm((prev) => ({
+                          ...prev,
+                          batchNumber: e.target.value,
+                        }))
+                      }
+                      className="w-full rounded border border-gray-300 px-3 py-2 text-sm"
+                      placeholder="e.g. LOT-2026-001"
+                      required
+                    />
+                  </div>
+
+                  <div>
+                    <label className="mb-2 block text-sm font-medium text-gray-700">
+                      Quantity
+                    </label>
+                    <input
+                      type="number"
+                      min="0.01"
+                      step="0.01"
+                      value={batchForm.quantity}
+                      onChange={(e) =>
+                        setBatchForm((prev) => ({
+                          ...prev,
+                          quantity: e.target.value,
+                        }))
+                      }
+                      className="w-full rounded border border-gray-300 px-3 py-2 text-sm"
+                      required
+                    />
+                  </div>
+
+                  <div>
+                    <label className="mb-2 block text-sm font-medium text-gray-700">
+                      Cost Price
+                    </label>
+                    <input
+                      type="number"
+                      min="0"
+                      step="0.01"
+                      value={batchForm.costPrice}
+                      onChange={(e) =>
+                        setBatchForm((prev) => ({
+                          ...prev,
+                          costPrice: e.target.value,
+                        }))
+                      }
+                      className="w-full rounded border border-gray-300 px-3 py-2 text-sm"
+                      required
+                    />
+                  </div>
+
+                  <div>
+                    <label className="mb-2 block text-sm font-medium text-gray-700">
+                      Purchase Date
+                    </label>
+                    <input
+                      type="date"
+                      value={batchForm.purchaseDate}
+                      onChange={(e) =>
+                        setBatchForm((prev) => ({
+                          ...prev,
+                          purchaseDate: e.target.value,
+                        }))
+                      }
+                      className="w-full rounded border border-gray-300 px-3 py-2 text-sm"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="mb-2 block text-sm font-medium text-gray-700">
+                      Expiry Date (Optional)
+                    </label>
+                    <input
+                      type="date"
+                      value={batchForm.expiryDate}
+                      onChange={(e) =>
+                        setBatchForm((prev) => ({
+                          ...prev,
+                          expiryDate: e.target.value,
+                        }))
+                      }
+                      className="w-full rounded border border-gray-300 px-3 py-2 text-sm"
+                    />
+                  </div>
+
+                  <button
+                    type="submit"
+                    disabled={creatingBatch}
+                    className="flex items-center space-x-2 rounded bg-[#68a300] px-4 py-2 text-white hover:bg-[#5f9600] disabled:opacity-60"
+                  >
+                    <FaPlus />
+                    <span>{creatingBatch ? "Saving..." : "Add Batch"}</span>
+                  </button>
+                </form>
+              </div>
+
+              <div>
+                <h3 className="mb-4 text-xl font-semibold">Existing Batches</h3>
+                <p className="mb-3 text-sm text-gray-600">
+                  Product: {selectedBatchProduct?.name || "-"}
+                </p>
+
+                {loadingBatches ? (
+                  <div className="rounded-xl border border-dashed p-8 text-center text-gray-400">
+                    Loading batches...
+                  </div>
+                ) : productBatches.length === 0 ? (
+                  <div className="rounded-xl border border-dashed p-8 text-center text-gray-400">
+                    No batches found for selected product.
+                  </div>
+                ) : (
+                  <div className="overflow-x-auto rounded-xl border bg-white">
+                    <table className="min-w-full table-auto">
+                      <thead>
+                        <tr className="bg-gray-50">
+                          <th className="px-4 py-3 text-left text-xs font-medium uppercase text-gray-500">
+                            Product
+                          </th>
+                          <th className="px-4 py-3 text-left text-xs font-medium uppercase text-gray-500">
+                            Batch Number
+                          </th>
+                          <th className="px-4 py-3 text-left text-xs font-medium uppercase text-gray-500">
+                            Quantity
+                          </th>
+                          <th className="px-4 py-3 text-left text-xs font-medium uppercase text-gray-500">
+                            Remaining
+                          </th>
+                          <th className="px-4 py-3 text-left text-xs font-medium uppercase text-gray-500">
+                            Cost Price
+                          </th>
+                          <th className="px-4 py-3 text-left text-xs font-medium uppercase text-gray-500">
+                            Purchase Date
+                          </th>
+                          <th className="px-4 py-3 text-left text-xs font-medium uppercase text-gray-500">
+                            Expiry Date
+                          </th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-gray-200 bg-white">
+                        {productBatches.map((batch) => (
+                          <tr key={batch._id}>
+                            <td className="px-4 py-4 text-sm text-gray-700">
+                              {selectedBatchProduct?.name || "-"}
+                            </td>
+                            <td className="px-4 py-4 text-sm font-medium text-gray-900">
+                              {batch.batch_number}
+                            </td>
+                            <td className="px-4 py-4 text-sm text-gray-700">
+                              {Number(batch.quantity || 0)}
+                            </td>
+                            <td className="px-4 py-4 text-sm text-gray-700">
+                              {Number(batch.remaining_quantity || 0)}
+                            </td>
+                            <td className="px-4 py-4 text-sm text-gray-700">
+                              ${Number(batch.cost_price || 0).toFixed(2)}
+                            </td>
+                            <td className="px-4 py-4 text-sm text-gray-700">
+                              {batch.purchase_date
+                                ? new Date(
+                                    batch.purchase_date,
+                                  ).toLocaleDateString()
+                                : "-"}
+                            </td>
+                            <td className="px-4 py-4 text-sm text-gray-700">
+                              {batch.expiry_date
+                                ? new Date(
+                                    batch.expiry_date,
+                                  ).toLocaleDateString()
+                                : "-"}
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                )}
               </div>
             </div>
           </div>

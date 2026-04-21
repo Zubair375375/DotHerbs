@@ -23,6 +23,24 @@ const orderItemSchema = new mongoose.Schema({
     required: true,
     min: 1,
   },
+  batchAllocations: [
+    {
+      batchId: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Batch",
+      },
+      batchNumber: {
+        type: String,
+        required: true,
+        trim: true,
+      },
+      quantity: {
+        type: Number,
+        required: true,
+        min: 0,
+      },
+    },
+  ],
 });
 
 const orderSchema = new mongoose.Schema(

@@ -171,7 +171,7 @@ const OrderDetail = () => {
               {order.orderItems?.map((item, index) => (
                 <div
                   key={`${item.product?._id || item.product}-${index}`}
-                  className="flex items-center gap-4 rounded border p-4"
+                  className="flex items-start gap-4 rounded border p-4"
                 >
                   <img
                     src={getOrderItemImage(item)}
@@ -183,6 +183,30 @@ const OrderDetail = () => {
                     <p className="text-sm text-gray-600">
                       Quantity: {item.quantity} x {formatCurrency(item.price)}
                     </p>
+                    {Array.isArray(item.batchAllocations) &&
+                    item.batchAllocations.length > 0 ? (
+                      <div className="mt-2 rounded bg-gray-50 p-2 text-xs text-gray-600">
+                        <p className="mb-1 font-medium text-gray-700">
+                          Batch Allocations (FIFO)
+                        </p>
+                        <div className="space-y-1">
+                          {item.batchAllocations.map(
+                            (allocation, allocIndex) => (
+                              <p
+                                key={`${allocation.batchId || allocation.batchNumber}-${allocIndex}`}
+                              >
+                                Batch {allocation.batchNumber}:{" "}
+                                {allocation.quantity}
+                              </p>
+                            ),
+                          )}
+                        </div>
+                      </div>
+                    ) : (
+                      <p className="mt-2 text-xs text-gray-400">
+                        No batch trace available for this item.
+                      </p>
+                    )}
                   </div>
                   <p className="font-semibold text-gray-900">
                     {formatCurrency(item.quantity * item.price)}
