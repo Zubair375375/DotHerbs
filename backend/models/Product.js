@@ -103,10 +103,39 @@ const productSchema = new mongoose.Schema(
         {
           type: String,
           trim: true,
-          maxlength: [
-            300,
-            "Each direction step cannot exceed 300 characters",
-          ],
+          maxlength: [300, "Each direction step cannot exceed 300 characters"],
+        },
+      ],
+      default: [],
+    },
+    servingSize: {
+      type: String,
+      trim: true,
+      maxlength: [200, "Serving size cannot be more than 200 characters"],
+      default: "",
+    },
+    instructionsContent: {
+      type: String,
+      trim: true,
+      maxlength: [
+        2000,
+        "Instructions content cannot be more than 2000 characters",
+      ],
+      default: "",
+    },
+    ingredients: {
+      type: [
+        {
+          name: {
+            type: String,
+            trim: true,
+            maxlength: [150, "Ingredient name cannot exceed 150 characters"],
+          },
+          amount: {
+            type: String,
+            trim: true,
+            maxlength: [100, "Ingredient amount cannot exceed 100 characters"],
+          },
         },
       ],
       default: [],

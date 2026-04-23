@@ -30,6 +30,27 @@ const isValidBriefPoints = (value) => {
   );
 };
 
+const isValidIngredients = (value) => {
+  if (!Array.isArray(value)) {
+    return false;
+  }
+
+  return value.every((item) => {
+    if (!item || typeof item !== "object") {
+      return false;
+    }
+
+    const name = String(item.name || "").trim();
+    const amount = String(item.amount || "").trim();
+
+    if (!name && !amount) {
+      return true;
+    }
+
+    return name.length > 0 && name.length <= 150 && amount.length <= 100;
+  });
+};
+
 // Validation rules
 const createProductValidation = [
   body("name")
@@ -82,14 +103,39 @@ const createProductValidation = [
     .trim()
     .isLength({ max: 600 })
     .withMessage("Helps to content cannot be more than 600 characters"),
-  body("directions").optional().custom((value) => {
-    if (value !== undefined && value !== null) {
-      if (!Array.isArray(value)) throw new Error("Directions must be an array");
-      if (value.some((s) => typeof s !== "string" || s.length > 300))
-        throw new Error("Each direction step must be a string up to 300 characters");
-    }
-    return true;
-  }),
+  body("directions")
+    .optional()
+    .custom((value) => {
+      if (value !== undefined && value !== null) {
+        if (!Array.isArray(value))
+          throw new Error("Directions must be an array");
+        if (value.some((s) => typeof s !== "string" || s.length > 300))
+          throw new Error(
+            "Each direction step must be a string up to 300 characters",
+          );
+      }
+      return true;
+    }),
+  body("servingSize")
+    .optional()
+    .trim()
+    .isLength({ max: 200 })
+    .withMessage("Serving size cannot be more than 200 characters"),
+  body("instructionsContent")
+    .optional()
+    .trim()
+    .isLength({ max: 2000 })
+    .withMessage("Instructions content cannot be more than 2000 characters"),
+  body("ingredients")
+    .optional()
+    .custom((value) => {
+      if (!isValidIngredients(value)) {
+        throw new Error(
+          "Ingredients must be a list of rows with name (required when row is filled) and optional amount",
+        );
+      }
+      return true;
+    }),
   body("stock")
     .isInt({ min: 0 })
     .withMessage("Stock must be a non-negative integer"),
@@ -159,14 +205,39 @@ const updateProductValidation = [
     .trim()
     .isLength({ max: 600 })
     .withMessage("Helps to content cannot be more than 600 characters"),
-  body("directions").optional().custom((value) => {
-    if (value !== undefined && value !== null) {
-      if (!Array.isArray(value)) throw new Error("Directions must be an array");
-      if (value.some((s) => typeof s !== "string" || s.length > 300))
-        throw new Error("Each direction step must be a string up to 300 characters");
-    }
-    return true;
-  }),
+  body("directions")
+    .optional()
+    .custom((value) => {
+      if (value !== undefined && value !== null) {
+        if (!Array.isArray(value))
+          throw new Error("Directions must be an array");
+        if (value.some((s) => typeof s !== "string" || s.length > 300))
+          throw new Error(
+            "Each direction step must be a string up to 300 characters",
+          );
+      }
+      return true;
+    }),
+  body("servingSize")
+    .optional()
+    .trim()
+    .isLength({ max: 200 })
+    .withMessage("Serving size cannot be more than 200 characters"),
+  body("instructionsContent")
+    .optional()
+    .trim()
+    .isLength({ max: 2000 })
+    .withMessage("Instructions content cannot be more than 2000 characters"),
+  body("ingredients")
+    .optional()
+    .custom((value) => {
+      if (!isValidIngredients(value)) {
+        throw new Error(
+          "Ingredients must be a list of rows with name (required when row is filled) and optional amount",
+        );
+      }
+      return true;
+    }),
 ];
 
 const reviewValidation = [

@@ -33,6 +33,9 @@ const EditProduct = ({ onClose, onSuccess, product: productProp }) => {
     description: "",
     briefDescriptionPoints: [""],
     directions: [""],
+    servingSize: "",
+    instructionsContent: "",
+    ingredients: [{ name: "", amount: "" }],
     helpsTo: "",
     price: "",
     costPrice: "",
@@ -95,6 +98,15 @@ const EditProduct = ({ onClose, onSuccess, product: productProp }) => {
           Array.isArray(product.directions) && product.directions.length > 0
             ? product.directions
             : [""],
+        servingSize: product.servingSize || "",
+        instructionsContent: product.instructionsContent || "",
+        ingredients:
+          Array.isArray(product.ingredients) && product.ingredients.length > 0
+            ? product.ingredients.map((item) => ({
+                name: String(item?.name || ""),
+                amount: String(item?.amount || ""),
+              }))
+            : [{ name: "", amount: "" }],
         helpsTo: product.helpsTo || "",
         price: product.price?.toString() || "",
         costPrice: product.costPrice?.toString() || "",
@@ -173,6 +185,31 @@ const EditProduct = ({ onClose, onSuccess, product: productProp }) => {
     });
   };
 
+  const handleIngredientChange = (index, field, value) => {
+    setFormData((prev) => {
+      const updated = [...prev.ingredients];
+      updated[index] = { ...updated[index], [field]: value };
+      return { ...prev, ingredients: updated };
+    });
+  };
+
+  const addIngredient = () => {
+    setFormData((prev) => ({
+      ...prev,
+      ingredients: [...prev.ingredients, { name: "", amount: "" }],
+    }));
+  };
+
+  const removeIngredient = (index) => {
+    setFormData((prev) => {
+      if (prev.ingredients.length <= 1) return prev;
+      return {
+        ...prev,
+        ingredients: prev.ingredients.filter((_, i) => i !== index),
+      };
+    });
+  };
+
   const handleImageChange = (e) => {
     const file = e.target.files[0];
     if (file) {
@@ -217,6 +254,9 @@ const EditProduct = ({ onClose, onSuccess, product: productProp }) => {
       description,
       briefDescriptionPoints,
       directions,
+      servingSize,
+      instructionsContent,
+      ingredients,
       helpsTo,
       price,
       costPrice,
@@ -262,6 +302,30 @@ const EditProduct = ({ onClose, onSuccess, product: productProp }) => {
     const normalizedBriefPoints = (briefDescriptionPoints || [])
       .map((point) => point.trim())
       .filter(Boolean);
+
+    const normalizedIngredients = (ingredients || [])
+      .map((item) => ({
+        name: String(item?.name || "").trim(),
+        amount: String(item?.amount || "").trim(),
+      }))
+      .filter((item) => item.name || item.amount);
+
+    if (
+      normalizedIngredients.some(
+        (item) =>
+          !item.name || item.name.length > 150 || item.amount.length > 100,
+      )
+    ) {
+      toast.error(
+        "Each ingredient row needs a name (max 150 chars) and optional amount (max 100 chars).",
+      );
+      return;
+    }
+
+    if ((instructionsContent || "").trim().length > 2000) {
+      toast.error("Instructions content must be 2000 characters or fewer.");
+      return;
+    }
 
     if (normalizedBriefPoints.length === 0) {
       toast.error("Please add at least one brief description point.");
@@ -311,6 +375,9 @@ const EditProduct = ({ onClose, onSuccess, product: productProp }) => {
         briefDescription: normalizedBriefPoints.join("\n"),
         briefDescriptionPoints: normalizedBriefPoints,
         directions: (directions || []).map((s) => s.trim()).filter(Boolean),
+        servingSize: (servingSize || "").trim(),
+        instructionsContent: (instructionsContent || "").trim(),
+        ingredients: normalizedIngredients,
         helpsTo: helpsTo.trim(),
         price: Number(price),
         costPrice: Number(costPrice),
@@ -595,7 +662,9 @@ const EditProduct = ({ onClose, onSuccess, product: productProp }) => {
                   <input
                     type="text"
                     value={step}
-                    onChange={(e) => handleDirectionChange(index, e.target.value)}
+                    onChange={(e) =>
+                      handleDirectionChange(index, e.target.value)
+                    }
                     className="block w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500 sm:text-sm"
                     placeholder={`Step ${index + 1}`}
                   />
@@ -618,7 +687,99 @@ const EditProduct = ({ onClose, onSuccess, product: productProp }) => {
               + Add Step
             </button>
             <p className="mt-1 text-xs text-gray-500">
-              Add usage instructions step by step. Each step up to 300 characters.
+              Add usage instructions step by step. Each step up to 300
+              characters.
+            </p>
+          </div>
+
+          <div>
+            <label
+              htmlFor="servingSize"
+              className="block text-sm font-medium text-gray-700"
+            >
+              Serving Size (Ingredients Section)
+            </label>
+            <input
+              id="servingSize"
+              name="servingSize"
+              type="text"
+              value={formData.servingSize}
+              onChange={handleChange}
+              maxLength={200}
+              className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500 sm:text-sm"
+              placeholder="Example: One (1) Capsule"
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700">
+              Ingredients Content
+            </label>
+            <div className="mt-2 space-y-2">
+              {formData.ingredients.map((item, index) => (
+                <div
+                  key={`ingredient-${index}`}
+                  className="grid grid-cols-1 gap-2 sm:grid-cols-12"
+                >
+                  <input
+                    type="text"
+                    value={item.name}
+                    onChange={(e) =>
+                      handleIngredientChange(index, "name", e.target.value)
+                    }
+                    className="sm:col-span-7 block w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500 sm:text-sm"
+                    placeholder={`Ingredient ${index + 1}`}
+                  />
+                  <input
+                    type="text"
+                    value={item.amount}
+                    onChange={(e) =>
+                      handleIngredientChange(index, "amount", e.target.value)
+                    }
+                    className="sm:col-span-4 block w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500 sm:text-sm"
+                    placeholder="Amount (e.g. 250 mg)"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => removeIngredient(index)}
+                    disabled={formData.ingredients.length <= 1}
+                    className="sm:col-span-1 rounded-md border border-gray-300 px-3 py-2 text-sm text-gray-700 hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50"
+                  >
+                    Remove
+                  </button>
+                </div>
+              ))}
+            </div>
+            <button
+              type="button"
+              onClick={addIngredient}
+              className="mt-2 rounded-md border border-green-600 px-3 py-1.5 text-sm font-medium text-green-700 hover:bg-green-50"
+            >
+              + Add Ingredient
+            </button>
+            <p className="mt-1 text-xs text-gray-500">
+              Add each ingredient with optional amount. If amount is filled,
+              name is required.
+            </p>
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700">
+              Instructions Paragraph (Ingredients Tab)
+            </label>
+            <textarea
+              id="instructionsContent"
+              name="instructionsContent"
+              rows="4"
+              value={formData.instructionsContent}
+              onChange={handleChange}
+              maxLength={2000}
+              className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500 sm:text-sm"
+              placeholder="Add the instructions text shown in the Instructions tab."
+            />
+            <p className="mt-1 text-xs text-gray-500">
+              This will appear as a paragraph in the Instructions tab (max 2000
+              characters).
             </p>
           </div>
 

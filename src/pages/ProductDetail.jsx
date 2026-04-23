@@ -21,6 +21,8 @@ import {
   FaShoppingCart,
   FaHeart,
   FaShare,
+  FaChevronDown,
+  FaChevronUp,
 } from "react-icons/fa";
 
 const ProductDetail = () => {
@@ -37,10 +39,13 @@ const ProductDetail = () => {
   const [selectedImage, setSelectedImage] = useState(0);
   const [quantity, setQuantity] = useState(1);
   const [isWishlisted, setIsWishlisted] = useState(false);
+  const [expandedSection, setExpandedSection] = useState("ingredients");
+  const [ingredientsTab, setIngredientsTab] = useState("ingredients");
 
-  const directionsPoints = Array.isArray(product?.directions) && product.directions.length > 0
-    ? product.directions
-    : [];
+  const directionsPoints =
+    Array.isArray(product?.directions) && product.directions.length > 0
+      ? product.directions
+      : [];
   const briefDescriptionPoints = Array.isArray(product?.briefDescriptionPoints)
     ? product.briefDescriptionPoints
         .map((point) => String(point).trim())
@@ -54,6 +59,22 @@ const ProductDetail = () => {
     .split(/\r?\n/)
     .map((point) => point.replace(/^[-*•]\s*/, "").trim())
     .filter(Boolean);
+
+  const ingredientsRows = Array.isArray(product?.ingredients)
+    ? product.ingredients
+        .map((item) => ({
+          name: String(item?.name || "").trim(),
+          amount: String(item?.amount || "").trim(),
+        }))
+        .filter((item) => item.name || item.amount)
+    : [];
+
+  const servingSizeText = (product?.servingSize || "").trim();
+  const instructionsParagraph = (product?.instructionsContent || "").trim();
+
+  const toggleSection = (section) => {
+    setExpandedSection((prev) => (prev === section ? "" : section));
+  };
 
   useEffect(() => {
     if (id) {
@@ -357,27 +378,186 @@ const ProductDetail = () => {
                 </ol>
               </div>
             )}
-          </div>
 
-          {/* Reviews Section */}
-          {product.reviews && product.reviews.length > 0 && (
-            <div className="border-t pt-6">
-              <h3 className="text-lg font-semibold mb-4">Customer Reviews</h3>
-              <div className="space-y-4">
-                {product.reviews.slice(0, 3).map((review, index) => (
-                  <div key={index} className="border-b pb-4">
-                    <div className="flex items-center space-x-2 mb-2">
-                      <div className="flex">{renderStars(review.rating)}</div>
-                      <span className="font-medium">
-                        {review.user?.name || "Anonymous"}
-                      </span>
-                    </div>
-                    <p className="text-gray-600">{review.comment}</p>
+            <div className="mt-6 border-t border-gray-200 pt-4">
+              <button
+                type="button"
+                onClick={() => toggleSection("ingredients")}
+                className="flex w-full items-center justify-between py-2 text-left"
+              >
+                <h4 className="text-2xl font-semibold text-gray-800">
+                  Ingredients
+                </h4>
+                {expandedSection === "ingredients" ? (
+                  <FaChevronUp className="text-gray-500" />
+                ) : (
+                  <FaChevronDown className="text-gray-500" />
+                )}
+              </button>
+
+              {expandedSection === "ingredients" && (
+                <div className="mt-3 border border-gray-200 bg-white">
+                  <div className="grid grid-cols-2 border-b border-gray-200 bg-gray-50">
+                    <button
+                      type="button"
+                      onClick={() => setIngredientsTab("ingredients")}
+                      className={`px-4 py-3 text-center text-sm font-semibold ${
+                        ingredientsTab === "ingredients"
+                          ? "border-b-2 border-gray-900 text-gray-900"
+                          : "text-gray-500"
+                      }`}
+                    >
+                      Ingredients
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setIngredientsTab("instructions")}
+                      className={`px-4 py-3 text-center text-sm font-semibold ${
+                        ingredientsTab === "instructions"
+                          ? "border-b-2 border-gray-900 text-gray-900"
+                          : "text-gray-500"
+                      }`}
+                    >
+                      Instructions
+                    </button>
                   </div>
-                ))}
+
+                  <div className="px-6 py-5 text-sm text-gray-700">
+                    {ingredientsTab === "ingredients" ? (
+                      <>
+                        {servingSizeText ? (
+                          <p className="mb-4 text-center font-medium">
+                            Serving Size: {servingSizeText}
+                          </p>
+                        ) : null}
+                        {ingredientsRows.length > 0 ? (
+                          <div className="space-y-3">
+                            {ingredientsRows.map((row, index) => (
+                              <div
+                                key={`ingredient-row-${index}`}
+                                className="flex items-center justify-between border-b border-gray-100 pb-3"
+                              >
+                                <span>{row.name || "-"}</span>
+                                <span className="font-medium">
+                                  {row.amount || "-"}
+                                </span>
+                              </div>
+                            ))}
+                          </div>
+                        ) : (
+                          <p className="text-center text-gray-500">
+                            Ingredients not added yet.
+                          </p>
+                        )}
+                      </>
+                    ) : (
+                      <div className="space-y-2">
+                        {instructionsParagraph ? (
+                          <p className="whitespace-pre-line leading-6 text-gray-700">
+                            {instructionsParagraph}
+                          </p>
+                        ) : (
+                          <p>No instructions added for this product yet.</p>
+                        )}
+                      </div>
+                    )}
+                  </div>
+                </div>
+              )}
+
+              <div className="mt-4 border-t border-gray-200">
+                <button
+                  type="button"
+                  onClick={() => toggleSection("faqs")}
+                  className="flex w-full items-center justify-between py-4 text-left"
+                >
+                  <span className="text-2xl font-semibold text-gray-800">
+                    FAQs
+                  </span>
+                  {expandedSection === "faqs" ? (
+                    <FaChevronUp className="text-gray-500" />
+                  ) : (
+                    <FaChevronDown className="text-gray-500" />
+                  )}
+                </button>
+                {expandedSection === "faqs" && (
+                  <div className="pb-4 text-sm text-gray-600">
+                    Frequently asked questions will be available soon.
+                  </div>
+                )}
+              </div>
+
+              <div className="border-t border-gray-200">
+                <button
+                  type="button"
+                  onClick={() => toggleSection("reviews")}
+                  className="flex w-full items-center justify-between py-4 text-left"
+                >
+                  <span className="text-2xl font-semibold text-gray-800">
+                    Customer Reviews
+                  </span>
+                  {expandedSection === "reviews" ? (
+                    <FaChevronUp className="text-gray-500" />
+                  ) : (
+                    <FaChevronDown className="text-gray-500" />
+                  )}
+                </button>
+                {expandedSection === "reviews" && (
+                  <div className="pb-4">
+                    {product.reviews && product.reviews.length > 0 ? (
+                      <div className="space-y-4">
+                        {product.reviews.slice(0, 3).map((review, index) => (
+                          <div
+                            key={index}
+                            className="border-b border-gray-100 pb-4"
+                          >
+                            <div className="mb-2 flex items-center space-x-2">
+                              <div className="flex">
+                                {renderStars(review.rating)}
+                              </div>
+                              <span className="font-medium">
+                                {review.user?.name || "Anonymous"}
+                              </span>
+                            </div>
+                            <p className="text-sm text-gray-600">
+                              {review.comment}
+                            </p>
+                          </div>
+                        ))}
+                      </div>
+                    ) : (
+                      <p className="text-sm text-gray-600">
+                        No customer reviews yet.
+                      </p>
+                    )}
+                  </div>
+                )}
+              </div>
+
+              <div className="border-t border-b border-gray-200">
+                <button
+                  type="button"
+                  onClick={() => toggleSection("quality")}
+                  className="flex w-full items-center justify-between py-4 text-left"
+                >
+                  <span className="text-2xl font-semibold text-gray-800">
+                    Our Quality Promise
+                  </span>
+                  {expandedSection === "quality" ? (
+                    <FaChevronUp className="text-gray-500" />
+                  ) : (
+                    <FaChevronDown className="text-gray-500" />
+                  )}
+                </button>
+                {expandedSection === "quality" && (
+                  <div className="pb-4 text-sm text-gray-600">
+                    Every batch is produced with strict quality checks for
+                    purity, consistency, and safety.
+                  </div>
+                )}
               </div>
             </div>
-          )}
+          </div>
         </div>
       </div>
     </div>
