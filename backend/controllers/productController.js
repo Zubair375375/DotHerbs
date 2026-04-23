@@ -456,9 +456,10 @@ export const createProductReview = async (req, res) => {
       message: "Review added",
     });
   } catch (error) {
+    console.error("Error creating review:", error);
     res.status(500).json({
       success: false,
-      error: "Server error",
+      error: error.message || "Server error",
     });
   }
 };

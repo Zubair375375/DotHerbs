@@ -65,8 +65,6 @@ const questionSchema = new mongoose.Schema(
       ref: "User",
       required: true,
     },
-    title: {
-      type: String,
     question: {
       type: String,
       required: true,

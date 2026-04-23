@@ -1,4 +1,4 @@
-import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
+import { createSlice, createAsyncThunk, createSelector } from "@reduxjs/toolkit";
 import axios from "axios";
 
 const API_URL = import.meta.env.VITE_API_URL || "http://localhost:5000/api";
@@ -148,10 +148,11 @@ const announcementSlice = createSlice({
 
 export const { dismissAnnouncement } = announcementSlice.actions;
 
-export const selectActiveAnnouncements = (state) =>
-  state.announcements.active.filter(
-    (a) => !state.announcements.dismissed.includes(a._id),
-  );
+export const selectActiveAnnouncements = createSelector(
+  [(state) => state.announcements.active, (state) => state.announcements.dismissed],
+  (active, dismissed) =>
+    active.filter((a) => !dismissed.includes(a._id)),
+);
 export const selectAllAnnouncements = (state) => state.announcements.all;
 export const selectAnnouncementsLoading = (state) =>
   state.announcements.isLoading;
