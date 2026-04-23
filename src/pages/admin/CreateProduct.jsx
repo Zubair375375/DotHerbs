@@ -30,6 +30,7 @@ const CreateProduct = ({ onClose, onSuccess }) => {
     servingSize: "",
     instructionsContent: "",
     faqContent: "",
+    qualityPromiseContent: "",
     ingredients: [{ name: "", amount: "" }],
     helpsTo: "",
     price: "",
@@ -208,6 +209,7 @@ const CreateProduct = ({ onClose, onSuccess }) => {
       servingSize,
       instructionsContent,
       faqContent,
+      qualityPromiseContent,
       ingredients,
       helpsTo,
       price,
@@ -276,6 +278,11 @@ const CreateProduct = ({ onClose, onSuccess }) => {
       return;
     }
 
+    if ((qualityPromiseContent || "").trim().length > 3000) {
+      toast.error("Quality promise content must be 3000 characters or fewer.");
+      return;
+    }
+
     if (normalizedBriefPoints.length === 0) {
       toast.error("Please add at least one brief description point.");
       return;
@@ -336,6 +343,7 @@ const CreateProduct = ({ onClose, onSuccess }) => {
         servingSize: (servingSize || "").trim(),
         instructionsContent: (instructionsContent || "").trim(),
         faqContent: (faqContent || "").trim(),
+        qualityPromiseContent: (qualityPromiseContent || "").trim(),
         ingredients: normalizedIngredients,
         helpsTo: helpsTo.trim(),
         price: Number(price),
@@ -746,6 +754,29 @@ const CreateProduct = ({ onClose, onSuccess }) => {
           />
           <p className="mt-1 text-xs text-gray-500">
             This content will appear inside the FAQs tab.
+          </p>
+        </div>
+
+        <div>
+          <label
+            htmlFor="qualityPromiseContent"
+            className="block text-sm font-medium text-gray-700"
+          >
+            Our Quality Promise Paragraph
+          </label>
+          <textarea
+            id="qualityPromiseContent"
+            name="qualityPromiseContent"
+            rows="4"
+            value={formData.qualityPromiseContent}
+            onChange={handleChange}
+            maxLength={3000}
+            className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500 sm:text-sm"
+            placeholder="Add quality promise content shown in the Our Quality Promise tab."
+          />
+          <p className="mt-1 text-xs text-gray-500">
+            This will appear as a paragraph in Our Quality Promise tab (max 3000
+            characters).
           </p>
         </div>
 

@@ -131,6 +131,11 @@ const createProductValidation = [
     .trim()
     .isLength({ max: 10000 })
     .withMessage("FAQ content cannot be more than 10000 characters"),
+  body("qualityPromiseContent")
+    .optional()
+    .trim()
+    .isLength({ max: 3000 })
+    .withMessage("Quality promise content cannot be more than 3000 characters"),
   body("ingredients")
     .optional()
     .custom((value) => {
@@ -238,6 +243,11 @@ const updateProductValidation = [
     .trim()
     .isLength({ max: 10000 })
     .withMessage("FAQ content cannot be more than 10000 characters"),
+  body("qualityPromiseContent")
+    .optional()
+    .trim()
+    .isLength({ max: 3000 })
+    .withMessage("Quality promise content cannot be more than 3000 characters"),
   body("ingredients")
     .optional()
     .custom((value) => {

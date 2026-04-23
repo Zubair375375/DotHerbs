@@ -129,6 +129,15 @@ const productSchema = new mongoose.Schema(
       maxlength: [10000, "FAQ content cannot be more than 10000 characters"],
       default: "",
     },
+    qualityPromiseContent: {
+      type: String,
+      trim: true,
+      maxlength: [
+        3000,
+        "Quality promise content cannot be more than 3000 characters",
+      ],
+      default: "",
+    },
     ingredients: {
       type: [
         {

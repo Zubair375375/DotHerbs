@@ -73,6 +73,7 @@ const ProductDetail = () => {
   const servingSizeText = (product?.servingSize || "").trim();
   const instructionsParagraph = (product?.instructionsContent || "").trim();
   const sanitizedFaqContent = DOMPurify.sanitize(product?.faqContent || "");
+  const qualityPromiseParagraph = (product?.qualityPromiseContent || "").trim();
 
   const toggleSection = (section) => {
     setExpandedSection((prev) => (prev === section ? "" : section));
@@ -562,8 +563,8 @@ const ProductDetail = () => {
                 </button>
                 {expandedSection === "quality" && (
                   <div className="pb-4 text-sm text-gray-600">
-                    Every batch is produced with strict quality checks for
-                    purity, consistency, and safety.
+                    {qualityPromiseParagraph ||
+                      "Every batch is produced with strict quality checks for purity, consistency, and safety."}
                   </div>
                 )}
               </div>
