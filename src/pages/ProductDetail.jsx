@@ -646,7 +646,7 @@ const ProductDetail = () => {
 
   if (status === "failed") {
     return (
-      <div className="container mx-auto px-4 py-8">
+      <div className="container mx-auto px-4 pt-14 pb-8">
         <div className="text-center text-red-600">
           <p>Error loading product: {error}</p>
           <button
@@ -662,7 +662,7 @@ const ProductDetail = () => {
 
   if (!product) {
     return (
-      <div className="container mx-auto px-4 py-8">
+      <div className="container mx-auto px-4 pt-14 pb-8">
         <div className="text-center">
           <p className="text-gray-500 text-lg">Product not found</p>
           <button
@@ -677,8 +677,9 @@ const ProductDetail = () => {
   }
 
   return (
-    <div className="container mx-auto px-4 py-8">
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+    <div className="container mx-auto px-4 pt-14 pb-8">
+      <div className="mx-auto w-full lg:w-[70%]">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
         {/* Product Images */}
         <div className="space-y-4">
           <div className="aspect-square bg-gray-100 rounded-lg overflow-hidden">
@@ -1565,6 +1566,7 @@ const ProductDetail = () => {
               </div>
             </div>
           </div>
+        </div>
         </div>
       </div>
     </div>
