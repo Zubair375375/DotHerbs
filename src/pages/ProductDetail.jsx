@@ -24,6 +24,9 @@ import {
   FaShare,
   FaChevronDown,
   FaChevronUp,
+  FaUpload,
+  FaReply,
+  FaTrash,
 } from "react-icons/fa";
 
 const ProductDetail = () => {
@@ -35,6 +38,7 @@ const ProductDetail = () => {
   const error = useSelector(selectProductsError);
   const isAuthenticated = useSelector(selectIsAuthenticated);
   const user = useSelector(selectAuthUser);
+  const accessToken = useSelector((state) => state.auth.accessToken);
   const isAdmin = user?.role === "admin";
 
   const [selectedImage, setSelectedImage] = useState(0);
@@ -42,6 +46,30 @@ const ProductDetail = () => {
   const [isWishlisted, setIsWishlisted] = useState(false);
   const [expandedSection, setExpandedSection] = useState("ingredients");
   const [ingredientsTab, setIngredientsTab] = useState("ingredients");
+  const [reviewsTab, setReviewsTab] = useState("reviews");
+  const [showReviewForm, setShowReviewForm] = useState(false);
+  const [showQuestionForm, setShowQuestionForm] = useState(false);
+  const [submittingReview, setSubmittingReview] = useState(false);
+  const [reviewImageName, setReviewImageName] = useState("");
+  const [reviewMediaFile, setReviewMediaFile] = useState(null);
+  const [submittingQuestion, setSubmittingQuestion] = useState(false);
+  const [reviewForm, setReviewForm] = useState({
+    rating: 0,
+    title: "",
+    content: "",
+    displayName: "",
+    email: "",
+  });
+  const [questionForm, setQuestionForm] = useState({
+    title: "",
+    question: "",
+    displayName: "",
+    email: "",
+  });
+  const [adminAnswerDrafts, setAdminAnswerDrafts] = useState({});
+  const [submittingAdminAnswerId, setSubmittingAdminAnswerId] = useState("");
+  const [deletingAdminAnswerId, setDeletingAdminAnswerId] = useState("");
+  const [deletingQuestionId, setDeletingQuestionId] = useState("");
 
   const directionsPoints =
     Array.isArray(product?.directions) && product.directions.length > 0
@@ -74,6 +102,441 @@ const ProductDetail = () => {
   const instructionsParagraph = (product?.instructionsContent || "").trim();
   const sanitizedFaqContent = DOMPurify.sanitize(product?.faqContent || "");
   const qualityPromiseParagraph = (product?.qualityPromiseContent || "").trim();
+  const reviewItems = Array.isArray(product?.reviews) ? product.reviews : [];
+  const questionItems = Array.isArray(product?.questions)
+    ? product.questions
+    : [];
+  const sortedReviews = [...reviewItems].sort(
+    (a, b) => new Date(b?.createdAt || 0) - new Date(a?.createdAt || 0),
+  );
+  const sortedQuestions = [...questionItems].sort(
+    (a, b) => new Date(b?.createdAt || 0) - new Date(a?.createdAt || 0),
+  );
+  const reviewCount = sortedReviews.length;
+  const questionCount = sortedQuestions.length;
+  const averageReviewRating = reviewCount
+    ? sortedReviews.reduce((sum, item) => sum + Number(item?.rating || 0), 0) /
+      reviewCount
+    : 0;
+
+  const formatReviewDate = (value) => {
+    const date = new Date(value);
+    if (Number.isNaN(date.getTime())) return "";
+    return date.toLocaleDateString("en-US", {
+      month: "2-digit",
+      day: "2-digit",
+      year: "numeric",
+    });
+  };
+
+  const parseReviewContent = (value = "") => {
+    const normalizedLines = String(value)
+      .split(/\r?\n/)
+      .map((line) => line.trim())
+      .filter(Boolean);
+
+    if (normalizedLines.length > 1) {
+      return {
+        title: normalizedLines[0],
+        body: normalizedLines.slice(1).join(" "),
+      };
+    }
+
+    const singleLine = normalizedLines[0] || "";
+    return {
+      title: singleLine.split(/[.!?]/)[0]?.trim() || "Review",
+      body: singleLine,
+    };
+  };
+
+  const handleReviewFieldChange = (field, value) => {
+    setReviewForm((prev) => ({ ...prev, [field]: value }));
+  };
+
+  const handleReviewImageChange = (e) => {
+    const file = e.target.files?.[0];
+    setReviewMediaFile(file || null);
+    setReviewImageName(file ? file.name : "");
+  };
+
+  const resetReviewForm = () => {
+    setReviewForm({
+      rating: 0,
+      title: "",
+      content: "",
+      displayName: user?.name || "",
+      email: user?.email || "",
+    });
+    setReviewImageName("");
+    setReviewMediaFile(null);
+  };
+
+  const resetQuestionForm = () => {
+    setQuestionForm({
+      title: "",
+      question: "",
+      displayName: user?.name || "",
+      email: user?.email || "",
+    });
+  };
+
+  const openReviewForm = () => {
+    if (isAdmin) {
+      toast.error("Admin accounts cannot submit reviews");
+      return;
+    }
+
+    if (!isAuthenticated) {
+      toast.error("Please login to write a review");
+      navigate("/login");
+      return;
+    }
+
+    setExpandedSection("reviews");
+    setReviewsTab("reviews");
+    setShowReviewForm(true);
+    setShowQuestionForm(false);
+    setReviewForm((prev) => ({
+      ...prev,
+      displayName: prev.displayName || user?.name || "",
+      email: prev.email || user?.email || "",
+    }));
+  };
+
+  const openQuestionForm = () => {
+    if (isAdmin) {
+      toast.error("Admin accounts cannot submit questions");
+      return;
+    }
+
+    if (!isAuthenticated) {
+      toast.error("Please login to ask a question");
+      navigate("/login");
+      return;
+    }
+
+    setExpandedSection("reviews");
+    setReviewsTab("questions");
+    setShowQuestionForm(true);
+    setShowReviewForm(false);
+    setQuestionForm((prev) => ({
+      ...prev,
+      displayName: prev.displayName || user?.name || "",
+      email: prev.email || user?.email || "",
+    }));
+  };
+
+  const handleQuestionFieldChange = (field, value) => {
+    setQuestionForm((prev) => ({ ...prev, [field]: value }));
+  };
+
+  const getAuthToken = () => {
+    if (accessToken) {
+      return accessToken;
+    }
+
+    const rawToken = localStorage.getItem("accessToken");
+    if (!rawToken) return null;
+
+    try {
+      return JSON.parse(rawToken);
+    } catch {
+      return rawToken;
+    }
+  };
+
+  const getEntityId = (entity) => entity?._id || entity?.id || "";
+
+  const handleAdminAnswerDraftChange = (questionId, value) => {
+    setAdminAnswerDrafts((prev) => ({ ...prev, [questionId]: value }));
+  };
+
+  const handleAdminAnswerQuestion = async (questionId) => {
+    const answer = (adminAnswerDrafts[questionId] || "").trim();
+    if (!answer) {
+      toast.error("Please write an answer first.");
+      return;
+    }
+
+    const token = getAuthToken();
+    if (!token) {
+      toast.error("Admin session expired. Please login again.");
+      navigate("/login");
+      return;
+    }
+
+    try {
+      setSubmittingAdminAnswerId(questionId);
+      const response = await fetch(
+        `${import.meta.env.VITE_API_URL || "http://localhost:5000/api"}/products/${id}/questions/${questionId}/answer`,
+        {
+          method: "PATCH",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify({ answer }),
+        },
+      );
+
+      const result = await response.json().catch(() => ({}));
+      if (!response.ok) {
+        throw new Error(result?.error || "Failed to save answer.");
+      }
+
+      toast.success("Answer saved successfully.");
+      dispatch(fetchProduct(id));
+    } catch (submitError) {
+      toast.error(submitError.message || "Failed to save answer.");
+    } finally {
+      setSubmittingAdminAnswerId("");
+    }
+  };
+
+  const handleAdminDeleteAnswer = async (questionId) => {
+    const token = getAuthToken();
+    if (!token) {
+      toast.error("Admin session expired. Please login again.");
+      navigate("/login");
+      return;
+    }
+
+    try {
+      setDeletingAdminAnswerId(questionId);
+      const response = await fetch(
+        `${import.meta.env.VITE_API_URL || "http://localhost:5000/api"}/products/${id}/questions/${questionId}/answer`,
+        {
+          method: "DELETE",
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        },
+      );
+
+      const result = await response.json().catch(() => ({}));
+      if (!response.ok) {
+        throw new Error(result?.error || "Failed to delete answer.");
+      }
+
+      setAdminAnswerDrafts((prev) => ({
+        ...prev,
+        [questionId]: "",
+      }));
+      toast.success("Reply deleted successfully.");
+      dispatch(fetchProduct(id));
+    } catch (submitError) {
+      toast.error(submitError.message || "Failed to delete answer.");
+    } finally {
+      setDeletingAdminAnswerId("");
+    }
+  };
+
+  const handleAdminDeleteQuestion = async (questionId) => {
+    if (!window.confirm("Delete this user question?")) {
+      return;
+    }
+
+    const token = getAuthToken();
+    if (!token) {
+      toast.error("Admin session expired. Please login again.");
+      navigate("/login");
+      return;
+    }
+
+    try {
+      setDeletingQuestionId(questionId);
+      const response = await fetch(
+        `${import.meta.env.VITE_API_URL || "http://localhost:5000/api"}/products/${id}/questions/${questionId}`,
+        {
+          method: "DELETE",
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        },
+      );
+
+      const result = await response.json().catch(() => ({}));
+      if (!response.ok) {
+        throw new Error(result?.error || "Failed to delete question.");
+      }
+
+      toast.success("Question deleted successfully.");
+      dispatch(fetchProduct(id));
+    } catch (submitError) {
+      toast.error(submitError.message || "Failed to delete question.");
+    } finally {
+      setDeletingQuestionId("");
+    }
+  };
+
+  const uploadReviewMedia = async (file, token) => {
+    const formData = new FormData();
+    const isVideo = file.type.startsWith("video/");
+    formData.append(isVideo ? "video" : "image", file);
+
+    const endpoint = isVideo ? "/upload/video" : "/upload";
+    const response = await fetch(
+      `${import.meta.env.VITE_API_URL || "http://localhost:5000/api"}${endpoint}`,
+      {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+        body: formData,
+      },
+    );
+
+    const result = await response.json().catch(() => ({}));
+    if (!response.ok) {
+      throw new Error(result?.error || "Failed to upload review media.");
+    }
+
+    return {
+      ...result.data,
+      mediaType: isVideo ? "video" : "image",
+    };
+  };
+
+  const handleSubmitReview = async (e) => {
+    e.preventDefault();
+
+    if (!isAuthenticated) {
+      toast.error("Please login to submit a review");
+      navigate("/login");
+      return;
+    }
+
+    if (!reviewForm.rating) {
+      toast.error("Please select a rating.");
+      return;
+    }
+
+    if (!reviewForm.title.trim()) {
+      toast.error("Please add a review title.");
+      return;
+    }
+
+    if (!reviewForm.content.trim()) {
+      toast.error("Please add your review content.");
+      return;
+    }
+
+    const rawToken = localStorage.getItem("accessToken");
+    const token = rawToken ? JSON.parse(rawToken) : null;
+
+    if (!token) {
+      toast.error("Please login to submit a review");
+      navigate("/login");
+      return;
+    }
+
+    setSubmittingReview(true);
+
+    try {
+      let uploadedMedia;
+      if (reviewMediaFile) {
+        uploadedMedia = await uploadReviewMedia(reviewMediaFile, token);
+      }
+
+      const response = await fetch(
+        `${import.meta.env.VITE_API_URL || "http://localhost:5000/api"}/products/${id}/reviews`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify({
+            rating: reviewForm.rating,
+            title: reviewForm.title.trim(),
+            comment: reviewForm.content.trim(),
+            displayName: reviewForm.displayName.trim(),
+            email: reviewForm.email.trim(),
+            media: uploadedMedia,
+          }),
+        },
+      );
+
+      const result = await response.json().catch(() => ({}));
+
+      if (!response.ok) {
+        throw new Error(result?.error || "Failed to submit review.");
+      }
+
+      toast.success("Review submitted successfully.");
+      resetReviewForm();
+      setShowReviewForm(false);
+      dispatch(fetchProduct(id));
+    } catch (submitError) {
+      toast.error(submitError.message || "Failed to submit review.");
+    } finally {
+      setSubmittingReview(false);
+    }
+  };
+
+  const handleSubmitQuestion = async (e) => {
+    e.preventDefault();
+
+    if (!isAuthenticated) {
+      toast.error("Please login to submit a question");
+      navigate("/login");
+      return;
+    }
+
+    if (!questionForm.title.trim()) {
+      toast.error("Please add a question title.");
+      return;
+    }
+
+    if (!questionForm.question.trim()) {
+      toast.error("Please add your question.");
+      return;
+    }
+
+    const rawToken = localStorage.getItem("accessToken");
+    const token = rawToken ? JSON.parse(rawToken) : null;
+
+    if (!token) {
+      toast.error("Please login to submit a question");
+      navigate("/login");
+      return;
+    }
+
+    setSubmittingQuestion(true);
+
+    try {
+      const response = await fetch(
+        `${import.meta.env.VITE_API_URL || "http://localhost:5000/api"}/products/${id}/questions`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify({
+            title: questionForm.title.trim(),
+            question: questionForm.question.trim(),
+            displayName: questionForm.displayName.trim(),
+            email: questionForm.email.trim(),
+          }),
+        },
+      );
+
+      const result = await response.json().catch(() => ({}));
+      if (!response.ok) {
+        throw new Error(result?.error || "Failed to submit question.");
+      }
+
+      toast.success("Question submitted successfully.");
+      resetQuestionForm();
+      setShowQuestionForm(false);
+      dispatch(fetchProduct(id));
+    } catch (submitError) {
+      toast.error(submitError.message || "Failed to submit question.");
+    } finally {
+      setSubmittingQuestion(false);
+    }
+  };
 
   const toggleSection = (section) => {
     setExpandedSection((prev) => (prev === section ? "" : section));
@@ -90,6 +553,37 @@ const ProductDetail = () => {
       setSelectedImage(0);
     }
   }, [product]);
+
+  useEffect(() => {
+    setReviewForm((prev) => ({
+      ...prev,
+      displayName: user?.name || prev.displayName,
+      email: user?.email || prev.email,
+    }));
+    setQuestionForm((prev) => ({
+      ...prev,
+      displayName: user?.name || prev.displayName,
+      email: user?.email || prev.email,
+    }));
+  }, [user]);
+
+  useEffect(() => {
+    if (!isAdmin) return;
+
+    setReviewsTab("questions");
+    setAdminAnswerDrafts((prev) => {
+      const next = { ...prev };
+      sortedQuestions.forEach((question) => {
+        const questionId = getEntityId(question);
+        if (!questionId) return;
+
+        if (!(questionId in next) || next[questionId] === "") {
+          next[questionId] = question?.answer || "";
+        }
+      });
+      return next;
+    });
+  }, [isAdmin, sortedQuestions]);
 
   const handleAddToCart = () => {
     if (isAdmin) {
@@ -515,32 +1009,541 @@ const ProductDetail = () => {
                   )}
                 </button>
                 {expandedSection === "reviews" && (
-                  <div className="pb-4">
-                    {product.reviews && product.reviews.length > 0 ? (
-                      <div className="space-y-4">
-                        {product.reviews.slice(0, 3).map((review, index) => (
-                          <div
-                            key={index}
-                            className="border-b border-gray-100 pb-4"
+                  <div className="pb-4 border-t border-gray-200 pt-6">
+                    <div className="text-center">
+                      <h4 className="text-4xl font-semibold text-gray-800">
+                        Customer Reviews
+                      </h4>
+                      <div className="mt-2 flex items-center justify-center gap-2 text-gray-700">
+                        <div className="flex">
+                          {renderStars(averageReviewRating)}
+                        </div>
+                        <span>{averageReviewRating.toFixed(2)} out of 5</span>
+                      </div>
+                      <p className="mt-1 text-gray-600">
+                        Based on {reviewCount} review
+                        {reviewCount === 1 ? "" : "s"}
+                      </p>
+
+                      {!isAdmin ? (
+                        <div className="mx-auto mt-6 grid max-w-xl grid-cols-1 gap-3 sm:grid-cols-2">
+                          <button
+                            type="button"
+                            onClick={openReviewForm}
+                            className="bg-gray-900 px-6 py-3 text-sm font-semibold text-white hover:bg-black"
                           >
-                            <div className="mb-2 flex items-center space-x-2">
-                              <div className="flex">
-                                {renderStars(review.rating)}
-                              </div>
-                              <span className="font-medium">
-                                {review.user?.name || "Anonymous"}
-                              </span>
-                            </div>
-                            <p className="text-sm text-gray-600">
-                              {review.comment}
-                            </p>
+                            Write a review
+                          </button>
+                          <button
+                            type="button"
+                            onClick={openQuestionForm}
+                            className="border border-gray-400 bg-white px-6 py-3 text-sm font-semibold text-gray-800 hover:bg-gray-50"
+                          >
+                            Ask a question
+                          </button>
+                        </div>
+                      ) : (
+                        <p className="mx-auto mt-6 max-w-2xl rounded border border-green-100 bg-green-50 px-4 py-3 text-sm text-green-800">
+                          Admin moderation mode: open the Questions tab below to
+                          answer customer questions.
+                        </p>
+                      )}
+                    </div>
+
+                    {showReviewForm && (
+                      <form
+                        className="mt-8 border-t border-gray-200 pt-6"
+                        onSubmit={handleSubmitReview}
+                      >
+                        <h5 className="text-center text-3xl font-semibold text-gray-800">
+                          Write a review
+                        </h5>
+
+                        <div className="mt-6">
+                          <label className="block text-xs font-medium uppercase tracking-wide text-gray-600">
+                            Rating
+                          </label>
+                          <div className="mt-3 flex items-center justify-center gap-2">
+                            {[1, 2, 3, 4, 5].map((star) => (
+                              <button
+                                key={`select-star-${star}`}
+                                type="button"
+                                onClick={() =>
+                                  handleReviewFieldChange("rating", star)
+                                }
+                                className="text-2xl"
+                              >
+                                {star <= reviewForm.rating ? (
+                                  <FaStar className="text-yellow-400" />
+                                ) : (
+                                  <FaRegStar className="text-gray-400" />
+                                )}
+                              </button>
+                            ))}
                           </div>
-                        ))}
+                        </div>
+
+                        <div className="mt-6">
+                          <label
+                            htmlFor="reviewTitle"
+                            className="block text-center text-xs font-medium uppercase tracking-wide text-gray-600"
+                          >
+                            Review Title{" "}
+                            <span className="text-gray-400">(100)</span>
+                          </label>
+                          <input
+                            id="reviewTitle"
+                            type="text"
+                            maxLength={100}
+                            value={reviewForm.title}
+                            onChange={(e) =>
+                              handleReviewFieldChange("title", e.target.value)
+                            }
+                            className="mt-3 block w-full border border-gray-300 px-3 py-2 text-sm text-gray-700"
+                            placeholder="Give your review a title"
+                          />
+                        </div>
+
+                        <div className="mt-6">
+                          <label
+                            htmlFor="reviewContent"
+                            className="block text-center text-xs font-medium uppercase tracking-wide text-gray-600"
+                          >
+                            Review Content
+                          </label>
+                          <textarea
+                            id="reviewContent"
+                            rows="5"
+                            value={reviewForm.content}
+                            onChange={(e) =>
+                              handleReviewFieldChange("content", e.target.value)
+                            }
+                            className="mt-3 block w-full border border-gray-300 px-3 py-2 text-sm text-gray-700"
+                            placeholder="Start writing here..."
+                          />
+                        </div>
+
+                        <div className="mt-6">
+                          <label className="block text-xs font-medium uppercase tracking-wide text-gray-600">
+                            Picture/Video (Optional)
+                          </label>
+                          <label className="mt-3 flex h-28 w-28 cursor-pointer items-center justify-center border border-gray-300 text-gray-500 hover:bg-gray-50">
+                            <input
+                              type="file"
+                              accept="image/*,video/*"
+                              className="hidden"
+                              onChange={handleReviewImageChange}
+                            />
+                            <FaUpload className="text-3xl" />
+                          </label>
+                          {reviewImageName ? (
+                            <p className="mt-2 text-xs text-gray-500">
+                              Selected: {reviewImageName}
+                            </p>
+                          ) : null}
+                        </div>
+
+                        <div className="mt-6">
+                          <label
+                            htmlFor="displayName"
+                            className="block text-xs font-medium uppercase tracking-wide text-gray-600"
+                          >
+                            Display Name{" "}
+                            <span className="normal-case text-gray-400">
+                              (displayed publicly)
+                            </span>
+                          </label>
+                          <input
+                            id="displayName"
+                            type="text"
+                            value={reviewForm.displayName}
+                            onChange={(e) =>
+                              handleReviewFieldChange(
+                                "displayName",
+                                e.target.value,
+                              )
+                            }
+                            className="mt-3 block w-full border border-gray-300 px-3 py-2 text-sm text-gray-700"
+                            placeholder="Display name"
+                          />
+                        </div>
+
+                        <div className="mt-6">
+                          <label
+                            htmlFor="reviewEmail"
+                            className="block text-xs font-medium uppercase tracking-wide text-gray-600"
+                          >
+                            Email Address
+                          </label>
+                          <input
+                            id="reviewEmail"
+                            type="email"
+                            value={reviewForm.email}
+                            onChange={(e) =>
+                              handleReviewFieldChange("email", e.target.value)
+                            }
+                            className="mt-3 block w-full border border-gray-300 px-3 py-2 text-sm text-gray-700"
+                            placeholder="Your email address"
+                          />
+                        </div>
+
+                        <p className="mt-6 text-center text-xs leading-5 text-gray-500">
+                          How we use your data: We&apos;ll only contact you
+                          about the review you left, and only if necessary. By
+                          submitting your review, you agree to our terms,
+                          privacy and content policies.
+                        </p>
+
+                        <div className="mt-6 flex flex-col justify-center gap-3 sm:flex-row">
+                          <button
+                            type="button"
+                            onClick={() => {
+                              resetReviewForm();
+                              setShowReviewForm(false);
+                            }}
+                            className="border border-gray-800 px-6 py-3 text-sm font-semibold text-gray-800 hover:bg-gray-50"
+                          >
+                            Cancel review
+                          </button>
+                          <button
+                            type="submit"
+                            disabled={submittingReview}
+                            className="bg-gray-900 px-6 py-3 text-sm font-semibold text-white hover:bg-black disabled:opacity-50"
+                          >
+                            {submittingReview
+                              ? "Submitting..."
+                              : "Submit Review"}
+                          </button>
+                        </div>
+                      </form>
+                    )}
+
+                    {showQuestionForm && (
+                      <form
+                        className="mt-8 border-t border-gray-200 pt-6"
+                        onSubmit={handleSubmitQuestion}
+                      >
+                        <h5 className="text-center text-3xl font-semibold text-gray-800">
+                          Ask a question
+                        </h5>
+
+                        <div className="mt-6">
+                          <label
+                            htmlFor="questionContent"
+                            className="block text-center text-xs font-medium uppercase tracking-wide text-gray-600"
+                          >
+                            Your Question
+                          </label>
+                          <textarea
+                            id="questionContent"
+                            rows="5"
+                            value={questionForm.question}
+                            onChange={(e) =>
+                              handleQuestionFieldChange(
+                                "question",
+                                e.target.value,
+                              )
+                            }
+                            className="mt-3 block w-full border border-gray-300 px-3 py-2 text-sm text-gray-700"
+                            placeholder="Start writing here..."
+                          />
+                        </div>
+
+                        <div className="mt-6">
+                          <label
+                            htmlFor="questionDisplayName"
+                            className="block text-xs font-medium uppercase tracking-wide text-gray-600"
+                          >
+                            Display Name
+                          </label>
+                          <input
+                            id="questionDisplayName"
+                            type="text"
+                            value={questionForm.displayName}
+                            onChange={(e) =>
+                              handleQuestionFieldChange(
+                                "displayName",
+                                e.target.value,
+                              )
+                            }
+                            className="mt-3 block w-full border border-gray-300 px-3 py-2 text-sm text-gray-700"
+                            placeholder="Display name"
+                          />
+                        </div>
+
+                        <div className="mt-6">
+                          <label
+                            htmlFor="questionEmail"
+                            className="block text-xs font-medium uppercase tracking-wide text-gray-600"
+                          >
+                            Email Address
+                          </label>
+                          <input
+                            id="questionEmail"
+                            type="email"
+                            value={questionForm.email}
+                            onChange={(e) =>
+                              handleQuestionFieldChange("email", e.target.value)
+                            }
+                            className="mt-3 block w-full border border-gray-300 px-3 py-2 text-sm text-gray-700"
+                            placeholder="Your email address"
+                          />
+                        </div>
+
+                        <div className="mt-6 flex flex-col justify-center gap-3 sm:flex-row">
+                          <button
+                            type="button"
+                            onClick={() => {
+                              resetQuestionForm();
+                              setShowQuestionForm(false);
+                            }}
+                            className="border border-gray-800 px-6 py-3 text-sm font-semibold text-gray-800 hover:bg-gray-50"
+                          >
+                            Cancel question
+                          </button>
+                          <button
+                            type="submit"
+                            disabled={submittingQuestion}
+                            className="bg-gray-900 px-6 py-3 text-sm font-semibold text-white hover:bg-black disabled:opacity-50"
+                          >
+                            {submittingQuestion
+                              ? "Submitting..."
+                              : "Submit Question"}
+                          </button>
+                        </div>
+                      </form>
+                    )}
+
+                    <div className="mt-8 border-y border-gray-200 py-2">
+                      <button
+                        type="button"
+                        onClick={() => setReviewsTab("reviews")}
+                        className={`mr-3 px-4 py-2 text-sm ${
+                          reviewsTab === "reviews"
+                            ? "bg-gray-200 text-gray-900"
+                            : "text-gray-700 hover:bg-gray-100"
+                        }`}
+                      >
+                        Reviews ({reviewCount})
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setReviewsTab("questions")}
+                        className={`px-4 py-2 text-sm underline ${
+                          reviewsTab === "questions"
+                            ? "bg-gray-200 text-gray-900 no-underline"
+                            : "text-gray-700 hover:bg-gray-100"
+                        }`}
+                      >
+                        Questions ({questionCount})
+                      </button>
+                    </div>
+
+                    {reviewsTab === "reviews" ? (
+                      <div className="mt-6">
+                        <p className="mb-4 text-sm text-gray-700">
+                          Most Recent
+                        </p>
+                        <div className="space-y-6">
+                          {sortedReviews.length > 0 ? (
+                            sortedReviews.map((review, index) => {
+                              const rawComment = String(
+                                review?.comment || "",
+                              ).trim();
+                              const parsedReview = parseReviewContent(
+                                review?.title
+                                  ? `${review.title}\n${rawComment}`
+                                  : rawComment,
+                              );
+
+                              return (
+                                <div
+                                  key={review?._id || `review-${index}`}
+                                  className="border-t border-gray-200 pt-4"
+                                >
+                                  <div className="mb-2 flex items-center justify-between">
+                                    <div className="flex">
+                                      {renderStars(review?.rating || 0)}
+                                    </div>
+                                    <span className="text-xs text-gray-500">
+                                      {formatReviewDate(review?.createdAt)}
+                                    </span>
+                                  </div>
+
+                                  <div className="mb-2 flex items-center gap-3 text-sm text-gray-700">
+                                    <span>
+                                      {review?.displayName ||
+                                        review?.user?.name ||
+                                        "Anonymous"}
+                                    </span>
+                                    <span className="bg-gray-800 px-2 py-0.5 text-xs font-semibold text-white">
+                                      Verified
+                                    </span>
+                                  </div>
+
+                                  <p className="font-semibold text-gray-800">
+                                    {parsedReview.title}
+                                  </p>
+                                  <p className="mt-1 whitespace-pre-line text-gray-700">
+                                    {parsedReview.body || rawComment}
+                                  </p>
+                                  {review?.media?.url ? (
+                                    review?.media?.mediaType === "video" ? (
+                                      <video
+                                        className="mt-3 max-h-64 w-full rounded border border-gray-200"
+                                        controls
+                                        src={`http://localhost:5000${review.media.url}`}
+                                      />
+                                    ) : (
+                                      <img
+                                        className="mt-3 max-h-64 rounded border border-gray-200"
+                                        src={`http://localhost:5000${review.media.url}`}
+                                        alt={parsedReview.title}
+                                      />
+                                    )
+                                  ) : null}
+                                </div>
+                              );
+                            })
+                          ) : (
+                            <p className="text-sm text-gray-600">
+                              No customer reviews yet.
+                            </p>
+                          )}
+                        </div>
                       </div>
                     ) : (
-                      <p className="text-sm text-gray-600">
-                        No customer reviews yet.
-                      </p>
+                      <div className="mt-6 space-y-6">
+                        {sortedQuestions.length > 0 ? (
+                          sortedQuestions.map((question, index) => {
+                            const questionId = getEntityId(question);
+                            return (
+                              <div
+                                key={questionId || `question-${index}`}
+                                className="border-t border-gray-200 pt-4"
+                              >
+                                <div className="flex items-center justify-between">
+                                  <span className="text-xs text-gray-500">
+                                    {formatReviewDate(question?.createdAt)}
+                                  </span>
+                                </div>
+                                <p className="mt-1 text-sm text-gray-500">
+                                  {question?.displayName ||
+                                    question?.user?.name ||
+                                    "Anonymous"}
+                                </p>
+                                <p className="mt-2 whitespace-pre-line text-gray-700">
+                                  {question?.question}
+                                </p>
+                                {question?.isAnswered && question?.answer ? (
+                                  <div className="mt-3 rounded bg-gray-50 p-3">
+                                    <p className="text-xs tracking-wide text-black">
+                                      <span className="font-bold">
+                                        &gt;&gt; Dot Herbs
+                                      </span>{" "}
+                                      replied:
+                                    </p>
+                                    <p className="mt-1 text-sm text-gray-700">
+                                      {question.answer}
+                                    </p>
+                                  </div>
+                                ) : null}
+
+                                {isAdmin ? (
+                                  <div className="mt-3 rounded border border-gray-200 bg-white p-3">
+                                    <label className="text-xs font-semibold uppercase tracking-wide text-gray-500">
+                                      Admin Reply
+                                    </label>
+                                    <textarea
+                                      rows="3"
+                                      value={
+                                        adminAnswerDrafts[questionId] || ""
+                                      }
+                                      onChange={(e) =>
+                                        handleAdminAnswerDraftChange(
+                                          questionId,
+                                          e.target.value,
+                                        )
+                                      }
+                                      className="mt-2 block w-full rounded border border-gray-300 px-3 py-2 text-sm text-gray-700"
+                                      placeholder="Write an answer for this question"
+                                    />
+                                    <div className="mt-3 flex justify-end">
+                                      <div className="flex flex-wrap items-center justify-end gap-2">
+                                        <button
+                                          type="button"
+                                          onClick={() =>
+                                            handleAdminDeleteQuestion(
+                                              questionId,
+                                            )
+                                          }
+                                          disabled={
+                                            deletingQuestionId === questionId
+                                          }
+                                          className="inline-flex items-center gap-2 rounded border border-red-200 px-3 py-2 text-sm font-semibold text-red-700 hover:bg-red-50 disabled:opacity-50"
+                                        >
+                                          <FaTrash />
+                                          {deletingQuestionId === questionId
+                                            ? "Deleting question..."
+                                            : "Delete Question"}
+                                        </button>
+
+                                        {question?.isAnswered ? (
+                                          <button
+                                            type="button"
+                                            onClick={() =>
+                                              handleAdminDeleteAnswer(
+                                                questionId,
+                                              )
+                                            }
+                                            disabled={
+                                              deletingAdminAnswerId ===
+                                              questionId
+                                            }
+                                            className="inline-flex items-center gap-2 rounded border border-red-200 px-3 py-2 text-sm font-semibold text-red-700 hover:bg-red-50 disabled:opacity-50"
+                                          >
+                                            <FaTrash />
+                                            {deletingAdminAnswerId ===
+                                            questionId
+                                              ? "Deleting reply..."
+                                              : "Delete Reply"}
+                                          </button>
+                                        ) : null}
+
+                                        <button
+                                          type="button"
+                                          onClick={() =>
+                                            handleAdminAnswerQuestion(
+                                              questionId,
+                                            )
+                                          }
+                                          disabled={
+                                            submittingAdminAnswerId ===
+                                            questionId
+                                          }
+                                          className="inline-flex items-center gap-2 rounded bg-gray-900 px-4 py-2 text-sm font-semibold text-white hover:bg-black disabled:opacity-50"
+                                        >
+                                          <FaReply />
+                                          {submittingAdminAnswerId ===
+                                          questionId
+                                            ? "Saving..."
+                                            : question?.isAnswered
+                                              ? "Update Answer"
+                                              : "Save Answer"}
+                                        </button>
+                                      </div>
+                                    </div>
+                                  </div>
+                                ) : null}
+                              </div>
+                            );
+                          })
+                        ) : (
+                          <p className="text-sm text-gray-600">
+                            No questions yet.
+                          </p>
+                        )}
+                      </div>
                     )}
                   </div>
                 )}

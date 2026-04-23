@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useParams, useNavigate } from "react-router-dom";
 import toast from "react-hot-toast";
+import { FaRegStar, FaReply, FaStar, FaTrash } from "react-icons/fa";
 import {
   fetchProduct,
   fetchCategories,
@@ -28,6 +29,9 @@ const EditProduct = ({ onClose, onSuccess, product: productProp }) => {
   const categories = useSelector(selectCategories);
   const user = useSelector(selectAuthUser);
   const isAuthenticated = useSelector(selectIsAuthenticated);
+  const accessToken = useSelector((state) => state.auth.accessToken);
+  const API_URL = import.meta.env.VITE_API_URL || "http://localhost:5000/api";
+  const API_ORIGIN = API_URL.replace(/\/api\/?$/, "");
 
   const [formData, setFormData] = useState({
     name: "",
@@ -50,6 +54,10 @@ const EditProduct = ({ onClose, onSuccess, product: productProp }) => {
   });
   const [imagePreview, setImagePreview] = useState(null);
   const [uploading, setUploading] = useState(false);
+  const [reviewRecords, setReviewRecords] = useState([]);
+  const [questionRecords, setQuestionRecords] = useState([]);
+  const [questionAnswerDrafts, setQuestionAnswerDrafts] = useState({});
+  const [moderatingId, setModeratingId] = useState("");
   const descriptionWordCount = formData.description
     .trim()
     .split(/\s+/)
@@ -125,8 +133,220 @@ const EditProduct = ({ onClose, onSuccess, product: productProp }) => {
       if (product.images?.[0]?.url || product.images?.[0]) {
         setImagePreview(product.images[0].url || product.images[0]);
       }
+
+      const nextReviews = Array.isArray(product.reviews) ? product.reviews : [];
+      const nextQuestions = Array.isArray(product.questions)
+        ? product.questions
+        : [];
+      setReviewRecords(nextReviews);
+      setQuestionRecords(nextQuestions);
+      setQuestionAnswerDrafts(
+        nextQuestions.reduce((accumulator, question) => {
+          if (question?._id) {
+            accumulator[question._id] = question.answer || "";
+          }
+          return accumulator;
+        }, {}),
+      );
     }
   }, [categories, product]);
+
+  const getAuthToken = () => {
+    if (accessToken) {
+      return accessToken;
+    }
+
+    const rawToken = localStorage.getItem("accessToken");
+    if (!rawToken) {
+      return null;
+    }
+
+    try {
+      return JSON.parse(rawToken);
+    } catch {
+      return rawToken;
+    }
+  };
+
+  const getEntityId = (entity) => entity?._id || entity?.id || "";
+
+  const getCurrentProductId = () =>
+    productProp?._id || productProp?.id || id || product?._id || product?.id;
+
+  const resolveMediaUrl = (url) => {
+    if (!url) return "";
+    if (url.startsWith("http://") || url.startsWith("https://")) return url;
+    if (url.startsWith("/uploads/")) return `${API_ORIGIN}${url}`;
+    return url;
+  };
+
+  const formatDate = (value) => {
+    const date = new Date(value);
+    if (Number.isNaN(date.getTime())) return "";
+    return date.toLocaleDateString("en-US", {
+      month: "2-digit",
+      day: "2-digit",
+      year: "numeric",
+    });
+  };
+
+  const renderStars = (rating) => {
+    const normalized = Math.max(0, Math.min(5, Number(rating) || 0));
+    return Array.from({ length: 5 }, (_, index) =>
+      index < normalized ? (
+        <FaStar key={`star-${index}`} className="text-yellow-400" />
+      ) : (
+        <FaRegStar key={`star-${index}`} className="text-gray-300" />
+      ),
+    );
+  };
+
+  const handleAnswerDraftChange = (questionId, value) => {
+    setQuestionAnswerDrafts((prev) => ({ ...prev, [questionId]: value }));
+  };
+
+  const handleDeleteReview = async (reviewId) => {
+    if (!window.confirm("Delete this review?")) {
+      return;
+    }
+
+    try {
+      setModeratingId(`review-delete-${reviewId}`);
+      const token = getAuthToken();
+      const productId = getCurrentProductId();
+      if (!token) {
+        throw new Error("Admin session expired. Please login again.");
+      }
+      if (!productId || !reviewId) {
+        throw new Error("Missing product or review identifier.");
+      }
+      const response = await fetch(
+        `${API_URL}/products/${productId}/reviews/${reviewId}`,
+        {
+          method: "DELETE",
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        },
+      );
+      const result = await response.json().catch(() => ({}));
+
+      if (!response.ok) {
+        throw new Error(result?.error || "Failed to delete review");
+      }
+
+      setReviewRecords((prev) =>
+        prev.filter((review) => review._id !== reviewId),
+      );
+      toast.success("Review deleted successfully.");
+    } catch (actionError) {
+      toast.error(actionError.message || "Failed to delete review.");
+    } finally {
+      setModeratingId("");
+    }
+  };
+
+  const handleDeleteQuestion = async (questionId) => {
+    if (!window.confirm("Delete this question?")) {
+      return;
+    }
+
+    try {
+      setModeratingId(`question-delete-${questionId}`);
+      const token = getAuthToken();
+      const productId = getCurrentProductId();
+      if (!token) {
+        throw new Error("Admin session expired. Please login again.");
+      }
+      if (!productId || !questionId) {
+        throw new Error("Missing product or question identifier.");
+      }
+      const response = await fetch(
+        `${API_URL}/products/${productId}/questions/${questionId}`,
+        {
+          method: "DELETE",
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        },
+      );
+      const result = await response.json().catch(() => ({}));
+
+      if (!response.ok) {
+        throw new Error(result?.error || "Failed to delete question");
+      }
+
+      setQuestionRecords((prev) =>
+        prev.filter((question) => question._id !== questionId),
+      );
+      setQuestionAnswerDrafts((prev) => {
+        const next = { ...prev };
+        delete next[questionId];
+        return next;
+      });
+      toast.success("Question deleted successfully.");
+    } catch (actionError) {
+      toast.error(actionError.message || "Failed to delete question.");
+    } finally {
+      setModeratingId("");
+    }
+  };
+
+  const handleAnswerQuestion = async (questionId) => {
+    const answer = (questionAnswerDrafts[questionId] || "").trim();
+    if (!answer) {
+      toast.error("Please enter an answer first.");
+      return;
+    }
+
+    try {
+      setModeratingId(`question-answer-${questionId}`);
+      const token = getAuthToken();
+      const productId = getCurrentProductId();
+      if (!token) {
+        throw new Error("Admin session expired. Please login again.");
+      }
+      if (!productId || !questionId) {
+        throw new Error("Missing product or question identifier.");
+      }
+      const response = await fetch(
+        `${API_URL}/products/${productId}/questions/${questionId}/answer`,
+        {
+          method: "PATCH",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify({ answer }),
+        },
+      );
+      const result = await response.json().catch(() => ({}));
+
+      if (!response.ok) {
+        throw new Error(result?.error || "Failed to save answer");
+      }
+
+      setQuestionRecords((prev) =>
+        prev.map((question) =>
+          getEntityId(question) === questionId
+            ? {
+                ...question,
+                answer,
+                isAnswered: true,
+              }
+            : question,
+        ),
+      );
+      if (!productProp && productId) {
+        dispatch(fetchProduct(productId));
+      }
+      toast.success("Question answered successfully.");
+    } catch (actionError) {
+      toast.error(actionError.message || "Failed to save answer.");
+    } finally {
+      setModeratingId("");
+    }
+  };
 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
@@ -865,6 +1085,195 @@ const EditProduct = ({ onClose, onSuccess, product: productProp }) => {
             <p className="mt-1 text-xs text-gray-500">
               Add benefits as points, one per line (max 600 characters total).
             </p>
+          </div>
+
+          <div className="rounded-lg border border-gray-200 p-5">
+            <div className="flex items-center justify-between">
+              <div>
+                <h2 className="text-lg font-semibold text-gray-900">
+                  Review Moderation
+                </h2>
+                <p className="mt-1 text-sm text-gray-500">
+                  Remove inappropriate reviews and inspect uploaded media.
+                </p>
+              </div>
+              <span className="rounded-full bg-gray-100 px-3 py-1 text-xs font-semibold text-gray-700">
+                {reviewRecords.length} review
+                {reviewRecords.length === 1 ? "" : "s"}
+              </span>
+            </div>
+
+            <div className="mt-4 space-y-4">
+              {reviewRecords.length > 0 ? (
+                reviewRecords.map((review) => (
+                  <div
+                    key={review._id}
+                    className="rounded-md border border-gray-200 p-4"
+                  >
+                    <div className="flex items-start justify-between gap-4">
+                      <div>
+                        <div className="flex items-center gap-2">
+                          <div className="flex">
+                            {renderStars(review.rating)}
+                          </div>
+                          <span className="text-xs text-gray-500">
+                            {formatDate(review.createdAt)}
+                          </span>
+                        </div>
+                        <p className="mt-2 font-semibold text-gray-900">
+                          {review.title || "Untitled review"}
+                        </p>
+                        <p className="mt-1 text-sm text-gray-600">
+                          {review.displayName || review.user?.name || "User"}
+                        </p>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => handleDeleteReview(review._id)}
+                        disabled={
+                          moderatingId === `review-delete-${review._id}`
+                        }
+                        className="inline-flex items-center gap-2 rounded-md border border-red-200 px-3 py-2 text-sm font-medium text-red-700 hover:bg-red-50 disabled:opacity-50"
+                      >
+                        <FaTrash />
+                        {moderatingId === `review-delete-${review._id}`
+                          ? "Deleting..."
+                          : "Delete"}
+                      </button>
+                    </div>
+                    <p className="mt-3 whitespace-pre-line text-sm text-gray-700">
+                      {review.comment}
+                    </p>
+                    {review.media?.url ? (
+                      <div className="mt-3">
+                        {review.media.mediaType === "video" ? (
+                          <video
+                            controls
+                            className="max-h-64 w-full rounded-md border border-gray-200"
+                            src={resolveMediaUrl(review.media.url)}
+                          />
+                        ) : (
+                          <img
+                            src={resolveMediaUrl(review.media.url)}
+                            alt={review.title || "Review media"}
+                            className="max-h-64 rounded-md border border-gray-200"
+                          />
+                        )}
+                      </div>
+                    ) : null}
+                  </div>
+                ))
+              ) : (
+                <p className="text-sm text-gray-500">
+                  No reviews submitted yet.
+                </p>
+              )}
+            </div>
+          </div>
+
+          <div className="rounded-lg border border-gray-200 p-5">
+            <div className="flex items-center justify-between">
+              <div>
+                <h2 className="text-lg font-semibold text-gray-900">
+                  Question Management
+                </h2>
+                <p className="mt-1 text-sm text-gray-500">
+                  Answer customer questions and remove unwanted submissions.
+                </p>
+              </div>
+              <span className="rounded-full bg-gray-100 px-3 py-1 text-xs font-semibold text-gray-700">
+                {questionRecords.length} question
+                {questionRecords.length === 1 ? "" : "s"}
+              </span>
+            </div>
+
+            <div className="mt-4 space-y-4">
+              {questionRecords.length > 0 ? (
+                questionRecords.map((question, index) => {
+                  const questionId = getEntityId(question);
+                  return (
+                    <div
+                      key={questionId || `question-${index}`}
+                      className="rounded-md border border-gray-200 p-4"
+                    >
+                      <div className="flex items-start justify-between gap-4">
+                        <div>
+                          <p className="font-semibold text-gray-900">
+                            {question.title}
+                          </p>
+                          <p className="mt-1 text-sm text-gray-600">
+                            {question.displayName ||
+                              question.user?.name ||
+                              "User"}
+                          </p>
+                          <p className="mt-1 text-xs text-gray-500">
+                            {formatDate(question.createdAt)}
+                          </p>
+                        </div>
+                        <button
+                          type="button"
+                          onClick={() => handleDeleteQuestion(questionId)}
+                          disabled={
+                            moderatingId === `question-delete-${questionId}`
+                          }
+                          className="inline-flex items-center gap-2 rounded-md border border-red-200 px-3 py-2 text-sm font-medium text-red-700 hover:bg-red-50 disabled:opacity-50"
+                        >
+                          <FaTrash />
+                          {moderatingId === `question-delete-${questionId}`
+                            ? "Deleting..."
+                            : "Delete"}
+                        </button>
+                      </div>
+
+                      <p className="mt-3 whitespace-pre-line text-sm text-gray-700">
+                        {question.question}
+                      </p>
+
+                      <div className="mt-4">
+                        <label className="block text-sm font-medium text-gray-700">
+                          Answer
+                        </label>
+                        <textarea
+                          rows="3"
+                          value={questionAnswerDrafts[questionId] || ""}
+                          onChange={(e) =>
+                            handleAnswerDraftChange(questionId, e.target.value)
+                          }
+                          className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500 sm:text-sm"
+                          placeholder="Write an answer for this question"
+                        />
+                        <div className="mt-3 flex items-center justify-between">
+                          <span className="text-xs text-gray-500">
+                            {question.isAnswered
+                              ? "Answered"
+                              : "Awaiting answer"}
+                          </span>
+                          <button
+                            type="button"
+                            onClick={() => handleAnswerQuestion(questionId)}
+                            disabled={
+                              moderatingId === `question-answer-${questionId}`
+                            }
+                            className="inline-flex items-center gap-2 rounded-md bg-green-600 px-3 py-2 text-sm font-medium text-white hover:bg-green-700 disabled:opacity-50"
+                          >
+                            <FaReply />
+                            {moderatingId === `question-answer-${questionId}`
+                              ? "Saving..."
+                              : question.isAnswered
+                                ? "Update Answer"
+                                : "Save Answer"}
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })
+              ) : (
+                <p className="text-sm text-gray-500">
+                  No questions submitted yet.
+                </p>
+              )}
+            </div>
           </div>
 
           <div className="flex items-center gap-4">

@@ -16,7 +16,89 @@ const reviewSchema = new mongoose.Schema(
     comment: {
       type: String,
       required: true,
-      maxlength: [500, "Review cannot be more than 500 characters"],
+      maxlength: [2000, "Review cannot be more than 2000 characters"],
+    },
+    title: {
+      type: String,
+      trim: true,
+      maxlength: [100, "Review title cannot be more than 100 characters"],
+      default: "",
+    },
+    displayName: {
+      type: String,
+      trim: true,
+      maxlength: [100, "Display name cannot be more than 100 characters"],
+      default: "",
+    },
+    email: {
+      type: String,
+      trim: true,
+      lowercase: true,
+      maxlength: [254, "Email cannot be more than 254 characters"],
+      default: "",
+    },
+    media: {
+      url: {
+        type: String,
+        default: "",
+      },
+      public_id: {
+        type: String,
+        default: "",
+      },
+      mediaType: {
+        type: String,
+        enum: ["image", "video", ""],
+        default: "",
+      },
+    },
+  },
+  {
+    timestamps: true,
+  },
+);
+
+const questionSchema = new mongoose.Schema(
+  {
+    user: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
+      required: true,
+    },
+    title: {
+      type: String,
+      required: true,
+      trim: true,
+      maxlength: [120, "Question title cannot be more than 120 characters"],
+    },
+    question: {
+      type: String,
+      required: true,
+      trim: true,
+      maxlength: [2000, "Question cannot be more than 2000 characters"],
+    },
+    displayName: {
+      type: String,
+      trim: true,
+      maxlength: [100, "Display name cannot be more than 100 characters"],
+      default: "",
+    },
+    email: {
+      type: String,
+      trim: true,
+      lowercase: true,
+      maxlength: [254, "Email cannot be more than 254 characters"],
+      default: "",
+    },
+    answer: {
+      type: String,
+      trim: true,
+      maxlength: [3000, "Answer cannot be more than 3000 characters"],
+      default: "",
+    },
+    isAnswered: {
+      type: Boolean,
+      default: false,
     },
   },
   {
@@ -172,6 +254,7 @@ const productSchema = new mongoose.Schema(
       default: "",
     },
     reviews: [reviewSchema],
+    questions: [questionSchema],
     numReviews: {
       type: Number,
       default: 0,

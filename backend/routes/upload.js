@@ -53,13 +53,7 @@ const videoUpload = multer({
 });
 
 router.post("/", protect, upload.single("image"), uploadImage);
-router.post(
-  "/video",
-  protect,
-  authorize("admin"),
-  videoUpload.single("video"),
-  uploadVideo,
-);
+router.post("/video", protect, videoUpload.single("video"), uploadVideo);
 router.delete("/:filename", protect, authorize("admin"), deleteImage);
 
 export default router;

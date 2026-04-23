@@ -8,6 +8,11 @@ import {
   updateProduct,
   deleteProduct,
   createProductReview,
+  createProductQuestion,
+  answerProductQuestion,
+  deleteProductQuestionAnswer,
+  deleteProductReview,
+  deleteProductQuestion,
   getCategories,
 } from "../controllers/productController.js";
 import { protect, authorize } from "../middleware/auth.js";
@@ -264,10 +269,73 @@ const reviewValidation = [
   body("rating")
     .isInt({ min: 1, max: 5 })
     .withMessage("Rating must be between 1 and 5"),
+  body("title")
+    .trim()
+    .isLength({ min: 3, max: 100 })
+    .withMessage("Review title must be between 3 and 100 characters"),
   body("comment")
     .trim()
-    .isLength({ min: 10, max: 500 })
-    .withMessage("Comment must be between 10 and 500 characters"),
+    .isLength({ min: 10, max: 2000 })
+    .withMessage("Comment must be between 10 and 2000 characters"),
+  body("displayName")
+    .optional()
+    .trim()
+    .isLength({ max: 100 })
+    .withMessage("Display name cannot be more than 100 characters"),
+  body("email")
+    .optional({ values: "falsy" })
+    .trim()
+    .isEmail()
+    .withMessage("Please provide a valid email address"),
+  body("media")
+    .optional()
+    .custom((value) => {
+      if (value == null) return true;
+      if (typeof value !== "object") {
+        throw new Error("Media must be an object");
+      }
+      if (value.url && typeof value.url !== "string") {
+        throw new Error("Media url must be a string");
+      }
+      if (value.public_id && typeof value.public_id !== "string") {
+        throw new Error("Media public id must be a string");
+      }
+      if (
+        value.mediaType &&
+        !["image", "video", ""].includes(value.mediaType)
+      ) {
+        throw new Error("Media type must be image or video");
+      }
+      return true;
+    }),
+];
+
+const questionValidation = [
+  body("title")
+    .trim()
+    .isLength({ min: 3, max: 120 })
+    .withMessage("Question title must be between 3 and 120 characters"),
+  body("question")
+    .trim()
+    .isLength({ min: 10, max: 2000 })
+    .withMessage("Question must be between 10 and 2000 characters"),
+  body("displayName")
+    .optional()
+    .trim()
+    .isLength({ max: 100 })
+    .withMessage("Display name cannot be more than 100 characters"),
+  body("email")
+    .optional({ values: "falsy" })
+    .trim()
+    .isEmail()
+    .withMessage("Please provide a valid email address"),
+];
+
+const answerQuestionValidation = [
+  body("answer")
+    .trim()
+    .isLength({ min: 1, max: 3000 })
+    .withMessage("Answer must be between 1 and 3000 characters"),
 ];
 
 // Routes
@@ -290,5 +358,36 @@ router.put(
 );
 router.delete("/:id", protect, authorize("admin"), deleteProduct);
 router.post("/:id/reviews", protect, reviewValidation, createProductReview);
+router.delete(
+  "/:id/reviews/:reviewId",
+  protect,
+  authorize("admin"),
+  deleteProductReview,
+);
+router.post(
+  "/:id/questions",
+  protect,
+  questionValidation,
+  createProductQuestion,
+);
+router.patch(
+  "/:id/questions/:questionId/answer",
+  protect,
+  authorize("admin"),
+  answerQuestionValidation,
+  answerProductQuestion,
+);
+router.delete(
+  "/:id/questions/:questionId/answer",
+  protect,
+  authorize("admin"),
+  deleteProductQuestionAnswer,
+);
+router.delete(
+  "/:id/questions/:questionId",
+  protect,
+  authorize("admin"),
+  deleteProductQuestion,
+);
 
 export default router;
