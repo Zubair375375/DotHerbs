@@ -67,10 +67,6 @@ const questionSchema = new mongoose.Schema(
     },
     title: {
       type: String,
-      required: true,
-      trim: true,
-      maxlength: [120, "Question title cannot be more than 120 characters"],
-    },
     question: {
       type: String,
       required: true,

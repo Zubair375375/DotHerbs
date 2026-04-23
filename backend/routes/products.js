@@ -311,10 +311,6 @@ const reviewValidation = [
 ];
 
 const questionValidation = [
-  body("title")
-    .trim()
-    .isLength({ min: 3, max: 120 })
-    .withMessage("Question title must be between 3 and 120 characters"),
   body("question")
     .trim()
     .isLength({ min: 10, max: 2000 })

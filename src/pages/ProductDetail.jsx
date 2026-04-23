@@ -61,7 +61,6 @@ const ProductDetail = () => {
     email: "",
   });
   const [questionForm, setQuestionForm] = useState({
-    title: "",
     question: "",
     displayName: "",
     email: "",
@@ -173,7 +172,6 @@ const ProductDetail = () => {
 
   const resetQuestionForm = () => {
     setQuestionForm({
-      title: "",
       question: "",
       displayName: user?.name || "",
       email: user?.email || "",
@@ -483,11 +481,6 @@ const ProductDetail = () => {
       return;
     }
 
-    if (!questionForm.title.trim()) {
-      toast.error("Please add a question title.");
-      return;
-    }
-
     if (!questionForm.question.trim()) {
       toast.error("Please add your question.");
       return;
@@ -514,7 +507,6 @@ const ProductDetail = () => {
             Authorization: `Bearer ${token}`,
           },
           body: JSON.stringify({
-            title: questionForm.title.trim(),
             question: questionForm.question.trim(),
             displayName: questionForm.displayName.trim(),
             email: questionForm.email.trim(),
@@ -1229,28 +1221,6 @@ const ProductDetail = () => {
 
                         <div className="mt-6">
                           <label
-                            htmlFor="questionContent"
-                            className="block text-center text-xs font-medium uppercase tracking-wide text-gray-600"
-                          >
-                            Your Question
-                          </label>
-                          <textarea
-                            id="questionContent"
-                            rows="5"
-                            value={questionForm.question}
-                            onChange={(e) =>
-                              handleQuestionFieldChange(
-                                "question",
-                                e.target.value,
-                              )
-                            }
-                            className="mt-3 block w-full border border-gray-300 px-3 py-2 text-sm text-gray-700"
-                            placeholder="Start writing here..."
-                          />
-                        </div>
-
-                        <div className="mt-6">
-                          <label
                             htmlFor="questionDisplayName"
                             className="block text-xs font-medium uppercase tracking-wide text-gray-600"
                           >
@@ -1287,6 +1257,28 @@ const ProductDetail = () => {
                             }
                             className="mt-3 block w-full border border-gray-300 px-3 py-2 text-sm text-gray-700"
                             placeholder="Your email address"
+                          />
+                        </div>
+
+                        <div className="mt-6">
+                          <label
+                            htmlFor="questionContent"
+                            className="block text-center text-xs font-medium uppercase tracking-wide text-gray-600"
+                          >
+                            Your Question
+                          </label>
+                          <textarea
+                            id="questionContent"
+                            rows="5"
+                            value={questionForm.question}
+                            onChange={(e) =>
+                              handleQuestionFieldChange(
+                                "question",
+                                e.target.value,
+                              )
+                            }
+                            className="mt-3 block w-full border border-gray-300 px-3 py-2 text-sm text-gray-700"
+                            placeholder="Start writing here..."
                           />
                         </div>
 
