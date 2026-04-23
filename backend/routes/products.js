@@ -45,6 +45,11 @@ const createProductValidation = [
     }
     return true;
   }),
+  body("helpsTo")
+    .optional()
+    .trim()
+    .isLength({ max: 600 })
+    .withMessage("Helps to content cannot be more than 600 characters"),
   body("stock")
     .isInt({ min: 0 })
     .withMessage("Stock must be a non-negative integer"),
@@ -100,6 +105,11 @@ const updateProductValidation = [
     .trim()
     .isLength({ max: 120 })
     .withMessage("Origin cannot be more than 120 characters"),
+  body("helpsTo")
+    .optional()
+    .trim()
+    .isLength({ max: 600 })
+    .withMessage("Helps to content cannot be more than 600 characters"),
 ];
 
 const reviewValidation = [

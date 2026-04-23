@@ -31,6 +31,7 @@ const EditProduct = ({ onClose, onSuccess, product: productProp }) => {
   const [formData, setFormData] = useState({
     name: "",
     description: "",
+    helpsTo: "",
     price: "",
     costPrice: "",
     category: "",
@@ -76,6 +77,7 @@ const EditProduct = ({ onClose, onSuccess, product: productProp }) => {
       setFormData({
         name: product.name || "",
         description: product.description || "",
+        helpsTo: product.helpsTo || "",
         price: product.price?.toString() || "",
         costPrice: product.costPrice?.toString() || "",
         category: product.category || categories[0]?.value || "",
@@ -143,6 +145,7 @@ const EditProduct = ({ onClose, onSuccess, product: productProp }) => {
     const {
       name,
       description,
+      helpsTo,
       price,
       costPrice,
       category,
@@ -181,6 +184,11 @@ const EditProduct = ({ onClose, onSuccess, product: productProp }) => {
       return;
     }
 
+    if ((helpsTo || "").trim().length > 600) {
+      toast.error("Helps to content cannot be more than 600 characters.");
+      return;
+    }
+
     try {
       let finalImages = product?.images || [];
       let finalImage = product?.image || "";
@@ -209,6 +217,7 @@ const EditProduct = ({ onClose, onSuccess, product: productProp }) => {
       const productData = {
         name,
         description,
+        helpsTo: helpsTo.trim(),
         price: Number(price),
         costPrice: Number(costPrice),
         category,
@@ -473,6 +482,28 @@ const EditProduct = ({ onClose, onSuccess, product: productProp }) => {
               placeholder="Describe the product features, benefits, and usage."
               required
             />
+          </div>
+
+          <div>
+            <label
+              htmlFor="helpsTo"
+              className="block text-sm font-medium text-gray-700"
+            >
+              Helps To
+            </label>
+            <textarea
+              id="helpsTo"
+              name="helpsTo"
+              rows="3"
+              value={formData.helpsTo}
+              onChange={handleChange}
+              maxLength={600}
+              className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500 sm:text-sm"
+              placeholder={"Enter one point per line, for example:\n- Helps improve immunity\n- Supports digestion\n- Maintains daily energy"}
+            />
+            <p className="mt-1 text-xs text-gray-500">
+              Add benefits as points, one per line (max 600 characters total).
+            </p>
           </div>
 
           <div className="flex items-center gap-4">

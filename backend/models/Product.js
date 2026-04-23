@@ -81,6 +81,12 @@ const productSchema = new mongoose.Schema(
       maxlength: [120, "Origin cannot be more than 120 characters"],
       default: "",
     },
+    helpsTo: {
+      type: String,
+      trim: true,
+      maxlength: [600, "Helps to content cannot be more than 600 characters"],
+      default: "",
+    },
     images: [
       {
         url: {

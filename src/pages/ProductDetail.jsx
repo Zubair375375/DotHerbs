@@ -38,6 +38,11 @@ const ProductDetail = () => {
   const [quantity, setQuantity] = useState(1);
   const [isWishlisted, setIsWishlisted] = useState(false);
 
+  const helpsToPoints = (product?.helpsTo || "")
+    .split(/\r?\n/)
+    .map((point) => point.replace(/^[-*•]\s*/, "").trim())
+    .filter(Boolean);
+
   useEffect(() => {
     if (id) {
       dispatch(fetchProduct(id));
@@ -209,6 +214,19 @@ const ProductDetail = () => {
             <div className="text-3xl mb-4">${product.price?.toFixed(2)}</div>
 
             <p className="text-gray-600 mb-6">{product.description}</p>
+
+            {product.helpsTo && (
+              <div className="mb-6 rounded-lg border border-green-100 bg-green-50 px-4 py-3">
+                <h2 className="text-sm font-semibold uppercase tracking-wide text-green-800">
+                  Helps To
+                </h2>
+                <ul className="mt-2 list-disc space-y-1 pl-5 text-sm text-green-900">
+                  {helpsToPoints.map((point, index) => (
+                    <li key={`${point}-${index}`}>{point}</li>
+                  ))}
+                </ul>
+              </div>
+            )}
           </div>
 
           {/* Stock Status */}

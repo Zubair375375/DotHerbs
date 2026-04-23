@@ -24,6 +24,7 @@ const CreateProduct = ({ onClose, onSuccess }) => {
   const [formData, setFormData] = useState({
     name: "",
     description: "",
+    helpsTo: "",
     price: "",
     costPrice: "",
     category: "",
@@ -110,6 +111,7 @@ const CreateProduct = ({ onClose, onSuccess }) => {
     const {
       name,
       description,
+      helpsTo,
       price,
       costPrice,
       category,
@@ -133,6 +135,11 @@ const CreateProduct = ({ onClose, onSuccess }) => {
       description.length > 1000
     ) {
       toast.error("Description must be between 10 and 1000 characters.");
+      return;
+    }
+
+    if ((helpsTo || "").trim().length > 600) {
+      toast.error("Helps to content cannot be more than 600 characters.");
       return;
     }
 
@@ -173,6 +180,7 @@ const CreateProduct = ({ onClose, onSuccess }) => {
       const productData = {
         name: name.trim(),
         description: description.trim(),
+        helpsTo: helpsTo.trim(),
         price: Number(price),
         costPrice: Number(costPrice),
         category,
@@ -433,6 +441,28 @@ const CreateProduct = ({ onClose, onSuccess }) => {
             placeholder="Describe the product features, benefits, and usage."
             required
           />
+        </div>
+
+        <div>
+          <label
+            htmlFor="helpsTo"
+            className="block text-sm font-medium text-gray-700"
+          >
+            Helps To
+          </label>
+          <textarea
+            id="helpsTo"
+            name="helpsTo"
+            rows="3"
+            value={formData.helpsTo}
+            onChange={handleChange}
+            maxLength={600}
+            className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500 sm:text-sm"
+            placeholder={"Enter one point per line, for example:\n- Helps improve immunity\n- Supports digestion\n- Maintains daily energy"}
+          />
+          <p className="mt-1 text-xs text-gray-500">
+            Add benefits as points, one per line (max 600 characters total).
+          </p>
         </div>
 
         <div className="flex items-center gap-4">
