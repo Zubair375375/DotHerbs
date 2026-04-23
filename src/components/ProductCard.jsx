@@ -77,7 +77,7 @@ const ProductCard = ({ product, viewMode = "grid" }) => {
               </span>
             </div>
 
-            <p className="mb-4 line-clamp-3 text-sm text-secondary-600">
+            <p className="mb-4 line-clamp-2 text-sm text-secondary-600">
               {product.description}
             </p>
           </div>
@@ -183,7 +183,7 @@ const ProductCard = ({ product, viewMode = "grid" }) => {
             {product.name}
           </h3>
 
-          <p className="mb-2 line-clamp-1 text-[11px] text-secondary-600">
+          <p className="mb-2 line-clamp-2 text-[11px] text-secondary-600">
             {product.description}
           </p>
 

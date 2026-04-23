@@ -14,6 +14,25 @@ import { protect, authorize } from "../middleware/auth.js";
 
 const router = express.Router();
 
+const getWordCount = (value = "") =>
+  String(value)
+    .trim()
+    .split(/\s+/)
+    .filter(Boolean).length;
+
+const isValidBriefPoints = (value) => {
+  if (!Array.isArray(value) || value.length === 0) {
+    return false;
+  }
+
+  return value.every(
+    (point) =>
+      typeof point === "string" &&
+      point.trim().length > 0 &&
+      point.trim().length <= 300,
+  );
+};
+
 // Validation rules
 const createProductValidation = [
   body("name")
@@ -23,7 +42,22 @@ const createProductValidation = [
   body("description")
     .trim()
     .isLength({ min: 10, max: 1000 })
-    .withMessage("Description must be between 10 and 1000 characters"),
+    .withMessage("Description must be between 10 and 1000 characters")
+    .custom((value) => {
+      if (getWordCount(value) > 50) {
+        throw new Error("Description for product listing must be 50 words or fewer");
+      }
+      return true;
+    }),
+  body("briefDescriptionPoints")
+    .custom((value) => {
+      if (!isValidBriefPoints(value)) {
+        throw new Error(
+          "Brief description points are required, and each point must be 1 to 300 characters",
+        );
+      }
+      return true;
+    }),
   body("price")
     .isFloat({ min: 0 })
     .withMessage("Price must be a positive number"),
@@ -65,7 +99,23 @@ const updateProductValidation = [
     .optional()
     .trim()
     .isLength({ min: 10, max: 1000 })
-    .withMessage("Description must be between 10 and 1000 characters"),
+    .withMessage("Description must be between 10 and 1000 characters")
+    .custom((value) => {
+      if (getWordCount(value) > 50) {
+        throw new Error("Description for product listing must be 50 words or fewer");
+      }
+      return true;
+    }),
+  body("briefDescriptionPoints")
+    .optional()
+    .custom((value) => {
+      if (!isValidBriefPoints(value)) {
+        throw new Error(
+          "Brief description points must be a non-empty list and each point must be 1 to 300 characters",
+        );
+      }
+      return true;
+    }),
   body("price")
     .optional()
     .isFloat({ min: 0 })
@@ -96,15 +146,6 @@ const updateProductValidation = [
     .optional()
     .isInt({ min: 0 })
     .withMessage("Stock must be a non-negative integer"),
-  body("weight")
-    .optional({ nullable: true })
-    .isFloat({ min: 0 })
-    .withMessage("Weight must be a non-negative number"),
-  body("origin")
-    .optional()
-    .trim()
-    .isLength({ max: 120 })
-    .withMessage("Origin cannot be more than 120 characters"),
   body("helpsTo")
     .optional()
     .trim()

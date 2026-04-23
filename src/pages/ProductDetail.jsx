@@ -38,6 +38,15 @@ const ProductDetail = () => {
   const [quantity, setQuantity] = useState(1);
   const [isWishlisted, setIsWishlisted] = useState(false);
 
+  const briefDescriptionPoints = Array.isArray(product?.briefDescriptionPoints)
+    ? product.briefDescriptionPoints
+        .map((point) => String(point).trim())
+        .filter(Boolean)
+    : (product?.briefDescription || "")
+        .split(/\r?\n/)
+        .map((point) => point.trim())
+        .filter(Boolean);
+
   const helpsToPoints = (product?.helpsTo || "")
     .split(/\r?\n/)
     .map((point) => point.replace(/^[-*•]\s*/, "").trim())
@@ -213,8 +222,6 @@ const ProductDetail = () => {
 
             <div className="text-3xl mb-4">${product.price?.toFixed(2)}</div>
 
-            <p className="text-gray-600 mb-6">{product.description}</p>
-
             {product.helpsTo && (
               <div className="mb-6 rounded-lg border border-green-100 bg-green-50 px-4 py-3">
                 <h2 className="text-sm font-semibold uppercase tracking-wide text-green-800">
@@ -316,14 +323,23 @@ const ProductDetail = () => {
                 <span className="font-medium text-gray-600">SKU:</span>
                 <p>{product.sku || "N/A"}</p>
               </div>
-              <div>
-                <span className="font-medium text-gray-600">Weight:</span>
-                <p>{product.weight ? `${product.weight}g` : "N/A"}</p>
-              </div>
-              <div>
-                <span className="font-medium text-gray-600">Origin:</span>
-                <p>{product.origin || "N/A"}</p>
-              </div>
+            </div>
+
+            <div className="mt-6">
+              <h4 className="text-sm font-semibold uppercase tracking-wide text-gray-700">
+                Brief Description
+              </h4>
+              {briefDescriptionPoints.length > 0 ? (
+                <ul className="mt-2 list-disc space-y-1 pl-5 text-sm text-gray-600">
+                  {briefDescriptionPoints.map((point, index) => (
+                    <li key={`brief-point-${index}`}>{point}</li>
+                  ))}
+                </ul>
+              ) : (
+                <p className="mt-2 text-sm text-gray-600">
+                  {product.description || "N/A"}
+                </p>
+              )}
             </div>
           </div>
 

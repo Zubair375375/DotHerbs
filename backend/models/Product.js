@@ -37,6 +37,22 @@ const productSchema = new mongoose.Schema(
       required: [true, "Product description is required"],
       maxlength: [1000, "Description cannot be more than 1000 characters"],
     },
+    briefDescription: {
+      type: String,
+      trim: true,
+      maxlength: [2000, "Brief description cannot be more than 2000 characters"],
+      default: "",
+    },
+    briefDescriptionPoints: {
+      type: [
+        {
+          type: String,
+          trim: true,
+          maxlength: [300, "Each brief description point cannot exceed 300 characters"],
+        },
+      ],
+      default: [],
+    },
     price: {
       type: Number,
       required: [true, "Product price is required"],
@@ -69,17 +85,6 @@ const productSchema = new mongoose.Schema(
       required: [true, "Stock quantity is required"],
       min: [0, "Stock cannot be negative"],
       default: 0,
-    },
-    weight: {
-      type: Number,
-      min: [0, "Weight cannot be negative"],
-      default: null,
-    },
-    origin: {
-      type: String,
-      trim: true,
-      maxlength: [120, "Origin cannot be more than 120 characters"],
-      default: "",
     },
     helpsTo: {
       type: String,

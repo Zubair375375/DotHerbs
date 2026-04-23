@@ -24,19 +24,22 @@ const CreateProduct = ({ onClose, onSuccess }) => {
   const [formData, setFormData] = useState({
     name: "",
     description: "",
+    briefDescriptionPoints: [""],
     helpsTo: "",
     price: "",
     costPrice: "",
     category: "",
     sku: "",
     stock: "0",
-    weight: "",
-    origin: "",
     image: null,
     isActive: true,
   });
   const [imagePreview, setImagePreview] = useState(null);
   const [uploading, setUploading] = useState(false);
+  const descriptionWordCount = formData.description
+    .trim()
+    .split(/\s+/)
+    .filter(Boolean).length;
 
   useEffect(() => {
     dispatch(fetchCategories());
@@ -66,6 +69,35 @@ const CreateProduct = ({ onClose, onSuccess }) => {
       ...prev,
       [name]: type === "checkbox" ? checked : value,
     }));
+  };
+
+  const handleBriefPointChange = (index, value) => {
+    setFormData((prev) => {
+      const updatedPoints = [...prev.briefDescriptionPoints];
+      updatedPoints[index] = value;
+      return { ...prev, briefDescriptionPoints: updatedPoints };
+    });
+  };
+
+  const addBriefPoint = () => {
+    setFormData((prev) => ({
+      ...prev,
+      briefDescriptionPoints: [...prev.briefDescriptionPoints, ""],
+    }));
+  };
+
+  const removeBriefPoint = (index) => {
+    setFormData((prev) => {
+      if (prev.briefDescriptionPoints.length <= 1) {
+        return prev;
+      }
+      return {
+        ...prev,
+        briefDescriptionPoints: prev.briefDescriptionPoints.filter(
+          (_, i) => i !== index,
+        ),
+      };
+    });
   };
 
   const handleImageChange = (e) => {
@@ -111,14 +143,13 @@ const CreateProduct = ({ onClose, onSuccess }) => {
     const {
       name,
       description,
+      briefDescriptionPoints,
       helpsTo,
       price,
       costPrice,
       category,
       sku,
       stock,
-      weight,
-      origin,
       image,
       isActive,
     } = formData;
@@ -135,6 +166,26 @@ const CreateProduct = ({ onClose, onSuccess }) => {
       description.length > 1000
     ) {
       toast.error("Description must be between 10 and 1000 characters.");
+      return;
+    }
+
+    const previewWordCount = description.trim().split(/\s+/).filter(Boolean).length;
+    if (previewWordCount > 50) {
+      toast.error("Product preview description must be 50 words or fewer.");
+      return;
+    }
+
+    const normalizedBriefPoints = (briefDescriptionPoints || [])
+      .map((point) => point.trim())
+      .filter(Boolean);
+
+    if (normalizedBriefPoints.length === 0) {
+      toast.error("Please add at least one brief description point.");
+      return;
+    }
+
+    if (normalizedBriefPoints.some((point) => point.length > 300)) {
+      toast.error("Each brief description point must be 300 characters or fewer.");
       return;
     }
 
@@ -180,14 +231,14 @@ const CreateProduct = ({ onClose, onSuccess }) => {
       const productData = {
         name: name.trim(),
         description: description.trim(),
+        briefDescription: normalizedBriefPoints.join("\n"),
+        briefDescriptionPoints: normalizedBriefPoints,
         helpsTo: helpsTo.trim(),
         price: Number(price),
         costPrice: Number(costPrice),
         category,
         sku: normalizedSku,
         stock: Number(stock),
-        weight: weight !== "" ? Number(weight) : null,
-        origin: origin.trim(),
         isActive,
         image: "",
         images: [],
@@ -355,44 +406,6 @@ const CreateProduct = ({ onClose, onSuccess }) => {
             />
           </div>
 
-          <div>
-            <label
-              htmlFor="weight"
-              className="block text-sm font-medium text-gray-700"
-            >
-              Weight (g)
-            </label>
-            <input
-              id="weight"
-              name="weight"
-              type="number"
-              min="0"
-              step="0.01"
-              value={formData.weight}
-              onChange={handleChange}
-              className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500 sm:text-sm"
-              placeholder="e.g. 250"
-            />
-          </div>
-
-          <div>
-            <label
-              htmlFor="origin"
-              className="block text-sm font-medium text-gray-700"
-            >
-              Origin
-            </label>
-            <input
-              id="origin"
-              name="origin"
-              type="text"
-              value={formData.origin}
-              onChange={handleChange}
-              className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500 sm:text-sm"
-              placeholder="e.g. Pakistan"
-              maxLength={120}
-            />
-          </div>
         </div>
 
         <div>
@@ -429,7 +442,7 @@ const CreateProduct = ({ onClose, onSuccess }) => {
             htmlFor="description"
             className="block text-sm font-medium text-gray-700"
           >
-            Description
+            Description (Products Preview)
           </label>
           <textarea
             id="description"
@@ -438,9 +451,54 @@ const CreateProduct = ({ onClose, onSuccess }) => {
             value={formData.description}
             onChange={handleChange}
             className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500 sm:text-sm"
-            placeholder="Describe the product features, benefits, and usage."
+            placeholder="Write a short preview for product listing (max 50 words)."
             required
           />
+          <p
+            className={`mt-1 text-xs ${
+              descriptionWordCount > 50 ? "text-red-600" : "text-gray-500"
+            }`}
+          >
+            This appears in product listing cards. Max 50 words.
+            {` (${descriptionWordCount}/50)`}
+          </p>
+        </div>
+
+        <div>
+          <label className="block text-sm font-medium text-gray-700">
+            Brief Description Points (Product Detail Page)
+          </label>
+          <div className="mt-2 space-y-2">
+            {formData.briefDescriptionPoints.map((point, index) => (
+              <div key={`brief-point-${index}`} className="flex gap-2">
+                <input
+                  type="text"
+                  value={point}
+                  onChange={(e) => handleBriefPointChange(index, e.target.value)}
+                  className="block w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500 sm:text-sm"
+                  placeholder={`Point ${index + 1}`}
+                />
+                <button
+                  type="button"
+                  onClick={() => removeBriefPoint(index)}
+                  disabled={formData.briefDescriptionPoints.length <= 1}
+                  className="rounded-md border border-gray-300 px-3 py-2 text-sm text-gray-700 hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50"
+                >
+                  Remove
+                </button>
+              </div>
+            ))}
+          </div>
+          <button
+            type="button"
+            onClick={addBriefPoint}
+            className="mt-2 rounded-md border border-green-600 px-3 py-1.5 text-sm font-medium text-green-700 hover:bg-green-50"
+          >
+            + Add Point
+          </button>
+          <p className="mt-1 text-xs text-gray-500">
+            Add as many points as needed. Each point can be up to 300 characters.
+          </p>
         </div>
 
         <div>
