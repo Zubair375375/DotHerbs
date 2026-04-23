@@ -12,6 +12,7 @@ import {
   selectAuthUser,
   selectIsAuthenticated,
 } from "../../store/slices/authSlice";
+import RichTextEditor from "../../components/RichTextEditor";
 
 const CreateProduct = ({ onClose, onSuccess }) => {
   const dispatch = useDispatch();
@@ -28,6 +29,7 @@ const CreateProduct = ({ onClose, onSuccess }) => {
     directions: [""],
     servingSize: "",
     instructionsContent: "",
+    faqContent: "",
     ingredients: [{ name: "", amount: "" }],
     helpsTo: "",
     price: "",
@@ -154,6 +156,10 @@ const CreateProduct = ({ onClose, onSuccess }) => {
     });
   };
 
+  const handleFaqContentChange = (value) => {
+    setFormData((prev) => ({ ...prev, faqContent: value }));
+  };
+
   const handleImageChange = (e) => {
     const file = e.target.files[0];
     if (file) {
@@ -201,6 +207,7 @@ const CreateProduct = ({ onClose, onSuccess }) => {
       directions,
       servingSize,
       instructionsContent,
+      faqContent,
       ingredients,
       helpsTo,
       price,
@@ -264,6 +271,11 @@ const CreateProduct = ({ onClose, onSuccess }) => {
       return;
     }
 
+    if ((faqContent || "").trim().length > 10000) {
+      toast.error("FAQ content must be 10000 characters or fewer.");
+      return;
+    }
+
     if (normalizedBriefPoints.length === 0) {
       toast.error("Please add at least one brief description point.");
       return;
@@ -323,6 +335,7 @@ const CreateProduct = ({ onClose, onSuccess }) => {
         directions: (directions || []).map((s) => s.trim()).filter(Boolean),
         servingSize: (servingSize || "").trim(),
         instructionsContent: (instructionsContent || "").trim(),
+        faqContent: (faqContent || "").trim(),
         ingredients: normalizedIngredients,
         helpsTo: helpsTo.trim(),
         price: Number(price),
@@ -719,6 +732,20 @@ const CreateProduct = ({ onClose, onSuccess }) => {
           <p className="mt-1 text-xs text-gray-500">
             This will appear as a paragraph in the Instructions tab (max 2000
             characters).
+          </p>
+        </div>
+
+        <div>
+          <label className="block text-sm font-medium text-gray-700">
+            FAQs Content (Rich Text)
+          </label>
+          <RichTextEditor
+            value={formData.faqContent}
+            onChange={handleFaqContentChange}
+            placeholder="Write FAQ content with formatting (bold, italic, lists, links, etc.)"
+          />
+          <p className="mt-1 text-xs text-gray-500">
+            This content will appear inside the FAQs tab.
           </p>
         </div>
 

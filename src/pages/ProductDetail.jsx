@@ -15,6 +15,7 @@ import {
 } from "../store/slices/authSlice";
 import Loader from "../components/Loader";
 import toast from "react-hot-toast";
+import DOMPurify from "dompurify";
 import {
   FaStar,
   FaRegStar,
@@ -71,6 +72,7 @@ const ProductDetail = () => {
 
   const servingSizeText = (product?.servingSize || "").trim();
   const instructionsParagraph = (product?.instructionsContent || "").trim();
+  const sanitizedFaqContent = DOMPurify.sanitize(product?.faqContent || "");
 
   const toggleSection = (section) => {
     setExpandedSection((prev) => (prev === section ? "" : section));
@@ -482,7 +484,16 @@ const ProductDetail = () => {
                 </button>
                 {expandedSection === "faqs" && (
                   <div className="pb-4 text-sm text-gray-600">
-                    Frequently asked questions will be available soon.
+                    {sanitizedFaqContent ? (
+                      <div
+                        className="prose prose-sm max-w-none prose-p:my-2 prose-ul:my-2 prose-ol:my-2"
+                        dangerouslySetInnerHTML={{
+                          __html: sanitizedFaqContent,
+                        }}
+                      />
+                    ) : (
+                      <p>Frequently asked questions will be available soon.</p>
+                    )}
                   </div>
                 )}
               </div>

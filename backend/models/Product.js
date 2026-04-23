@@ -123,6 +123,12 @@ const productSchema = new mongoose.Schema(
       ],
       default: "",
     },
+    faqContent: {
+      type: String,
+      trim: true,
+      maxlength: [10000, "FAQ content cannot be more than 10000 characters"],
+      default: "",
+    },
     ingredients: {
       type: [
         {

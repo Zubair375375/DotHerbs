@@ -126,6 +126,11 @@ const createProductValidation = [
     .trim()
     .isLength({ max: 2000 })
     .withMessage("Instructions content cannot be more than 2000 characters"),
+  body("faqContent")
+    .optional()
+    .trim()
+    .isLength({ max: 10000 })
+    .withMessage("FAQ content cannot be more than 10000 characters"),
   body("ingredients")
     .optional()
     .custom((value) => {
@@ -228,6 +233,11 @@ const updateProductValidation = [
     .trim()
     .isLength({ max: 2000 })
     .withMessage("Instructions content cannot be more than 2000 characters"),
+  body("faqContent")
+    .optional()
+    .trim()
+    .isLength({ max: 10000 })
+    .withMessage("FAQ content cannot be more than 10000 characters"),
   body("ingredients")
     .optional()
     .custom((value) => {

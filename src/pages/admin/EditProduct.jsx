@@ -16,6 +16,7 @@ import {
   selectAuthUser,
   selectIsAuthenticated,
 } from "../../store/slices/authSlice";
+import RichTextEditor from "../../components/RichTextEditor";
 
 const EditProduct = ({ onClose, onSuccess, product: productProp }) => {
   const { id } = useParams();
@@ -35,6 +36,7 @@ const EditProduct = ({ onClose, onSuccess, product: productProp }) => {
     directions: [""],
     servingSize: "",
     instructionsContent: "",
+    faqContent: "",
     ingredients: [{ name: "", amount: "" }],
     helpsTo: "",
     price: "",
@@ -100,6 +102,7 @@ const EditProduct = ({ onClose, onSuccess, product: productProp }) => {
             : [""],
         servingSize: product.servingSize || "",
         instructionsContent: product.instructionsContent || "",
+        faqContent: product.faqContent || "",
         ingredients:
           Array.isArray(product.ingredients) && product.ingredients.length > 0
             ? product.ingredients.map((item) => ({
@@ -210,6 +213,10 @@ const EditProduct = ({ onClose, onSuccess, product: productProp }) => {
     });
   };
 
+  const handleFaqContentChange = (value) => {
+    setFormData((prev) => ({ ...prev, faqContent: value }));
+  };
+
   const handleImageChange = (e) => {
     const file = e.target.files[0];
     if (file) {
@@ -256,6 +263,7 @@ const EditProduct = ({ onClose, onSuccess, product: productProp }) => {
       directions,
       servingSize,
       instructionsContent,
+      faqContent,
       ingredients,
       helpsTo,
       price,
@@ -327,6 +335,11 @@ const EditProduct = ({ onClose, onSuccess, product: productProp }) => {
       return;
     }
 
+    if ((faqContent || "").trim().length > 10000) {
+      toast.error("FAQ content must be 10000 characters or fewer.");
+      return;
+    }
+
     if (normalizedBriefPoints.length === 0) {
       toast.error("Please add at least one brief description point.");
       return;
@@ -377,6 +390,7 @@ const EditProduct = ({ onClose, onSuccess, product: productProp }) => {
         directions: (directions || []).map((s) => s.trim()).filter(Boolean),
         servingSize: (servingSize || "").trim(),
         instructionsContent: (instructionsContent || "").trim(),
+        faqContent: (faqContent || "").trim(),
         ingredients: normalizedIngredients,
         helpsTo: helpsTo.trim(),
         price: Number(price),
@@ -780,6 +794,20 @@ const EditProduct = ({ onClose, onSuccess, product: productProp }) => {
             <p className="mt-1 text-xs text-gray-500">
               This will appear as a paragraph in the Instructions tab (max 2000
               characters).
+            </p>
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700">
+              FAQs Content (Rich Text)
+            </label>
+            <RichTextEditor
+              value={formData.faqContent}
+              onChange={handleFaqContentChange}
+              placeholder="Write FAQ content with formatting (bold, italic, lists, links, etc.)"
+            />
+            <p className="mt-1 text-xs text-gray-500">
+              This content will appear inside the FAQs tab.
             </p>
           </div>
 
