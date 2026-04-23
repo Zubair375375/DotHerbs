@@ -15,10 +15,7 @@ import { protect, authorize } from "../middleware/auth.js";
 const router = express.Router();
 
 const getWordCount = (value = "") =>
-  String(value)
-    .trim()
-    .split(/\s+/)
-    .filter(Boolean).length;
+  String(value).trim().split(/\s+/).filter(Boolean).length;
 
 const isValidBriefPoints = (value) => {
   if (!Array.isArray(value) || value.length === 0) {
@@ -45,19 +42,20 @@ const createProductValidation = [
     .withMessage("Description must be between 10 and 1000 characters")
     .custom((value) => {
       if (getWordCount(value) > 50) {
-        throw new Error("Description for product listing must be 50 words or fewer");
-      }
-      return true;
-    }),
-  body("briefDescriptionPoints")
-    .custom((value) => {
-      if (!isValidBriefPoints(value)) {
         throw new Error(
-          "Brief description points are required, and each point must be 1 to 300 characters",
+          "Description for product listing must be 50 words or fewer",
         );
       }
       return true;
     }),
+  body("briefDescriptionPoints").custom((value) => {
+    if (!isValidBriefPoints(value)) {
+      throw new Error(
+        "Brief description points are required, and each point must be 1 to 300 characters",
+      );
+    }
+    return true;
+  }),
   body("price")
     .isFloat({ min: 0 })
     .withMessage("Price must be a positive number"),
@@ -84,6 +82,14 @@ const createProductValidation = [
     .trim()
     .isLength({ max: 600 })
     .withMessage("Helps to content cannot be more than 600 characters"),
+  body("directions").optional().custom((value) => {
+    if (value !== undefined && value !== null) {
+      if (!Array.isArray(value)) throw new Error("Directions must be an array");
+      if (value.some((s) => typeof s !== "string" || s.length > 300))
+        throw new Error("Each direction step must be a string up to 300 characters");
+    }
+    return true;
+  }),
   body("stock")
     .isInt({ min: 0 })
     .withMessage("Stock must be a non-negative integer"),
@@ -102,7 +108,9 @@ const updateProductValidation = [
     .withMessage("Description must be between 10 and 1000 characters")
     .custom((value) => {
       if (getWordCount(value) > 50) {
-        throw new Error("Description for product listing must be 50 words or fewer");
+        throw new Error(
+          "Description for product listing must be 50 words or fewer",
+        );
       }
       return true;
     }),
@@ -151,6 +159,14 @@ const updateProductValidation = [
     .trim()
     .isLength({ max: 600 })
     .withMessage("Helps to content cannot be more than 600 characters"),
+  body("directions").optional().custom((value) => {
+    if (value !== undefined && value !== null) {
+      if (!Array.isArray(value)) throw new Error("Directions must be an array");
+      if (value.some((s) => typeof s !== "string" || s.length > 300))
+        throw new Error("Each direction step must be a string up to 300 characters");
+    }
+    return true;
+  }),
 ];
 
 const reviewValidation = [

@@ -1775,1947 +1775,1989 @@ const AdminDashboard = () => {
 
         {/* Tab Content */}
         <div className="bg-white rounded-lg shadow-md">
-        {/* Overview Tab */}
-        {activeTab === "overview" && (
-          <div className="p-6">
-            <h2 className="text-2xl font-semibold mb-6">Dashboard Overview</h2>
+          {/* Overview Tab */}
+          {activeTab === "overview" && (
+            <div className="p-6">
+              <h2 className="text-2xl font-semibold mb-6">
+                Dashboard Overview
+              </h2>
 
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-              {/* Recent Orders */}
-              <div>
-                <h3 className="text-lg font-semibold mb-4">Recent Orders</h3>
-                <div className="space-y-4">
-                  {orders.slice(0, 5).map((order) => (
-                    <div
-                      key={order._id}
-                      className="flex items-center justify-between p-4 border rounded"
-                    >
-                      <div>
-                        <div className="flex items-center gap-2">
-                          <p className="font-medium" title={order._id}>
-                            Order {formatOrderDisplayId(order._id)}
-                          </p>
-                          <button
-                            type="button"
-                            title="Copy full order ID"
-                            onClick={() => handleCopyOrderId(order._id)}
-                            className="text-gray-400 transition hover:text-gray-700"
-                          >
-                            <FaCopy className="text-xs" />
-                          </button>
-                        </div>
-                        <p className="text-sm text-gray-600">
-                          {order.user?.name} - ${order.total?.toFixed(2)}
-                        </p>
-                      </div>
-                      <span
-                        className={`px-2 py-1 rounded text-xs ${getOrderStatusColor(order.status)}`}
-                      >
-                        {order.status}
-                      </span>
-                    </div>
-                  ))}
-                </div>
-              </div>
-
-              {/* Low Stock Products */}
-              <div>
-                <h3 className="text-lg font-semibold mb-4">Low Stock Alert</h3>
-                <div className="space-y-4">
-                  {products
-                    .filter((product) => product.stock < 10)
-                    .slice(0, 5)
-                    .map((product) => (
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                {/* Recent Orders */}
+                <div>
+                  <h3 className="text-lg font-semibold mb-4">Recent Orders</h3>
+                  <div className="space-y-4">
+                    {orders.slice(0, 5).map((order) => (
                       <div
-                        key={product._id}
+                        key={order._id}
                         className="flex items-center justify-between p-4 border rounded"
                       >
-                        <div className="flex items-center space-x-3">
-                          <img
-                            src={
-                              product.image
-                                ? `http://localhost:5000${product.image}`
-                                : product.images?.[0]?.url ||
-                                  product.images?.[0] ||
-                                  "/placeholder-product.jpg"
-                            }
-                            alt={product.name}
-                            className="w-10 h-10 object-cover rounded"
-                          />
-                          <div>
-                            <p className="font-medium">{product.name}</p>
-                            <p className="text-sm text-red-600">
-                              Only {product.stock} left
+                        <div>
+                          <div className="flex items-center gap-2">
+                            <p className="font-medium" title={order._id}>
+                              Order {formatOrderDisplayId(order._id)}
                             </p>
+                            <button
+                              type="button"
+                              title="Copy full order ID"
+                              onClick={() => handleCopyOrderId(order._id)}
+                              className="text-gray-400 transition hover:text-gray-700"
+                            >
+                              <FaCopy className="text-xs" />
+                            </button>
                           </div>
+                          <p className="text-sm text-gray-600">
+                            {order.user?.name} - ${order.total?.toFixed(2)}
+                          </p>
                         </div>
+                        <span
+                          className={`px-2 py-1 rounded text-xs ${getOrderStatusColor(order.status)}`}
+                        >
+                          {order.status}
+                        </span>
                       </div>
                     ))}
+                  </div>
                 </div>
-              </div>
-            </div>
-          </div>
-        )}
 
-        {/* Products Tab */}
-        {activeTab === "products" && (
-          <div className="p-6">
-            <div className="flex items-center justify-between mb-6">
-              <h2 className="text-2xl font-semibold">Product Management</h2>
-              <button
-                onClick={() => setShowAddProductModal(true)}
-                className="bg-[#68a300] text-white px-4 py-2 rounded hover:bg-[#5f9600] flex items-center space-x-2"
-              >
-                <FaPlus />
-                <span>Add Product</span>
-              </button>
-              <button
-                onClick={() =>
-                  exportToExcel(
-                    [
-                      {
-                        name: "Products",
-                        data: formatProductsForExport(products),
-                      },
-                    ],
-                    "products.xlsx",
-                  ).catch(() => toast.error("Export failed"))
-                }
-                className="flex items-center space-x-2 rounded bg-green-700 px-4 py-2 text-white hover:bg-green-800"
-              >
-                <FaFileExcel />
-                <span>Export</span>
-              </button>
-            </div>
-
-            <div className="mb-8 grid grid-cols-1 gap-8 lg:grid-cols-[360px,1fr]">
-              <div className="rounded-lg border bg-gray-50 p-5">
-                <h3 className="mb-4 text-xl font-semibold">
-                  Products Page Banners
-                </h3>
-                <form
-                  className="space-y-4"
-                  onSubmit={handleCreateProductBanner}
-                >
-                  <div>
-                    <label className="mb-2 block text-sm font-medium text-gray-700">
-                      Banner Image
-                    </label>
-                    {productBannerImagePreview && (
-                      <img
-                        src={productBannerImagePreview}
-                        alt="Products banner preview"
-                        className="mb-3 h-32 w-full rounded-lg object-cover"
-                      />
-                    )}
-                    <input
-                      type="file"
-                      accept="image/*"
-                      onChange={(e) => {
-                        const file = e.target.files[0];
-                        if (!file) {
-                          return;
-                        }
-
-                        setProductBannerImageFile(file);
-                        const reader = new FileReader();
-                        reader.onload = (event) =>
-                          setProductBannerImagePreview(event.target.result);
-                        reader.readAsDataURL(file);
-                      }}
-                      className="w-full rounded border border-gray-300 px-3 py-2 text-sm"
-                    />
-                  </div>
-
-                  <div>
-                    <label className="mb-2 block text-sm font-medium text-gray-700">
-                      Display Order
-                    </label>
-                    <input
-                      type="number"
-                      value={productBannerForm.displayOrder}
-                      onChange={(e) =>
-                        setProductBannerForm((prev) => ({
-                          ...prev,
-                          displayOrder: e.target.value,
-                        }))
-                      }
-                      className="w-full rounded border border-gray-300 px-3 py-2"
-                      min="0"
-                    />
-                  </div>
-
-                  <button
-                    type="submit"
-                    disabled={uploadingProductBannerImage}
-                    className="flex items-center space-x-2 rounded bg-[#68a300] px-4 py-2 text-white hover:bg-[#5f9600] disabled:opacity-60"
-                  >
-                    <FaPlus />
-                    <span>
-                      {uploadingProductBannerImage
-                        ? "Uploading..."
-                        : "Add Banner"}
-                    </span>
-                  </button>
-                </form>
-              </div>
-
-              <div>
-                <h3 className="mb-4 text-xl font-semibold">Existing Banners</h3>
-                <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
-                  {productBanners.map((banner) => (
-                    <div
-                      key={banner._id}
-                      className="overflow-hidden rounded-xl border bg-white shadow-sm"
-                    >
-                      <img
-                        src={`http://localhost:5000${banner.image}`}
-                        alt="Products banner"
-                        className="h-32 w-full object-cover"
-                      />
-                      <div className="flex items-center justify-between p-3">
-                        <p className="text-sm text-gray-500">
-                          Order: {banner.displayOrder || 0}
-                        </p>
-                        <button
-                          onClick={() => handleDeleteProductBanner(banner._id)}
-                          className="text-red-600 hover:text-red-900"
+                {/* Low Stock Products */}
+                <div>
+                  <h3 className="text-lg font-semibold mb-4">
+                    Low Stock Alert
+                  </h3>
+                  <div className="space-y-4">
+                    {products
+                      .filter((product) => product.stock < 10)
+                      .slice(0, 5)
+                      .map((product) => (
+                        <div
+                          key={product._id}
+                          className="flex items-center justify-between p-4 border rounded"
                         >
-                          <FaTrash />
-                        </button>
-                      </div>
-                    </div>
-                  ))}
-
-                  {productBanners.length === 0 && (
-                    <div className="rounded-xl border border-dashed p-8 text-center text-gray-400 md:col-span-2 xl:col-span-3">
-                      No products banners yet.
-                    </div>
-                  )}
-                </div>
-              </div>
-            </div>
-
-            <div className="overflow-x-auto">
-              <table className="min-w-full table-auto">
-                <thead>
-                  <tr className="bg-gray-50">
-                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">
-                      Product
-                    </th>
-                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">
-                      Category
-                    </th>
-                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">
-                      SKU
-                    </th>
-                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">
-                      Cost Price
-                    </th>
-                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">
-                      Price
-                    </th>
-                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">
-                      Stock
-                    </th>
-                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">
-                      Actions
-                    </th>
-                  </tr>
-                </thead>
-                <tbody className="bg-white divide-y divide-gray-200">
-                  {products.map((product) => (
-                    <tr key={product._id}>
-                      <td className="px-4 py-4 whitespace-nowrap">
-                        <div className="flex items-center">
-                          <img
-                            src={
-                              product.image
-                                ? `http://localhost:5000${product.image}`
-                                : product.images?.[0]?.url ||
-                                  product.images?.[0] ||
-                                  "/placeholder-product.jpg"
-                            }
-                            alt={product.name}
-                            className="w-10 h-10 object-cover rounded"
-                          />
-                          <div className="ml-4">
-                            <div className="text-sm font-medium text-gray-900">
-                              {product.name}
+                          <div className="flex items-center space-x-3">
+                            <img
+                              src={
+                                product.image
+                                  ? `http://localhost:5000${product.image}`
+                                  : product.images?.[0]?.url ||
+                                    product.images?.[0] ||
+                                    "/placeholder-product.jpg"
+                              }
+                              alt={product.name}
+                              className="w-10 h-10 object-cover rounded"
+                            />
+                            <div>
+                              <p className="font-medium">{product.name}</p>
+                              <p className="text-sm text-red-600">
+                                Only {product.stock} left
+                              </p>
                             </div>
                           </div>
                         </div>
-                      </td>
-                      <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-500 capitalize">
-                        {product.category}
-                      </td>
-                      <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-900">
-                        {product.sku || "N/A"}
-                      </td>
-                      <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-900">
-                        ${Number(product.costPrice || 0).toFixed(2)}
-                      </td>
-                      <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-900">
-                        ${product.price?.toFixed(2)}
-                      </td>
-                      <td className="px-4 py-4 whitespace-nowrap">
-                        <span
-                          className={`px-2 py-1 text-xs rounded ${
-                            product.stock > 10
-                              ? "bg-green-100 text-green-800"
-                              : product.stock > 0
-                                ? "bg-yellow-100 text-yellow-800"
-                                : "bg-red-100 text-red-800"
-                          }`}
-                        >
-                          {product.stock}
-                        </span>
-                      </td>
-                      <td className="px-4 py-4 whitespace-nowrap text-sm font-medium space-x-2">
-                        <button
-                          onClick={() => handleEditProduct(product)}
-                          className="text-blue-600 hover:text-blue-900"
-                        >
-                          <FaEdit />
-                        </button>
-                        <button
-                          onClick={() => handleDeleteProduct(product._id)}
-                          className="text-red-600 hover:text-red-900"
-                        >
-                          <FaTrash />
-                        </button>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          </div>
-        )}
-
-        {/* Categories Tab */}
-        {activeTab === "categories" && (
-          <div className="p-6">
-            <div className="grid grid-cols-1 lg:grid-cols-[360px,1fr] gap-8">
-              <div className="border rounded-lg p-5 bg-gray-50">
-                <h2 className="text-2xl font-semibold mb-4">Add Category</h2>
-                <form className="space-y-4" onSubmit={handleCreateCategory}>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Category Name
-                    </label>
-                    <input
-                      type="text"
-                      value={categoryForm.name}
-                      onChange={(e) =>
-                        setCategoryForm((prev) => ({
-                          ...prev,
-                          name: e.target.value,
-                        }))
-                      }
-                      className="w-full border border-gray-300 rounded px-3 py-2"
-                      placeholder="e.g. Skincare"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Description
-                    </label>
-                    <textarea
-                      value={categoryForm.description}
-                      onChange={(e) =>
-                        setCategoryForm((prev) => ({
-                          ...prev,
-                          description: e.target.value,
-                        }))
-                      }
-                      rows={3}
-                      className="w-full border border-gray-300 rounded px-3 py-2"
-                      placeholder="Optional short description for the home page"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Category Image
-                    </label>
-                    {categoryImagePreview && (
-                      <img
-                        src={categoryImagePreview}
-                        alt="Preview"
-                        className="w-20 h-20 object-cover rounded-full border-2 border-[#68a300] mb-2"
-                      />
-                    )}
-                    <input
-                      type="file"
-                      accept="image/*"
-                      onChange={(e) => {
-                        const file = e.target.files[0];
-                        if (file) {
-                          setCategoryImageFile(file);
-                          const reader = new FileReader();
-                          reader.onload = (ev) =>
-                            setCategoryImagePreview(ev.target.result);
-                          reader.readAsDataURL(file);
-                        }
-                      }}
-                      className="w-full border border-gray-300 rounded px-3 py-2 text-sm"
-                    />
-                  </div>
-                  <button
-                    type="submit"
-                    disabled={uploadingCategoryImage}
-                    className="bg-[#68a300] text-white px-4 py-2 rounded hover:bg-[#5f9600] flex items-center space-x-2 disabled:opacity-60"
-                  >
-                    <FaPlus />
-                    <span>
-                      {uploadingCategoryImage ? "Uploading..." : "Add Category"}
-                    </span>
-                  </button>
-                </form>
-              </div>
-
-              <div>
-                <h2 className="text-2xl font-semibold mb-6">
-                  Category Management
-                </h2>
-                <div className="overflow-x-auto">
-                  <table className="min-w-full table-auto">
-                    <thead>
-                      <tr className="bg-gray-50">
-                        <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">
-                          Image
-                        </th>
-                        <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">
-                          Name
-                        </th>
-                        <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">
-                          Value
-                        </th>
-                        <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">
-                          Description
-                        </th>
-                        <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">
-                          Actions
-                        </th>
-                      </tr>
-                    </thead>
-                    <tbody className="bg-white divide-y divide-gray-200">
-                      {categories.map((category) => (
-                        <tr key={category._id || category.value}>
-                          <td className="px-4 py-4">
-                            {category.image ? (
-                              <img
-                                src={`http://localhost:5000${category.image}`}
-                                alt={category.name}
-                                className="w-10 h-10 object-cover rounded-full border border-gray-200"
-                              />
-                            ) : (
-                              <div className="w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center text-gray-400 text-xs border border-gray-200">
-                                N/A
-                              </div>
-                            )}
-                          </td>
-                          <td className="px-4 py-4 text-sm font-medium text-gray-900">
-                            {category.name}
-                          </td>
-                          <td className="px-4 py-4 text-sm text-gray-500">
-                            {category.value}
-                          </td>
-                          <td className="px-4 py-4 text-sm text-gray-500">
-                            {category.description || "-"}
-                          </td>
-                          <td className="px-4 py-4 text-sm font-medium">
-                            <button
-                              onClick={() => handleDeleteCategory(category._id)}
-                              className="text-red-600 hover:text-red-900"
-                            >
-                              <FaTrash />
-                            </button>
-                          </td>
-                        </tr>
                       ))}
-                    </tbody>
-                  </table>
+                  </div>
                 </div>
               </div>
             </div>
-          </div>
-        )}
+          )}
 
-        {/* Orders Tab */}
-        {activeTab === "orders" && (
-          <div className="p-6">
-            <div className="mb-6 flex items-center justify-between">
-              <h2 className="text-2xl font-semibold">Order Management</h2>
-              <button
-                onClick={() =>
-                  exportToExcel(
-                    [{ name: "Orders", data: formatOrdersForExport(orders) }],
-                    "orders.xlsx",
-                  ).catch(() => toast.error("Export failed"))
-                }
-                className="flex items-center space-x-2 rounded bg-green-700 px-4 py-2 text-white hover:bg-green-800"
-              >
-                <FaFileExcel />
-                <span>Export</span>
-              </button>
-            </div>
+          {/* Products Tab */}
+          {activeTab === "products" && (
+            <div className="p-6">
+              <div className="flex items-center justify-between mb-6">
+                <h2 className="text-2xl font-semibold">Product Management</h2>
+                <button
+                  onClick={() => setShowAddProductModal(true)}
+                  className="bg-[#68a300] text-white px-4 py-2 rounded hover:bg-[#5f9600] flex items-center space-x-2"
+                >
+                  <FaPlus />
+                  <span>Add Product</span>
+                </button>
+                <button
+                  onClick={() =>
+                    exportToExcel(
+                      [
+                        {
+                          name: "Products",
+                          data: formatProductsForExport(products),
+                        },
+                      ],
+                      "products.xlsx",
+                    ).catch(() => toast.error("Export failed"))
+                  }
+                  className="flex items-center space-x-2 rounded bg-green-700 px-4 py-2 text-white hover:bg-green-800"
+                >
+                  <FaFileExcel />
+                  <span>Export</span>
+                </button>
+              </div>
 
-            <div className="overflow-x-auto">
-              <table className="min-w-full table-auto">
-                <thead>
-                  <tr className="bg-gray-50">
-                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">
-                      Order ID
-                    </th>
-                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">
-                      Customer
-                    </th>
-                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">
-                      Total
-                    </th>
-                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">
-                      Status
-                    </th>
-                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">
-                      Date
-                    </th>
-                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">
-                      Actions
-                    </th>
-                  </tr>
-                </thead>
-                <tbody className="bg-white divide-y divide-gray-200">
-                  {orders.map((order) => (
-                    <tr key={order._id}>
-                      <td className="px-4 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                        <div className="flex items-center gap-2">
-                          <span title={order._id}>
-                            {formatOrderDisplayId(order._id)}
-                          </span>
-                          <button
-                            type="button"
-                            title="Copy full order ID"
-                            onClick={() => handleCopyOrderId(order._id)}
-                            className="text-gray-400 transition hover:text-gray-700"
-                          >
-                            <FaCopy className="text-xs" />
-                          </button>
-                        </div>
-                      </td>
-                      <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-500">
-                        {order.user?.name}
-                      </td>
-                      <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-900">
-                        ${order.total?.toFixed(2)}
-                      </td>
-                      <td className="px-4 py-4 whitespace-nowrap">
-                        <select
-                          value={order.status}
-                          onChange={(e) =>
-                            handleUpdateOrderStatus(order._id, e.target.value)
-                          }
-                          className="text-sm border border-gray-300 rounded px-2 py-1"
-                        >
-                          <option value="pending">Pending</option>
-                          <option value="processing">Processing</option>
-                          <option value="shipped">Shipped</option>
-                          <option value="delivered">Delivered</option>
-                          <option value="cancelled">Cancelled</option>
-                        </select>
-                      </td>
-                      <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-500">
-                        {new Date(order.createdAt).toLocaleDateString()}
-                      </td>
-                      <td className="px-4 py-4 whitespace-nowrap text-sm font-medium">
-                        <button
-                          onClick={() => navigate(`/admin/orders/${order._id}`)}
-                          className="text-blue-600 hover:text-blue-900"
-                        >
-                          <FaEye />
-                        </button>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          </div>
-        )}
-
-        {/* Users Tab */}
-        {activeTab === "users" && (
-          <div className="p-6">
-            <div className="mb-6 flex items-center justify-between">
-              <h2 className="text-2xl font-semibold">User Management</h2>
-              <button
-                onClick={() =>
-                  exportToExcel(
-                    [{ name: "Users", data: formatUsersForExport(users) }],
-                    "users.xlsx",
-                  ).catch(() => toast.error("Export failed"))
-                }
-                className="flex items-center space-x-2 rounded bg-green-700 px-4 py-2 text-white hover:bg-green-800"
-              >
-                <FaFileExcel />
-                <span>Export</span>
-              </button>
-            </div>
-
-            <div className="overflow-x-auto">
-              <table className="min-w-full table-auto">
-                <thead>
-                  <tr className="bg-gray-50">
-                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">
-                      User
-                    </th>
-                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">
-                      Email
-                    </th>
-                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">
-                      Role
-                    </th>
-                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">
-                      Joined
-                    </th>
-                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">
-                      Actions
-                    </th>
-                  </tr>
-                </thead>
-                <tbody className="bg-white divide-y divide-gray-200">
-                  {users.map((userData) => (
-                    <tr key={userData._id}>
-                      <td className="px-4 py-4 whitespace-nowrap">
-                        <div className="text-sm font-medium text-gray-900">
-                          {userData.name}
-                        </div>
-                      </td>
-                      <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-500">
-                        {userData.email}
-                      </td>
-                      <td className="px-4 py-4 whitespace-nowrap">
-                        <span
-                          className={`px-2 py-1 text-xs rounded ${
-                            userData.role === "admin"
-                              ? "bg-purple-100 text-purple-800"
-                              : "bg-gray-100 text-gray-800"
-                          }`}
-                        >
-                          {userData.role}
-                        </span>
-                      </td>
-                      <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-500">
-                        {new Date(userData.createdAt).toLocaleDateString()}
-                      </td>
-                      <td className="px-4 py-4 whitespace-nowrap text-sm font-medium space-x-2">
-                        <button
-                          onClick={() =>
-                            navigate(`/admin/users/${userData._id}`)
-                          }
-                          className="text-blue-600 hover:text-blue-900"
-                        >
-                          <FaEye />
-                        </button>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          </div>
-        )}
-
-        {/* Hero Tab */}
-        {activeTab === "hero" && (
-          <div className="p-6">
-            <div className="grid grid-cols-1 gap-8 lg:grid-cols-[380px,1fr]">
-              <div className="rounded-lg border bg-gray-50 p-5">
-                <h2 className="mb-4 text-2xl font-semibold">Add Hero Slide</h2>
-                <form className="space-y-4" onSubmit={handleCreateHeroSlide}>
-                  <div>
-                    <label className="mb-2 block text-sm font-medium text-gray-700">
-                      Hero Image
-                    </label>
-                    {heroImagePreview && (
-                      <img
-                        src={heroImagePreview}
-                        alt="Hero preview"
-                        className="mb-3 h-40 w-full rounded-lg object-cover"
-                      />
-                    )}
-                    <input
-                      type="file"
-                      accept="image/*"
-                      onChange={(e) => {
-                        const file = e.target.files[0];
-                        if (!file) {
-                          return;
-                        }
-
-                        setHeroImageFile(file);
-                        const reader = new FileReader();
-                        reader.onload = (event) =>
-                          setHeroImagePreview(event.target.result);
-                        reader.readAsDataURL(file);
-                      }}
-                      className="w-full rounded border border-gray-300 px-3 py-2 text-sm"
-                    />
-                  </div>
-                  <div>
-                    <label className="mb-2 block text-sm font-medium text-gray-700">
-                      Display Order
-                    </label>
-                    <input
-                      type="number"
-                      value={heroForm.displayOrder}
-                      onChange={(e) =>
-                        setHeroForm((prev) => ({
-                          ...prev,
-                          displayOrder: e.target.value,
-                        }))
-                      }
-                      className="w-full rounded border border-gray-300 px-3 py-2"
-                      min="0"
-                    />
-                  </div>
-                  <button
-                    type="submit"
-                    disabled={uploadingHeroImage}
-                    className="flex items-center space-x-2 rounded bg-[#68a300] px-4 py-2 text-white hover:bg-[#5f9600] disabled:opacity-60"
+              <div className="mb-8 grid grid-cols-1 gap-8 lg:grid-cols-[360px,1fr]">
+                <div className="rounded-lg border bg-gray-50 p-5">
+                  <h3 className="mb-4 text-xl font-semibold">
+                    Products Page Banners
+                  </h3>
+                  <form
+                    className="space-y-4"
+                    onSubmit={handleCreateProductBanner}
                   >
-                    <FaPlus />
-                    <span>
-                      {uploadingHeroImage ? "Uploading..." : "Add Hero Slide"}
-                    </span>
-                  </button>
-                </form>
-              </div>
+                    <div>
+                      <label className="mb-2 block text-sm font-medium text-gray-700">
+                        Banner Image
+                      </label>
+                      {productBannerImagePreview && (
+                        <img
+                          src={productBannerImagePreview}
+                          alt="Products banner preview"
+                          className="mb-3 h-32 w-full rounded-lg object-cover"
+                        />
+                      )}
+                      <input
+                        type="file"
+                        accept="image/*"
+                        onChange={(e) => {
+                          const file = e.target.files[0];
+                          if (!file) {
+                            return;
+                          }
 
-              <div>
-                <div className="mb-6 flex items-center justify-between">
-                  <h2 className="text-2xl font-semibold">Hero Slides</h2>
-                  <div className="flex items-center gap-2 text-sm text-gray-500">
-                    <FaImage />
-                    <span>{heroSlides.length} slides</span>
-                  </div>
+                          setProductBannerImageFile(file);
+                          const reader = new FileReader();
+                          reader.onload = (event) =>
+                            setProductBannerImagePreview(event.target.result);
+                          reader.readAsDataURL(file);
+                        }}
+                        className="w-full rounded border border-gray-300 px-3 py-2 text-sm"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="mb-2 block text-sm font-medium text-gray-700">
+                        Display Order
+                      </label>
+                      <input
+                        type="number"
+                        value={productBannerForm.displayOrder}
+                        onChange={(e) =>
+                          setProductBannerForm((prev) => ({
+                            ...prev,
+                            displayOrder: e.target.value,
+                          }))
+                        }
+                        className="w-full rounded border border-gray-300 px-3 py-2"
+                        min="0"
+                      />
+                    </div>
+
+                    <button
+                      type="submit"
+                      disabled={uploadingProductBannerImage}
+                      className="flex items-center space-x-2 rounded bg-[#68a300] px-4 py-2 text-white hover:bg-[#5f9600] disabled:opacity-60"
+                    >
+                      <FaPlus />
+                      <span>
+                        {uploadingProductBannerImage
+                          ? "Uploading..."
+                          : "Add Banner"}
+                      </span>
+                    </button>
+                  </form>
                 </div>
 
-                <div className="grid grid-cols-1 gap-5 md:grid-cols-2 xl:grid-cols-3">
-                  {heroSlides.map((slide) => (
-                    <div
-                      key={slide._id}
-                      className="overflow-hidden rounded-xl border bg-white shadow-sm"
-                    >
-                      <img
-                        src={`http://localhost:5000${slide.image}`}
-                        alt="Hero slide"
-                        className="h-44 w-full object-cover"
-                      />
-                      <div className="space-y-2 p-4">
-                        <div className="flex items-start justify-between gap-4">
-                          <div>
-                            <p className="text-sm text-gray-500">
-                              Order: {slide.displayOrder || 0}
-                            </p>
-                          </div>
+                <div>
+                  <h3 className="mb-4 text-xl font-semibold">
+                    Existing Banners
+                  </h3>
+                  <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
+                    {productBanners.map((banner) => (
+                      <div
+                        key={banner._id}
+                        className="overflow-hidden rounded-xl border bg-white shadow-sm"
+                      >
+                        <img
+                          src={`http://localhost:5000${banner.image}`}
+                          alt="Products banner"
+                          className="h-32 w-full object-cover"
+                        />
+                        <div className="flex items-center justify-between p-3">
+                          <p className="text-sm text-gray-500">
+                            Order: {banner.displayOrder || 0}
+                          </p>
                           <button
-                            onClick={() => handleDeleteHeroSlide(slide._id)}
+                            onClick={() =>
+                              handleDeleteProductBanner(banner._id)
+                            }
                             className="text-red-600 hover:text-red-900"
                           >
                             <FaTrash />
                           </button>
                         </div>
                       </div>
-                    </div>
-                  ))}
+                    ))}
 
-                  {heroSlides.length === 0 && (
-                    <div className="rounded-xl border border-dashed p-8 text-center text-gray-400 md:col-span-2 xl:col-span-3">
-                      No hero slides yet.
-                    </div>
-                  )}
+                    {productBanners.length === 0 && (
+                      <div className="rounded-xl border border-dashed p-8 text-center text-gray-400 md:col-span-2 xl:col-span-3">
+                        No products banners yet.
+                      </div>
+                    )}
+                  </div>
                 </div>
               </div>
-            </div>
-          </div>
-        )}
 
-        {/* Batches Tab */}
-        {activeTab === "batches" && (
-          <div className="p-6">
-            <div className="mb-6 flex items-center justify-between">
-              <h2 className="text-2xl font-semibold">Batch Management</h2>
-              <p className="text-sm text-gray-500">
-                Total batch stock: {batchStockTotal}
-              </p>
-            </div>
-
-            <div className="mb-8 grid grid-cols-1 gap-8 lg:grid-cols-[360px,1fr]">
-              <div className="rounded-lg border bg-gray-50 p-5">
-                <h3 className="mb-4 text-xl font-semibold">Add New Batch</h3>
-                <form className="space-y-4" onSubmit={handleCreateBatch}>
-                  <div>
-                    <label className="mb-2 block text-sm font-medium text-gray-700">
-                      Product
-                    </label>
-                    <select
-                      value={selectedBatchProductId}
-                      onChange={(e) =>
-                        setSelectedBatchProductId(e.target.value)
-                      }
-                      className="w-full rounded border border-gray-300 px-3 py-2 text-sm"
-                      required
-                    >
-                      {products.map((product) => (
-                        <option key={product._id} value={product._id}>
-                          {product.name}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
-
-                  <div>
-                    <label className="mb-2 block text-sm font-medium text-gray-700">
-                      Batch Number
-                    </label>
-                    <input
-                      type="text"
-                      value={batchForm.batchNumber}
-                      onChange={(e) =>
-                        setBatchForm((prev) => ({
-                          ...prev,
-                          batchNumber: e.target.value,
-                        }))
-                      }
-                      className="w-full rounded border border-gray-300 px-3 py-2 text-sm"
-                      placeholder="e.g. LOT-2026-001"
-                      required
-                    />
-                  </div>
-
-                  <div>
-                    <label className="mb-2 block text-sm font-medium text-gray-700">
-                      Quantity
-                    </label>
-                    <input
-                      type="number"
-                      min="0.01"
-                      step="0.01"
-                      value={batchForm.quantity}
-                      onChange={(e) =>
-                        setBatchForm((prev) => ({
-                          ...prev,
-                          quantity: e.target.value,
-                        }))
-                      }
-                      className="w-full rounded border border-gray-300 px-3 py-2 text-sm"
-                      required
-                    />
-                  </div>
-
-                  <div>
-                    <label className="mb-2 block text-sm font-medium text-gray-700">
-                      Cost Price
-                    </label>
-                    <input
-                      type="number"
-                      min="0"
-                      step="0.01"
-                      value={batchForm.costPrice}
-                      onChange={(e) =>
-                        setBatchForm((prev) => ({
-                          ...prev,
-                          costPrice: e.target.value,
-                        }))
-                      }
-                      className="w-full rounded border border-gray-300 px-3 py-2 text-sm"
-                      required
-                    />
-                  </div>
-
-                  <div>
-                    <label className="mb-2 block text-sm font-medium text-gray-700">
-                      Purchase Date
-                    </label>
-                    <input
-                      type="date"
-                      value={batchForm.purchaseDate}
-                      onChange={(e) =>
-                        setBatchForm((prev) => ({
-                          ...prev,
-                          purchaseDate: e.target.value,
-                        }))
-                      }
-                      className="w-full rounded border border-gray-300 px-3 py-2 text-sm"
-                    />
-                  </div>
-
-                  <div>
-                    <label className="mb-2 block text-sm font-medium text-gray-700">
-                      Expiry Date (Optional)
-                    </label>
-                    <input
-                      type="date"
-                      value={batchForm.expiryDate}
-                      onChange={(e) =>
-                        setBatchForm((prev) => ({
-                          ...prev,
-                          expiryDate: e.target.value,
-                        }))
-                      }
-                      className="w-full rounded border border-gray-300 px-3 py-2 text-sm"
-                    />
-                  </div>
-
-                  <button
-                    type="submit"
-                    disabled={creatingBatch}
-                    className="flex items-center space-x-2 rounded bg-[#68a300] px-4 py-2 text-white hover:bg-[#5f9600] disabled:opacity-60"
-                  >
-                    <FaPlus />
-                    <span>{creatingBatch ? "Saving..." : "Add Batch"}</span>
-                  </button>
-                </form>
+              <div className="overflow-x-auto">
+                <table className="min-w-full table-auto">
+                  <thead>
+                    <tr className="bg-gray-50">
+                      <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+                        Product
+                      </th>
+                      <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+                        Category
+                      </th>
+                      <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+                        SKU
+                      </th>
+                      <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+                        Cost Price
+                      </th>
+                      <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+                        Price
+                      </th>
+                      <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+                        Stock
+                      </th>
+                      <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+                        Actions
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody className="bg-white divide-y divide-gray-200">
+                    {products.map((product) => (
+                      <tr key={product._id}>
+                        <td className="px-4 py-4 whitespace-nowrap">
+                          <div className="flex items-center">
+                            <img
+                              src={
+                                product.image
+                                  ? `http://localhost:5000${product.image}`
+                                  : product.images?.[0]?.url ||
+                                    product.images?.[0] ||
+                                    "/placeholder-product.jpg"
+                              }
+                              alt={product.name}
+                              className="w-10 h-10 object-cover rounded"
+                            />
+                            <div className="ml-4">
+                              <div className="text-sm font-medium text-gray-900">
+                                {product.name}
+                              </div>
+                            </div>
+                          </div>
+                        </td>
+                        <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-500 capitalize">
+                          {product.category}
+                        </td>
+                        <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-900">
+                          {product.sku || "N/A"}
+                        </td>
+                        <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-900">
+                          ${Number(product.costPrice || 0).toFixed(2)}
+                        </td>
+                        <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-900">
+                          ${product.price?.toFixed(2)}
+                        </td>
+                        <td className="px-4 py-4 whitespace-nowrap">
+                          <span
+                            className={`px-2 py-1 text-xs rounded ${
+                              product.stock > 10
+                                ? "bg-green-100 text-green-800"
+                                : product.stock > 0
+                                  ? "bg-yellow-100 text-yellow-800"
+                                  : "bg-red-100 text-red-800"
+                            }`}
+                          >
+                            {product.stock}
+                          </span>
+                        </td>
+                        <td className="px-4 py-4 whitespace-nowrap text-sm font-medium space-x-2">
+                          <button
+                            onClick={() => handleEditProduct(product)}
+                            className="text-blue-600 hover:text-blue-900"
+                          >
+                            <FaEdit />
+                          </button>
+                          <button
+                            onClick={() => handleDeleteProduct(product._id)}
+                            className="text-red-600 hover:text-red-900"
+                          >
+                            <FaTrash />
+                          </button>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
               </div>
+            </div>
+          )}
 
-              <div>
-                <h3 className="mb-4 text-xl font-semibold">Existing Batches</h3>
-                <p className="mb-3 text-sm text-gray-600">
-                  Product: {selectedBatchProduct?.name || "-"}
-                </p>
+          {/* Categories Tab */}
+          {activeTab === "categories" && (
+            <div className="p-6">
+              <div className="grid grid-cols-1 lg:grid-cols-[360px,1fr] gap-8">
+                <div className="border rounded-lg p-5 bg-gray-50">
+                  <h2 className="text-2xl font-semibold mb-4">Add Category</h2>
+                  <form className="space-y-4" onSubmit={handleCreateCategory}>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                        Category Name
+                      </label>
+                      <input
+                        type="text"
+                        value={categoryForm.name}
+                        onChange={(e) =>
+                          setCategoryForm((prev) => ({
+                            ...prev,
+                            name: e.target.value,
+                          }))
+                        }
+                        className="w-full border border-gray-300 rounded px-3 py-2"
+                        placeholder="e.g. Skincare"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                        Description
+                      </label>
+                      <textarea
+                        value={categoryForm.description}
+                        onChange={(e) =>
+                          setCategoryForm((prev) => ({
+                            ...prev,
+                            description: e.target.value,
+                          }))
+                        }
+                        rows={3}
+                        className="w-full border border-gray-300 rounded px-3 py-2"
+                        placeholder="Optional short description for the home page"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                        Category Image
+                      </label>
+                      {categoryImagePreview && (
+                        <img
+                          src={categoryImagePreview}
+                          alt="Preview"
+                          className="w-20 h-20 object-cover rounded-full border-2 border-[#68a300] mb-2"
+                        />
+                      )}
+                      <input
+                        type="file"
+                        accept="image/*"
+                        onChange={(e) => {
+                          const file = e.target.files[0];
+                          if (file) {
+                            setCategoryImageFile(file);
+                            const reader = new FileReader();
+                            reader.onload = (ev) =>
+                              setCategoryImagePreview(ev.target.result);
+                            reader.readAsDataURL(file);
+                          }
+                        }}
+                        className="w-full border border-gray-300 rounded px-3 py-2 text-sm"
+                      />
+                    </div>
+                    <button
+                      type="submit"
+                      disabled={uploadingCategoryImage}
+                      className="bg-[#68a300] text-white px-4 py-2 rounded hover:bg-[#5f9600] flex items-center space-x-2 disabled:opacity-60"
+                    >
+                      <FaPlus />
+                      <span>
+                        {uploadingCategoryImage
+                          ? "Uploading..."
+                          : "Add Category"}
+                      </span>
+                    </button>
+                  </form>
+                </div>
 
-                {loadingBatches ? (
-                  <div className="rounded-xl border border-dashed p-8 text-center text-gray-400">
-                    Loading batches...
-                  </div>
-                ) : productBatches.length === 0 ? (
-                  <div className="rounded-xl border border-dashed p-8 text-center text-gray-400">
-                    No batches found for selected product.
-                  </div>
-                ) : (
-                  <div className="overflow-x-auto rounded-xl border bg-white">
+                <div>
+                  <h2 className="text-2xl font-semibold mb-6">
+                    Category Management
+                  </h2>
+                  <div className="overflow-x-auto">
                     <table className="min-w-full table-auto">
                       <thead>
                         <tr className="bg-gray-50">
-                          <th className="px-4 py-3 text-left text-xs font-medium uppercase text-gray-500">
-                            Product
+                          <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+                            Image
                           </th>
-                          <th className="px-4 py-3 text-left text-xs font-medium uppercase text-gray-500">
-                            Batch Number
+                          <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+                            Name
                           </th>
-                          <th className="px-4 py-3 text-left text-xs font-medium uppercase text-gray-500">
-                            Quantity
+                          <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+                            Value
                           </th>
-                          <th className="px-4 py-3 text-left text-xs font-medium uppercase text-gray-500">
-                            Remaining
+                          <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+                            Description
                           </th>
-                          <th className="px-4 py-3 text-left text-xs font-medium uppercase text-gray-500">
-                            Cost Price
-                          </th>
-                          <th className="px-4 py-3 text-left text-xs font-medium uppercase text-gray-500">
-                            Purchase Date
-                          </th>
-                          <th className="px-4 py-3 text-left text-xs font-medium uppercase text-gray-500">
-                            Expiry Date
+                          <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+                            Actions
                           </th>
                         </tr>
                       </thead>
-                      <tbody className="divide-y divide-gray-200 bg-white">
-                        {productBatches.map((batch) => (
-                          <tr key={batch._id}>
-                            <td className="px-4 py-4 text-sm text-gray-700">
-                              {selectedBatchProduct?.name || "-"}
+                      <tbody className="bg-white divide-y divide-gray-200">
+                        {categories.map((category) => (
+                          <tr key={category._id || category.value}>
+                            <td className="px-4 py-4">
+                              {category.image ? (
+                                <img
+                                  src={`http://localhost:5000${category.image}`}
+                                  alt={category.name}
+                                  className="w-10 h-10 object-cover rounded-full border border-gray-200"
+                                />
+                              ) : (
+                                <div className="w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center text-gray-400 text-xs border border-gray-200">
+                                  N/A
+                                </div>
+                              )}
                             </td>
                             <td className="px-4 py-4 text-sm font-medium text-gray-900">
-                              {batch.batch_number}
+                              {category.name}
                             </td>
-                            <td className="px-4 py-4 text-sm text-gray-700">
-                              {Number(batch.quantity || 0)}
+                            <td className="px-4 py-4 text-sm text-gray-500">
+                              {category.value}
                             </td>
-                            <td className="px-4 py-4 text-sm text-gray-700">
-                              {Number(batch.remaining_quantity || 0)}
+                            <td className="px-4 py-4 text-sm text-gray-500">
+                              {category.description || "-"}
                             </td>
-                            <td className="px-4 py-4 text-sm text-gray-700">
-                              ${Number(batch.cost_price || 0).toFixed(2)}
-                            </td>
-                            <td className="px-4 py-4 text-sm text-gray-700">
-                              {batch.purchase_date
-                                ? new Date(
-                                    batch.purchase_date,
-                                  ).toLocaleDateString()
-                                : "-"}
-                            </td>
-                            <td className="px-4 py-4 text-sm text-gray-700">
-                              {batch.expiry_date
-                                ? new Date(
-                                    batch.expiry_date,
-                                  ).toLocaleDateString()
-                                : "-"}
+                            <td className="px-4 py-4 text-sm font-medium">
+                              <button
+                                onClick={() =>
+                                  handleDeleteCategory(category._id)
+                                }
+                                className="text-red-600 hover:text-red-900"
+                              >
+                                <FaTrash />
+                              </button>
                             </td>
                           </tr>
                         ))}
                       </tbody>
                     </table>
                   </div>
-                )}
+                </div>
               </div>
             </div>
-          </div>
-        )}
+          )}
 
-        {/* About Video Tab */}
-        {activeTab === "about-video" && (
-          <div className="p-6 space-y-8">
-            <div className="grid grid-cols-1 gap-8 lg:grid-cols-[380px,1fr]">
-              <div className="rounded-lg border bg-gray-50 p-5">
-                <h2 className="mb-4 text-2xl font-semibold">
-                  About Page Video
-                </h2>
-                <form className="space-y-4" onSubmit={handleUploadAboutVideo}>
-                  <div>
-                    <label className="mb-2 block text-sm font-medium text-gray-700">
-                      Upload Video
-                    </label>
-                    {aboutVideoPreview && (
-                      <video
-                        src={aboutVideoPreview}
-                        controls
-                        className="mb-3 h-44 w-full rounded-lg border object-cover"
+          {/* Orders Tab */}
+          {activeTab === "orders" && (
+            <div className="p-6">
+              <div className="mb-6 flex items-center justify-between">
+                <h2 className="text-2xl font-semibold">Order Management</h2>
+                <button
+                  onClick={() =>
+                    exportToExcel(
+                      [{ name: "Orders", data: formatOrdersForExport(orders) }],
+                      "orders.xlsx",
+                    ).catch(() => toast.error("Export failed"))
+                  }
+                  className="flex items-center space-x-2 rounded bg-green-700 px-4 py-2 text-white hover:bg-green-800"
+                >
+                  <FaFileExcel />
+                  <span>Export</span>
+                </button>
+              </div>
+
+              <div className="overflow-x-auto">
+                <table className="min-w-full table-auto">
+                  <thead>
+                    <tr className="bg-gray-50">
+                      <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+                        Order ID
+                      </th>
+                      <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+                        Customer
+                      </th>
+                      <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+                        Total
+                      </th>
+                      <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+                        Status
+                      </th>
+                      <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+                        Date
+                      </th>
+                      <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+                        Actions
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody className="bg-white divide-y divide-gray-200">
+                    {orders.map((order) => (
+                      <tr key={order._id}>
+                        <td className="px-4 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                          <div className="flex items-center gap-2">
+                            <span title={order._id}>
+                              {formatOrderDisplayId(order._id)}
+                            </span>
+                            <button
+                              type="button"
+                              title="Copy full order ID"
+                              onClick={() => handleCopyOrderId(order._id)}
+                              className="text-gray-400 transition hover:text-gray-700"
+                            >
+                              <FaCopy className="text-xs" />
+                            </button>
+                          </div>
+                        </td>
+                        <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-500">
+                          {order.user?.name}
+                        </td>
+                        <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-900">
+                          ${order.total?.toFixed(2)}
+                        </td>
+                        <td className="px-4 py-4 whitespace-nowrap">
+                          <select
+                            value={order.status}
+                            onChange={(e) =>
+                              handleUpdateOrderStatus(order._id, e.target.value)
+                            }
+                            className="text-sm border border-gray-300 rounded px-2 py-1"
+                          >
+                            <option value="pending">Pending</option>
+                            <option value="processing">Processing</option>
+                            <option value="shipped">Shipped</option>
+                            <option value="delivered">Delivered</option>
+                            <option value="cancelled">Cancelled</option>
+                          </select>
+                        </td>
+                        <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-500">
+                          {new Date(order.createdAt).toLocaleDateString()}
+                        </td>
+                        <td className="px-4 py-4 whitespace-nowrap text-sm font-medium">
+                          <button
+                            onClick={() =>
+                              navigate(`/admin/orders/${order._id}`)
+                            }
+                            className="text-blue-600 hover:text-blue-900"
+                          >
+                            <FaEye />
+                          </button>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          )}
+
+          {/* Users Tab */}
+          {activeTab === "users" && (
+            <div className="p-6">
+              <div className="mb-6 flex items-center justify-between">
+                <h2 className="text-2xl font-semibold">User Management</h2>
+                <button
+                  onClick={() =>
+                    exportToExcel(
+                      [{ name: "Users", data: formatUsersForExport(users) }],
+                      "users.xlsx",
+                    ).catch(() => toast.error("Export failed"))
+                  }
+                  className="flex items-center space-x-2 rounded bg-green-700 px-4 py-2 text-white hover:bg-green-800"
+                >
+                  <FaFileExcel />
+                  <span>Export</span>
+                </button>
+              </div>
+
+              <div className="overflow-x-auto">
+                <table className="min-w-full table-auto">
+                  <thead>
+                    <tr className="bg-gray-50">
+                      <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+                        User
+                      </th>
+                      <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+                        Email
+                      </th>
+                      <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+                        Role
+                      </th>
+                      <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+                        Joined
+                      </th>
+                      <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+                        Actions
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody className="bg-white divide-y divide-gray-200">
+                    {users.map((userData) => (
+                      <tr key={userData._id}>
+                        <td className="px-4 py-4 whitespace-nowrap">
+                          <div className="text-sm font-medium text-gray-900">
+                            {userData.name}
+                          </div>
+                        </td>
+                        <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-500">
+                          {userData.email}
+                        </td>
+                        <td className="px-4 py-4 whitespace-nowrap">
+                          <span
+                            className={`px-2 py-1 text-xs rounded ${
+                              userData.role === "admin"
+                                ? "bg-purple-100 text-purple-800"
+                                : "bg-gray-100 text-gray-800"
+                            }`}
+                          >
+                            {userData.role}
+                          </span>
+                        </td>
+                        <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-500">
+                          {new Date(userData.createdAt).toLocaleDateString()}
+                        </td>
+                        <td className="px-4 py-4 whitespace-nowrap text-sm font-medium space-x-2">
+                          <button
+                            onClick={() =>
+                              navigate(`/admin/users/${userData._id}`)
+                            }
+                            className="text-blue-600 hover:text-blue-900"
+                          >
+                            <FaEye />
+                          </button>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          )}
+
+          {/* Hero Tab */}
+          {activeTab === "hero" && (
+            <div className="p-6">
+              <div className="grid grid-cols-1 gap-8 lg:grid-cols-[380px,1fr]">
+                <div className="rounded-lg border bg-gray-50 p-5">
+                  <h2 className="mb-4 text-2xl font-semibold">
+                    Add Hero Slide
+                  </h2>
+                  <form className="space-y-4" onSubmit={handleCreateHeroSlide}>
+                    <div>
+                      <label className="mb-2 block text-sm font-medium text-gray-700">
+                        Hero Image
+                      </label>
+                      {heroImagePreview && (
+                        <img
+                          src={heroImagePreview}
+                          alt="Hero preview"
+                          className="mb-3 h-40 w-full rounded-lg object-cover"
+                        />
+                      )}
+                      <input
+                        type="file"
+                        accept="image/*"
+                        onChange={(e) => {
+                          const file = e.target.files[0];
+                          if (!file) {
+                            return;
+                          }
+
+                          setHeroImageFile(file);
+                          const reader = new FileReader();
+                          reader.onload = (event) =>
+                            setHeroImagePreview(event.target.result);
+                          reader.readAsDataURL(file);
+                        }}
+                        className="w-full rounded border border-gray-300 px-3 py-2 text-sm"
                       />
-                    )}
-                    <input
-                      type="file"
-                      accept="video/*"
-                      onChange={(e) => {
-                        const file = e.target.files[0];
-                        if (!file) {
-                          return;
+                    </div>
+                    <div>
+                      <label className="mb-2 block text-sm font-medium text-gray-700">
+                        Display Order
+                      </label>
+                      <input
+                        type="number"
+                        value={heroForm.displayOrder}
+                        onChange={(e) =>
+                          setHeroForm((prev) => ({
+                            ...prev,
+                            displayOrder: e.target.value,
+                          }))
                         }
-
-                        setAboutVideoFile(file);
-                        if (aboutVideoPreview) {
-                          URL.revokeObjectURL(aboutVideoPreview);
-                        }
-                        setAboutVideoPreview(URL.createObjectURL(file));
-                      }}
-                      className="w-full rounded border border-gray-300 px-3 py-2 text-sm"
-                    />
-                    <p className="mt-2 text-xs text-gray-500">
-                      Supported: MP4/WebM/OGG, max size 100MB.
-                    </p>
-                  </div>
-
-                  <div className="flex gap-3">
+                        className="w-full rounded border border-gray-300 px-3 py-2"
+                        min="0"
+                      />
+                    </div>
                     <button
                       type="submit"
-                      disabled={uploadingAboutVideo}
+                      disabled={uploadingHeroImage}
                       className="flex items-center space-x-2 rounded bg-[#68a300] px-4 py-2 text-white hover:bg-[#5f9600] disabled:opacity-60"
                     >
-                      <FaVideo />
+                      <FaPlus />
                       <span>
-                        {uploadingAboutVideo ? "Saving..." : "Save Video"}
+                        {uploadingHeroImage ? "Uploading..." : "Add Hero Slide"}
                       </span>
                     </button>
+                  </form>
+                </div>
+
+                <div>
+                  <div className="mb-6 flex items-center justify-between">
+                    <h2 className="text-2xl font-semibold">Hero Slides</h2>
+                    <div className="flex items-center gap-2 text-sm text-gray-500">
+                      <FaImage />
+                      <span>{heroSlides.length} slides</span>
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-1 gap-5 md:grid-cols-2 xl:grid-cols-3">
+                    {heroSlides.map((slide) => (
+                      <div
+                        key={slide._id}
+                        className="overflow-hidden rounded-xl border bg-white shadow-sm"
+                      >
+                        <img
+                          src={`http://localhost:5000${slide.image}`}
+                          alt="Hero slide"
+                          className="h-44 w-full object-cover"
+                        />
+                        <div className="space-y-2 p-4">
+                          <div className="flex items-start justify-between gap-4">
+                            <div>
+                              <p className="text-sm text-gray-500">
+                                Order: {slide.displayOrder || 0}
+                              </p>
+                            </div>
+                            <button
+                              onClick={() => handleDeleteHeroSlide(slide._id)}
+                              className="text-red-600 hover:text-red-900"
+                            >
+                              <FaTrash />
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+
+                    {heroSlides.length === 0 && (
+                      <div className="rounded-xl border border-dashed p-8 text-center text-gray-400 md:col-span-2 xl:col-span-3">
+                        No hero slides yet.
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Batches Tab */}
+          {activeTab === "batches" && (
+            <div className="p-6">
+              <div className="mb-6 flex items-center justify-between">
+                <h2 className="text-2xl font-semibold">Batch Management</h2>
+                <p className="text-sm text-gray-500">
+                  Total batch stock: {batchStockTotal}
+                </p>
+              </div>
+
+              <div className="mb-8 grid grid-cols-1 gap-8 lg:grid-cols-[360px,1fr]">
+                <div className="rounded-lg border bg-gray-50 p-5">
+                  <h3 className="mb-4 text-xl font-semibold">Add New Batch</h3>
+                  <form className="space-y-4" onSubmit={handleCreateBatch}>
+                    <div>
+                      <label className="mb-2 block text-sm font-medium text-gray-700">
+                        Product
+                      </label>
+                      <select
+                        value={selectedBatchProductId}
+                        onChange={(e) =>
+                          setSelectedBatchProductId(e.target.value)
+                        }
+                        className="w-full rounded border border-gray-300 px-3 py-2 text-sm"
+                        required
+                      >
+                        {products.map((product) => (
+                          <option key={product._id} value={product._id}>
+                            {product.name}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+
+                    <div>
+                      <label className="mb-2 block text-sm font-medium text-gray-700">
+                        Batch Number
+                      </label>
+                      <input
+                        type="text"
+                        value={batchForm.batchNumber}
+                        onChange={(e) =>
+                          setBatchForm((prev) => ({
+                            ...prev,
+                            batchNumber: e.target.value,
+                          }))
+                        }
+                        className="w-full rounded border border-gray-300 px-3 py-2 text-sm"
+                        placeholder="e.g. LOT-2026-001"
+                        required
+                      />
+                    </div>
+
+                    <div>
+                      <label className="mb-2 block text-sm font-medium text-gray-700">
+                        Quantity
+                      </label>
+                      <input
+                        type="number"
+                        min="0.01"
+                        step="0.01"
+                        value={batchForm.quantity}
+                        onChange={(e) =>
+                          setBatchForm((prev) => ({
+                            ...prev,
+                            quantity: e.target.value,
+                          }))
+                        }
+                        className="w-full rounded border border-gray-300 px-3 py-2 text-sm"
+                        required
+                      />
+                    </div>
+
+                    <div>
+                      <label className="mb-2 block text-sm font-medium text-gray-700">
+                        Cost Price
+                      </label>
+                      <input
+                        type="number"
+                        min="0"
+                        step="0.01"
+                        value={batchForm.costPrice}
+                        onChange={(e) =>
+                          setBatchForm((prev) => ({
+                            ...prev,
+                            costPrice: e.target.value,
+                          }))
+                        }
+                        className="w-full rounded border border-gray-300 px-3 py-2 text-sm"
+                        required
+                      />
+                    </div>
+
+                    <div>
+                      <label className="mb-2 block text-sm font-medium text-gray-700">
+                        Purchase Date
+                      </label>
+                      <input
+                        type="date"
+                        value={batchForm.purchaseDate}
+                        onChange={(e) =>
+                          setBatchForm((prev) => ({
+                            ...prev,
+                            purchaseDate: e.target.value,
+                          }))
+                        }
+                        className="w-full rounded border border-gray-300 px-3 py-2 text-sm"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="mb-2 block text-sm font-medium text-gray-700">
+                        Expiry Date (Optional)
+                      </label>
+                      <input
+                        type="date"
+                        value={batchForm.expiryDate}
+                        onChange={(e) =>
+                          setBatchForm((prev) => ({
+                            ...prev,
+                            expiryDate: e.target.value,
+                          }))
+                        }
+                        className="w-full rounded border border-gray-300 px-3 py-2 text-sm"
+                      />
+                    </div>
 
                     <button
-                      type="button"
-                      onClick={handleRemoveAboutVideo}
-                      disabled={uploadingAboutVideo || !aboutVideoUrl}
-                      className="flex items-center space-x-2 rounded border border-red-200 bg-white px-4 py-2 text-red-600 hover:bg-red-50 disabled:opacity-50"
+                      type="submit"
+                      disabled={creatingBatch}
+                      className="flex items-center space-x-2 rounded bg-[#68a300] px-4 py-2 text-white hover:bg-[#5f9600] disabled:opacity-60"
                     >
-                      <FaTrash />
-                      <span>Remove</span>
+                      <FaPlus />
+                      <span>{creatingBatch ? "Saving..." : "Add Batch"}</span>
                     </button>
+                  </form>
+                </div>
+
+                <div>
+                  <h3 className="mb-4 text-xl font-semibold">
+                    Existing Batches
+                  </h3>
+                  <p className="mb-3 text-sm text-gray-600">
+                    Product: {selectedBatchProduct?.name || "-"}
+                  </p>
+
+                  {loadingBatches ? (
+                    <div className="rounded-xl border border-dashed p-8 text-center text-gray-400">
+                      Loading batches...
+                    </div>
+                  ) : productBatches.length === 0 ? (
+                    <div className="rounded-xl border border-dashed p-8 text-center text-gray-400">
+                      No batches found for selected product.
+                    </div>
+                  ) : (
+                    <div className="overflow-x-auto rounded-xl border bg-white">
+                      <table className="min-w-full table-auto">
+                        <thead>
+                          <tr className="bg-gray-50">
+                            <th className="px-4 py-3 text-left text-xs font-medium uppercase text-gray-500">
+                              Product
+                            </th>
+                            <th className="px-4 py-3 text-left text-xs font-medium uppercase text-gray-500">
+                              Batch Number
+                            </th>
+                            <th className="px-4 py-3 text-left text-xs font-medium uppercase text-gray-500">
+                              Quantity
+                            </th>
+                            <th className="px-4 py-3 text-left text-xs font-medium uppercase text-gray-500">
+                              Remaining
+                            </th>
+                            <th className="px-4 py-3 text-left text-xs font-medium uppercase text-gray-500">
+                              Cost Price
+                            </th>
+                            <th className="px-4 py-3 text-left text-xs font-medium uppercase text-gray-500">
+                              Purchase Date
+                            </th>
+                            <th className="px-4 py-3 text-left text-xs font-medium uppercase text-gray-500">
+                              Expiry Date
+                            </th>
+                          </tr>
+                        </thead>
+                        <tbody className="divide-y divide-gray-200 bg-white">
+                          {productBatches.map((batch) => (
+                            <tr key={batch._id}>
+                              <td className="px-4 py-4 text-sm text-gray-700">
+                                {selectedBatchProduct?.name || "-"}
+                              </td>
+                              <td className="px-4 py-4 text-sm font-medium text-gray-900">
+                                {batch.batch_number}
+                              </td>
+                              <td className="px-4 py-4 text-sm text-gray-700">
+                                {Number(batch.quantity || 0)}
+                              </td>
+                              <td className="px-4 py-4 text-sm text-gray-700">
+                                {Number(batch.remaining_quantity || 0)}
+                              </td>
+                              <td className="px-4 py-4 text-sm text-gray-700">
+                                ${Number(batch.cost_price || 0).toFixed(2)}
+                              </td>
+                              <td className="px-4 py-4 text-sm text-gray-700">
+                                {batch.purchase_date
+                                  ? new Date(
+                                      batch.purchase_date,
+                                    ).toLocaleDateString()
+                                  : "-"}
+                              </td>
+                              <td className="px-4 py-4 text-sm text-gray-700">
+                                {batch.expiry_date
+                                  ? new Date(
+                                      batch.expiry_date,
+                                    ).toLocaleDateString()
+                                  : "-"}
+                              </td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* About Video Tab */}
+          {activeTab === "about-video" && (
+            <div className="p-6 space-y-8">
+              <div className="grid grid-cols-1 gap-8 lg:grid-cols-[380px,1fr]">
+                <div className="rounded-lg border bg-gray-50 p-5">
+                  <h2 className="mb-4 text-2xl font-semibold">
+                    About Page Video
+                  </h2>
+                  <form className="space-y-4" onSubmit={handleUploadAboutVideo}>
+                    <div>
+                      <label className="mb-2 block text-sm font-medium text-gray-700">
+                        Upload Video
+                      </label>
+                      {aboutVideoPreview && (
+                        <video
+                          src={aboutVideoPreview}
+                          controls
+                          className="mb-3 h-44 w-full rounded-lg border object-cover"
+                        />
+                      )}
+                      <input
+                        type="file"
+                        accept="video/*"
+                        onChange={(e) => {
+                          const file = e.target.files[0];
+                          if (!file) {
+                            return;
+                          }
+
+                          setAboutVideoFile(file);
+                          if (aboutVideoPreview) {
+                            URL.revokeObjectURL(aboutVideoPreview);
+                          }
+                          setAboutVideoPreview(URL.createObjectURL(file));
+                        }}
+                        className="w-full rounded border border-gray-300 px-3 py-2 text-sm"
+                      />
+                      <p className="mt-2 text-xs text-gray-500">
+                        Supported: MP4/WebM/OGG, max size 100MB.
+                      </p>
+                    </div>
+
+                    <div className="flex gap-3">
+                      <button
+                        type="submit"
+                        disabled={uploadingAboutVideo}
+                        className="flex items-center space-x-2 rounded bg-[#68a300] px-4 py-2 text-white hover:bg-[#5f9600] disabled:opacity-60"
+                      >
+                        <FaVideo />
+                        <span>
+                          {uploadingAboutVideo ? "Saving..." : "Save Video"}
+                        </span>
+                      </button>
+
+                      <button
+                        type="button"
+                        onClick={handleRemoveAboutVideo}
+                        disabled={uploadingAboutVideo || !aboutVideoUrl}
+                        className="flex items-center space-x-2 rounded border border-red-200 bg-white px-4 py-2 text-red-600 hover:bg-red-50 disabled:opacity-50"
+                      >
+                        <FaTrash />
+                        <span>Remove</span>
+                      </button>
+                    </div>
+                  </form>
+                </div>
+
+                <div>
+                  <div className="mb-6 flex items-center justify-between">
+                    <h2 className="text-2xl font-semibold">
+                      Current About Video
+                    </h2>
+                    <div className="flex items-center gap-2 text-sm text-gray-500">
+                      <FaVideo />
+                      <span>{aboutVideoUrl ? "Configured" : "Not Set"}</span>
+                    </div>
                   </div>
+
+                  <div className="overflow-hidden rounded-xl border bg-white p-4 shadow-sm">
+                    {loadingAboutVideo ? (
+                      <div className="flex h-72 items-center justify-center text-gray-400">
+                        Loading...
+                      </div>
+                    ) : aboutVideoUrl ? (
+                      <video
+                        src={resolveMediaUrl(aboutVideoUrl)}
+                        controls
+                        className="h-72 w-full rounded-lg bg-black object-contain"
+                      />
+                    ) : (
+                      <div className="flex h-72 items-center justify-center rounded-lg border-2 border-dashed border-gray-300 bg-gray-50 text-gray-400">
+                        No video uploaded yet.
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </div>
+
+              <div className="rounded-xl border bg-white p-6 shadow-sm">
+                <div className="mb-6 flex flex-wrap items-center justify-between gap-3">
+                  <h2 className="text-2xl font-semibold">
+                    Section After Video Content
+                  </h2>
+                  <button
+                    type="button"
+                    onClick={handleResetAboutSectionDefaults}
+                    className="rounded border border-gray-300 px-3 py-2 text-sm text-gray-700 hover:bg-gray-50"
+                  >
+                    Reset Defaults
+                  </button>
+                </div>
+
+                <form className="space-y-6" onSubmit={handleSaveAboutSection}>
+                  <div>
+                    <label className="mb-2 block text-sm font-medium text-gray-700">
+                      Heading
+                    </label>
+                    <input
+                      type="text"
+                      value={aboutSectionHeading}
+                      onChange={(e) => setAboutSectionHeading(e.target.value)}
+                      className="w-full rounded border border-gray-300 px-3 py-2 text-sm"
+                      maxLength={180}
+                      placeholder="Enter section heading"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="mb-2 block text-sm font-medium text-gray-700">
+                      Descriptive Paragraph
+                    </label>
+                    <textarea
+                      value={aboutSectionDescription}
+                      onChange={(e) =>
+                        setAboutSectionDescription(e.target.value)
+                      }
+                      className="w-full rounded border border-gray-300 px-3 py-2 text-sm"
+                      rows={4}
+                      maxLength={1200}
+                      placeholder="Enter section paragraph"
+                    />
+                  </div>
+
+                  <div>
+                    <p className="mb-3 text-sm font-medium text-gray-700">
+                      Upload 3 Images
+                    </p>
+                    <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
+                      {[0, 1, 2].map((index) => {
+                        const preview =
+                          aboutSectionImagePreviews[index] ||
+                          resolveMediaUrl(aboutSectionImages[index]);
+
+                        return (
+                          <div
+                            key={index}
+                            className="rounded-lg border bg-gray-50 p-3"
+                          >
+                            <p className="mb-2 text-xs font-semibold uppercase text-gray-500">
+                              Image {index + 1}
+                            </p>
+                            {preview ? (
+                              <img
+                                src={preview}
+                                alt={`Section preview ${index + 1}`}
+                                className="mb-3 h-28 w-full rounded object-cover"
+                              />
+                            ) : (
+                              <div className="mb-3 flex h-28 items-center justify-center rounded border-2 border-dashed border-gray-300 text-xs text-gray-400">
+                                No image selected
+                              </div>
+                            )}
+                            <input
+                              type="file"
+                              accept="image/*"
+                              onChange={(e) =>
+                                handleAboutSectionImageChange(
+                                  index,
+                                  e.target.files[0],
+                                )
+                              }
+                              className="w-full rounded border border-gray-300 px-2 py-2 text-xs"
+                            />
+                            <button
+                              type="button"
+                              onClick={() =>
+                                handleRemoveAboutSectionImage(index)
+                              }
+                              className="mt-2 w-full rounded border border-red-200 px-2 py-2 text-xs text-red-600 hover:bg-red-50"
+                            >
+                              Clear
+                            </button>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </div>
+
+                  <button
+                    type="submit"
+                    disabled={savingAboutSection}
+                    className="inline-flex items-center space-x-2 rounded bg-[#68a300] px-4 py-2 text-white hover:bg-[#5f9600] disabled:opacity-60"
+                  >
+                    <FaCheck />
+                    <span>
+                      {savingAboutSection ? "Saving..." : "Save Section"}
+                    </span>
+                  </button>
                 </form>
               </div>
 
-              <div>
-                <div className="mb-6 flex items-center justify-between">
+              <div className="rounded-xl border bg-white p-6 shadow-sm">
+                <div className="mb-6 flex flex-wrap items-center justify-between gap-3">
                   <h2 className="text-2xl font-semibold">
-                    Current About Video
+                    "Backed by Science" Section Content
                   </h2>
-                  <div className="flex items-center gap-2 text-sm text-gray-500">
-                    <FaVideo />
-                    <span>{aboutVideoUrl ? "Configured" : "Not Set"}</span>
-                  </div>
+                  <button
+                    type="button"
+                    onClick={handleResetScienceSectionDefaults}
+                    className="rounded border border-gray-300 px-3 py-2 text-sm text-gray-700 hover:bg-gray-50"
+                  >
+                    Reset Defaults
+                  </button>
                 </div>
 
-                <div className="overflow-hidden rounded-xl border bg-white p-4 shadow-sm">
-                  {loadingAboutVideo ? (
-                    <div className="flex h-72 items-center justify-center text-gray-400">
-                      Loading...
-                    </div>
-                  ) : aboutVideoUrl ? (
-                    <video
-                      src={resolveMediaUrl(aboutVideoUrl)}
-                      controls
-                      className="h-72 w-full rounded-lg bg-black object-contain"
+                <form className="space-y-6" onSubmit={handleSaveScienceSection}>
+                  <div>
+                    <label className="mb-2 block text-sm font-medium text-gray-700">
+                      Heading
+                    </label>
+                    <input
+                      type="text"
+                      value={scienceHeading}
+                      onChange={(e) => setScienceHeading(e.target.value)}
+                      className="w-full rounded border border-gray-300 px-3 py-2 text-sm"
+                      maxLength={180}
+                      placeholder="e.g. We Are Backed By Science"
                     />
-                  ) : (
-                    <div className="flex h-72 items-center justify-center rounded-lg border-2 border-dashed border-gray-300 bg-gray-50 text-gray-400">
-                      No video uploaded yet.
-                    </div>
-                  )}
-                </div>
-              </div>
-            </div>
+                  </div>
 
-            <div className="rounded-xl border bg-white p-6 shadow-sm">
-              <div className="mb-6 flex flex-wrap items-center justify-between gap-3">
-                <h2 className="text-2xl font-semibold">
-                  Section After Video Content
-                </h2>
-                <button
-                  type="button"
-                  onClick={handleResetAboutSectionDefaults}
-                  className="rounded border border-gray-300 px-3 py-2 text-sm text-gray-700 hover:bg-gray-50"
-                >
-                  Reset Defaults
-                </button>
-              </div>
+                  <div>
+                    <label className="mb-2 block text-sm font-medium text-gray-700">
+                      Descriptive Paragraph
+                    </label>
+                    <textarea
+                      value={scienceDescription}
+                      onChange={(e) => setScienceDescription(e.target.value)}
+                      className="w-full rounded border border-gray-300 px-3 py-2 text-sm"
+                      rows={4}
+                      maxLength={1200}
+                      placeholder="Enter descriptive paragraph"
+                    />
+                  </div>
 
-              <form className="space-y-6" onSubmit={handleSaveAboutSection}>
-                <div>
-                  <label className="mb-2 block text-sm font-medium text-gray-700">
-                    Heading
-                  </label>
-                  <input
-                    type="text"
-                    value={aboutSectionHeading}
-                    onChange={(e) => setAboutSectionHeading(e.target.value)}
-                    className="w-full rounded border border-gray-300 px-3 py-2 text-sm"
-                    maxLength={180}
-                    placeholder="Enter section heading"
-                  />
-                </div>
+                  <div>
+                    <p className="mb-3 text-sm font-medium text-gray-700">
+                      Certification Badges (upload 1 or more)
+                    </p>
 
-                <div>
-                  <label className="mb-2 block text-sm font-medium text-gray-700">
-                    Descriptive Paragraph
-                  </label>
-                  <textarea
-                    value={aboutSectionDescription}
-                    onChange={(e) => setAboutSectionDescription(e.target.value)}
-                    className="w-full rounded border border-gray-300 px-3 py-2 text-sm"
-                    rows={4}
-                    maxLength={1200}
-                    placeholder="Enter section paragraph"
-                  />
-                </div>
+                    <input
+                      type="file"
+                      accept="image/*"
+                      multiple
+                      onChange={(e) =>
+                        handleScienceBadgeImageSelection(e.target.files)
+                      }
+                      className="w-full rounded border border-gray-300 px-3 py-2 text-sm"
+                    />
 
-                <div>
-                  <p className="mb-3 text-sm font-medium text-gray-700">
-                    Upload 3 Images
-                  </p>
-                  <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
-                    {[0, 1, 2].map((index) => {
-                      const preview =
-                        aboutSectionImagePreviews[index] ||
-                        resolveMediaUrl(aboutSectionImages[index]);
-
-                      return (
+                    <div className="mt-4 grid grid-cols-2 gap-3 md:grid-cols-4">
+                      {scienceBadgeImages.map((badge, index) => (
                         <div
-                          key={index}
-                          className="rounded-lg border bg-gray-50 p-3"
+                          key={`${badge}-${index}`}
+                          className="rounded border p-2"
                         >
-                          <p className="mb-2 text-xs font-semibold uppercase text-gray-500">
-                            Image {index + 1}
-                          </p>
-                          {preview ? (
-                            <img
-                              src={preview}
-                              alt={`Section preview ${index + 1}`}
-                              className="mb-3 h-28 w-full rounded object-cover"
-                            />
-                          ) : (
-                            <div className="mb-3 flex h-28 items-center justify-center rounded border-2 border-dashed border-gray-300 text-xs text-gray-400">
-                              No image selected
-                            </div>
-                          )}
-                          <input
-                            type="file"
-                            accept="image/*"
-                            onChange={(e) =>
-                              handleAboutSectionImageChange(
-                                index,
-                                e.target.files[0],
-                              )
-                            }
-                            className="w-full rounded border border-gray-300 px-2 py-2 text-xs"
+                          <img
+                            src={resolveMediaUrl(badge)}
+                            alt={`Saved badge ${index + 1}`}
+                            className="h-20 w-full rounded object-cover"
                           />
                           <button
                             type="button"
-                            onClick={() => handleRemoveAboutSectionImage(index)}
-                            className="mt-2 w-full rounded border border-red-200 px-2 py-2 text-xs text-red-600 hover:bg-red-50"
+                            onClick={() => handleRemoveSavedScienceBadge(index)}
+                            className="mt-2 w-full rounded border border-red-200 px-2 py-1 text-xs text-red-600 hover:bg-red-50"
                           >
-                            Clear
+                            Remove
                           </button>
                         </div>
-                      );
-                    })}
-                  </div>
-                </div>
+                      ))}
 
-                <button
-                  type="submit"
-                  disabled={savingAboutSection}
-                  className="inline-flex items-center space-x-2 rounded bg-[#68a300] px-4 py-2 text-white hover:bg-[#5f9600] disabled:opacity-60"
-                >
-                  <FaCheck />
-                  <span>
-                    {savingAboutSection ? "Saving..." : "Save Section"}
-                  </span>
-                </button>
-              </form>
-            </div>
-
-            <div className="rounded-xl border bg-white p-6 shadow-sm">
-              <div className="mb-6 flex flex-wrap items-center justify-between gap-3">
-                <h2 className="text-2xl font-semibold">
-                  "Backed by Science" Section Content
-                </h2>
-                <button
-                  type="button"
-                  onClick={handleResetScienceSectionDefaults}
-                  className="rounded border border-gray-300 px-3 py-2 text-sm text-gray-700 hover:bg-gray-50"
-                >
-                  Reset Defaults
-                </button>
-              </div>
-
-              <form className="space-y-6" onSubmit={handleSaveScienceSection}>
-                <div>
-                  <label className="mb-2 block text-sm font-medium text-gray-700">
-                    Heading
-                  </label>
-                  <input
-                    type="text"
-                    value={scienceHeading}
-                    onChange={(e) => setScienceHeading(e.target.value)}
-                    className="w-full rounded border border-gray-300 px-3 py-2 text-sm"
-                    maxLength={180}
-                    placeholder="e.g. We Are Backed By Science"
-                  />
-                </div>
-
-                <div>
-                  <label className="mb-2 block text-sm font-medium text-gray-700">
-                    Descriptive Paragraph
-                  </label>
-                  <textarea
-                    value={scienceDescription}
-                    onChange={(e) => setScienceDescription(e.target.value)}
-                    className="w-full rounded border border-gray-300 px-3 py-2 text-sm"
-                    rows={4}
-                    maxLength={1200}
-                    placeholder="Enter descriptive paragraph"
-                  />
-                </div>
-
-                <div>
-                  <p className="mb-3 text-sm font-medium text-gray-700">
-                    Certification Badges (upload 1 or more)
-                  </p>
-
-                  <input
-                    type="file"
-                    accept="image/*"
-                    multiple
-                    onChange={(e) =>
-                      handleScienceBadgeImageSelection(e.target.files)
-                    }
-                    className="w-full rounded border border-gray-300 px-3 py-2 text-sm"
-                  />
-
-                  <div className="mt-4 grid grid-cols-2 gap-3 md:grid-cols-4">
-                    {scienceBadgeImages.map((badge, index) => (
-                      <div
-                        key={`${badge}-${index}`}
-                        className="rounded border p-2"
-                      >
-                        <img
-                          src={resolveMediaUrl(badge)}
-                          alt={`Saved badge ${index + 1}`}
-                          className="h-20 w-full rounded object-cover"
-                        />
-                        <button
-                          type="button"
-                          onClick={() => handleRemoveSavedScienceBadge(index)}
-                          className="mt-2 w-full rounded border border-red-200 px-2 py-1 text-xs text-red-600 hover:bg-red-50"
-                        >
-                          Remove
-                        </button>
-                      </div>
-                    ))}
-
-                    {scienceBadgeImagePreviews.map((preview, index) => (
-                      <div
-                        key={`pending-${index}`}
-                        className="rounded border border-[#68a300]/40 bg-[#f4faeb] p-2"
-                      >
-                        <img
-                          src={preview}
-                          alt={`Pending badge ${index + 1}`}
-                          className="h-20 w-full rounded object-cover"
-                        />
-                        <button
-                          type="button"
-                          onClick={() => handleRemovePendingScienceBadge(index)}
-                          className="mt-2 w-full rounded border border-red-200 px-2 py-1 text-xs text-red-600 hover:bg-red-50"
-                        >
-                          Remove
-                        </button>
-                      </div>
-                    ))}
-                  </div>
-
-                  <p className="mt-2 text-xs text-gray-400">
-                    You can keep up to 8 badge images.
-                  </p>
-                </div>
-
-                <div>
-                  <p className="mb-3 text-sm font-medium text-gray-700">
-                    Section Image (upload 1 image)
-                  </p>
-
-                  {(scienceImagePreview || scienceImage) && (
-                    <img
-                      src={scienceImagePreview || resolveMediaUrl(scienceImage)}
-                      alt="Science section preview"
-                      className="mb-3 h-40 w-full max-w-sm rounded-lg border object-cover"
-                    />
-                  )}
-
-                  <input
-                    type="file"
-                    accept="image/*"
-                    onChange={(e) =>
-                      handleScienceImageChange(e.target.files[0])
-                    }
-                    className="w-full max-w-sm rounded border border-gray-300 px-3 py-2 text-sm"
-                  />
-
-                  <button
-                    type="button"
-                    onClick={handleRemoveScienceImage}
-                    className="mt-2 rounded border border-red-200 px-3 py-2 text-xs text-red-600 hover:bg-red-50"
-                  >
-                    Clear Section Image
-                  </button>
-                </div>
-
-                <button
-                  type="submit"
-                  disabled={savingScienceSection}
-                  className="inline-flex items-center space-x-2 rounded bg-[#68a300] px-4 py-2 text-white hover:bg-[#5f9600] disabled:opacity-60"
-                >
-                  <FaCheck />
-                  <span>
-                    {savingScienceSection ? "Saving..." : "Save Section"}
-                  </span>
-                </button>
-              </form>
-            </div>
-
-            <div className="rounded-xl border bg-white p-6 shadow-sm">
-              <div className="mb-6 flex flex-wrap items-center justify-between gap-3">
-                <h2 className="text-2xl font-semibold">
-                  Why Nutrifactor Section
-                </h2>
-                <button
-                  type="button"
-                  onClick={handleResetWhyNutrifactorSectionDefaults}
-                  className="rounded border border-gray-300 px-3 py-2 text-sm text-gray-700 hover:bg-gray-50"
-                >
-                  Reset Defaults
-                </button>
-              </div>
-
-              <form
-                className="space-y-6"
-                onSubmit={handleSaveWhyNutrifactorSection}
-              >
-                <div>
-                  <label className="mb-2 block text-sm font-medium text-gray-700">
-                    Heading
-                  </label>
-                  <input
-                    type="text"
-                    value={whyNutrifactorHeading}
-                    onChange={(e) => setWhyNutrifactorHeading(e.target.value)}
-                    className="w-full rounded border border-gray-300 px-3 py-2 text-sm"
-                    maxLength={180}
-                    placeholder="e.g. WHY NUTRIFACTOR!"
-                  />
-                </div>
-
-                <div>
-                  <label className="mb-2 block text-sm font-medium text-gray-700">
-                    Descriptive Paragraph
-                  </label>
-                  <textarea
-                    value={whyNutrifactorDescription}
-                    onChange={(e) =>
-                      setWhyNutrifactorDescription(e.target.value)
-                    }
-                    className="w-full rounded border border-gray-300 px-3 py-2 text-sm"
-                    rows={5}
-                    maxLength={1400}
-                    placeholder="Enter Why Nutrifactor paragraph"
-                  />
-                </div>
-
-                <div>
-                  <p className="mb-3 text-sm font-medium text-gray-700">
-                    Section Image (upload 1 image)
-                  </p>
-
-                  {(whyNutrifactorImagePreview || whyNutrifactorImage) && (
-                    <img
-                      src={
-                        whyNutrifactorImagePreview ||
-                        resolveMediaUrl(whyNutrifactorImage)
-                      }
-                      alt="Why Nutrifactor preview"
-                      className="mb-3 h-44 w-full max-w-2xl rounded-lg border object-cover"
-                    />
-                  )}
-
-                  <input
-                    type="file"
-                    accept="image/*"
-                    onChange={(e) =>
-                      handleWhyNutrifactorImageChange(e.target.files[0])
-                    }
-                    className="w-full max-w-sm rounded border border-gray-300 px-3 py-2 text-sm"
-                  />
-
-                  <button
-                    type="button"
-                    onClick={handleRemoveWhyNutrifactorImage}
-                    className="mt-2 rounded border border-red-200 px-3 py-2 text-xs text-red-600 hover:bg-red-50"
-                  >
-                    Clear Section Image
-                  </button>
-                </div>
-
-                <button
-                  type="submit"
-                  disabled={savingWhyNutrifactorSection}
-                  className="inline-flex items-center space-x-2 rounded bg-[#68a300] px-4 py-2 text-white hover:bg-[#5f9600] disabled:opacity-60"
-                >
-                  <FaCheck />
-                  <span>
-                    {savingWhyNutrifactorSection ? "Saving..." : "Save Section"}
-                  </span>
-                </button>
-              </form>
-            </div>
-
-            <div className="rounded-xl border bg-white p-6 shadow-sm">
-              <div className="mb-6 flex flex-wrap items-center justify-between gap-3">
-                <h2 className="text-2xl font-semibold">Our Mission Section</h2>
-                <button
-                  type="button"
-                  onClick={handleResetMissionSectionDefaults}
-                  className="rounded border border-gray-300 px-3 py-2 text-sm text-gray-700 hover:bg-gray-50"
-                >
-                  Reset Defaults
-                </button>
-              </div>
-
-              <form className="space-y-6" onSubmit={handleSaveMissionSection}>
-                <div>
-                  <label className="mb-2 block text-sm font-medium text-gray-700">
-                    Heading
-                  </label>
-                  <input
-                    type="text"
-                    value={missionHeading}
-                    onChange={(e) => setMissionHeading(e.target.value)}
-                    className="w-full rounded border border-gray-300 px-3 py-2 text-sm"
-                    maxLength={180}
-                    placeholder="Enter mission heading"
-                  />
-                </div>
-
-                <div>
-                  <label className="mb-2 block text-sm font-medium text-gray-700">
-                    Descriptive Paragraph
-                  </label>
-                  <textarea
-                    value={missionDescription}
-                    onChange={(e) => setMissionDescription(e.target.value)}
-                    className="w-full rounded border border-gray-300 px-3 py-2 text-sm"
-                    rows={5}
-                    maxLength={1500}
-                    placeholder="Enter mission paragraph"
-                  />
-                </div>
-
-                <div>
-                  <p className="mb-3 text-sm font-medium text-gray-700">
-                    Section Image (upload 1 image)
-                  </p>
-
-                  {(missionImagePreview || missionImage) && (
-                    <img
-                      src={missionImagePreview || resolveMediaUrl(missionImage)}
-                      alt="Mission section preview"
-                      className="mb-3 h-44 w-full max-w-2xl rounded-lg border object-cover"
-                    />
-                  )}
-
-                  <input
-                    type="file"
-                    accept="image/*"
-                    onChange={(e) =>
-                      handleMissionImageChange(e.target.files[0])
-                    }
-                    className="w-full max-w-sm rounded border border-gray-300 px-3 py-2 text-sm"
-                  />
-
-                  <button
-                    type="button"
-                    onClick={handleRemoveMissionImage}
-                    className="mt-2 rounded border border-red-200 px-3 py-2 text-xs text-red-600 hover:bg-red-50"
-                  >
-                    Clear Section Image
-                  </button>
-                </div>
-
-                <button
-                  type="submit"
-                  disabled={savingMissionSection}
-                  className="inline-flex items-center space-x-2 rounded bg-[#68a300] px-4 py-2 text-white hover:bg-[#5f9600] disabled:opacity-60"
-                >
-                  <FaCheck />
-                  <span>
-                    {savingMissionSection ? "Saving..." : "Save Section"}
-                  </span>
-                </button>
-              </form>
-            </div>
-
-            <div className="rounded-xl border bg-white p-6 shadow-sm">
-              <div className="mb-6 flex flex-wrap items-center justify-between gap-3">
-                <h2 className="text-2xl font-semibold">
-                  Your Health, Our Priority Section
-                </h2>
-                <button
-                  type="button"
-                  onClick={handleResetHealthPrioritySectionDefaults}
-                  className="rounded border border-gray-300 px-3 py-2 text-sm text-gray-700 hover:bg-gray-50"
-                >
-                  Reset Defaults
-                </button>
-              </div>
-
-              <form
-                className="space-y-6"
-                onSubmit={handleSaveHealthPrioritySection}
-              >
-                <div>
-                  <label className="mb-2 block text-sm font-medium text-gray-700">
-                    Heading
-                  </label>
-                  <input
-                    type="text"
-                    value={healthPriorityHeading}
-                    onChange={(e) => setHealthPriorityHeading(e.target.value)}
-                    className="w-full rounded border border-gray-300 px-3 py-2 text-sm"
-                    maxLength={180}
-                    placeholder="e.g. YOUR HEALTH, OUR PRIORITY"
-                  />
-                </div>
-
-                {[0, 1, 2].map((index) => (
-                  <div
-                    key={`health-item-${index}`}
-                    className="rounded-lg border bg-gray-50 p-4"
-                  >
-                    <p className="mb-3 text-sm font-semibold text-gray-700">
-                      Text Block {index + 1}
-                    </p>
-                    <input
-                      type="text"
-                      value={healthPriorityItems[index]?.title || ""}
-                      onChange={(e) =>
-                        handleHealthPriorityItemChange(
-                          index,
-                          "title",
-                          e.target.value,
-                        )
-                      }
-                      className="mb-3 w-full rounded border border-gray-300 px-3 py-2 text-sm"
-                      maxLength={180}
-                      placeholder="Title"
-                    />
-                    <textarea
-                      value={healthPriorityItems[index]?.description || ""}
-                      onChange={(e) =>
-                        handleHealthPriorityItemChange(
-                          index,
-                          "description",
-                          e.target.value,
-                        )
-                      }
-                      className="w-full rounded border border-gray-300 px-3 py-2 text-sm"
-                      rows={3}
-                      maxLength={1000}
-                      placeholder="Description"
-                    />
-                  </div>
-                ))}
-
-                <div>
-                  <p className="mb-3 text-sm font-medium text-gray-700">
-                    Image Grid (upload up to 4 images)
-                  </p>
-                  <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-                    {[0, 1, 2, 3].map((index) => {
-                      const preview =
-                        healthPriorityImagePreviews[index] ||
-                        resolveMediaUrl(healthPriorityImages[index]);
-
-                      return (
+                      {scienceBadgeImagePreviews.map((preview, index) => (
                         <div
-                          key={`health-image-${index}`}
-                          className="rounded-lg border bg-gray-50 p-3"
+                          key={`pending-${index}`}
+                          className="rounded border border-[#68a300]/40 bg-[#f4faeb] p-2"
                         >
-                          <p className="mb-2 text-xs font-semibold uppercase text-gray-500">
-                            Image {index + 1}
-                          </p>
-                          {preview ? (
-                            <img
-                              src={preview}
-                              alt={`Health Priority preview ${index + 1}`}
-                              className="mb-3 h-32 w-full rounded object-cover"
-                            />
-                          ) : (
-                            <div className="mb-3 flex h-32 items-center justify-center rounded border-2 border-dashed border-gray-300 text-xs text-gray-400">
-                              No image selected
-                            </div>
-                          )}
-                          <input
-                            type="file"
-                            accept="image/*"
-                            onChange={(e) =>
-                              handleHealthPriorityImageChange(
-                                index,
-                                e.target.files[0],
-                              )
-                            }
-                            className="w-full rounded border border-gray-300 px-2 py-2 text-xs"
+                          <img
+                            src={preview}
+                            alt={`Pending badge ${index + 1}`}
+                            className="h-20 w-full rounded object-cover"
                           />
                           <button
                             type="button"
                             onClick={() =>
-                              handleRemoveHealthPriorityImage(index)
+                              handleRemovePendingScienceBadge(index)
                             }
-                            className="mt-2 w-full rounded border border-red-200 px-2 py-2 text-xs text-red-600 hover:bg-red-50"
+                            className="mt-2 w-full rounded border border-red-200 px-2 py-1 text-xs text-red-600 hover:bg-red-50"
                           >
-                            Clear
+                            Remove
                           </button>
                         </div>
-                      );
-                    })}
+                      ))}
+                    </div>
+
+                    <p className="mt-2 text-xs text-gray-400">
+                      You can keep up to 8 badge images.
+                    </p>
                   </div>
-                </div>
 
-                <button
-                  type="submit"
-                  disabled={savingHealthPrioritySection}
-                  className="inline-flex items-center space-x-2 rounded bg-[#68a300] px-4 py-2 text-white hover:bg-[#5f9600] disabled:opacity-60"
-                >
-                  <FaCheck />
-                  <span>
-                    {savingHealthPrioritySection ? "Saving..." : "Save Section"}
-                  </span>
-                </button>
-              </form>
-            </div>
+                  <div>
+                    <p className="mb-3 text-sm font-medium text-gray-700">
+                      Section Image (upload 1 image)
+                    </p>
 
-            <div className="rounded-xl border bg-white p-6 shadow-sm">
-              <div className="mb-6 flex flex-wrap items-center justify-between gap-3">
-                <h2 className="text-2xl font-semibold">
-                  Meet Our Team Members
-                </h2>
-                <div className="flex items-center gap-3">
+                    {(scienceImagePreview || scienceImage) && (
+                      <img
+                        src={
+                          scienceImagePreview || resolveMediaUrl(scienceImage)
+                        }
+                        alt="Science section preview"
+                        className="mb-3 h-40 w-full max-w-sm rounded-lg border object-cover"
+                      />
+                    )}
+
+                    <input
+                      type="file"
+                      accept="image/*"
+                      onChange={(e) =>
+                        handleScienceImageChange(e.target.files[0])
+                      }
+                      className="w-full max-w-sm rounded border border-gray-300 px-3 py-2 text-sm"
+                    />
+
+                    <button
+                      type="button"
+                      onClick={handleRemoveScienceImage}
+                      className="mt-2 rounded border border-red-200 px-3 py-2 text-xs text-red-600 hover:bg-red-50"
+                    >
+                      Clear Section Image
+                    </button>
+                  </div>
+
                   <button
-                    type="button"
-                    onClick={handleResetTeamMembersDefaults}
-                    className="rounded border border-gray-300 px-3 py-2 text-sm text-gray-700 hover:bg-gray-50"
+                    type="submit"
+                    disabled={savingScienceSection}
+                    className="inline-flex items-center space-x-2 rounded bg-[#68a300] px-4 py-2 text-white hover:bg-[#5f9600] disabled:opacity-60"
                   >
-                    Clear All
+                    <FaCheck />
+                    <span>
+                      {savingScienceSection ? "Saving..." : "Save Section"}
+                    </span>
                   </button>
-                  <button
-                    type="button"
-                    onClick={handleAddTeamMember}
-                    className="rounded bg-[#68a300] px-3 py-2 text-sm text-white hover:bg-[#5f9600]"
-                  >
-                    Add Member
-                  </button>
-                </div>
+                </form>
               </div>
 
-              <form className="space-y-5" onSubmit={handleSaveTeamMembers}>
-                {teamMembers.length === 0 && (
-                  <div className="rounded-lg border border-dashed border-gray-300 bg-gray-50 p-4 text-sm text-gray-500">
-                    No team members added yet. Click Add Member to start.
-                  </div>
-                )}
-
-                {teamMembers.map((member, index) => (
-                  <div
-                    key={`team-member-${index}`}
-                    className="rounded-lg border bg-gray-50 p-4"
+              <div className="rounded-xl border bg-white p-6 shadow-sm">
+                <div className="mb-6 flex flex-wrap items-center justify-between gap-3">
+                  <h2 className="text-2xl font-semibold">
+                    Why Nutrifactor Section
+                  </h2>
+                  <button
+                    type="button"
+                    onClick={handleResetWhyNutrifactorSectionDefaults}
+                    className="rounded border border-gray-300 px-3 py-2 text-sm text-gray-700 hover:bg-gray-50"
                   >
-                    <div className="mb-3 flex items-center justify-between">
-                      <p className="text-sm font-semibold text-gray-700">
-                        Member {index + 1}
+                    Reset Defaults
+                  </button>
+                </div>
+
+                <form
+                  className="space-y-6"
+                  onSubmit={handleSaveWhyNutrifactorSection}
+                >
+                  <div>
+                    <label className="mb-2 block text-sm font-medium text-gray-700">
+                      Heading
+                    </label>
+                    <input
+                      type="text"
+                      value={whyNutrifactorHeading}
+                      onChange={(e) => setWhyNutrifactorHeading(e.target.value)}
+                      className="w-full rounded border border-gray-300 px-3 py-2 text-sm"
+                      maxLength={180}
+                      placeholder="e.g. WHY NUTRIFACTOR!"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="mb-2 block text-sm font-medium text-gray-700">
+                      Descriptive Paragraph
+                    </label>
+                    <textarea
+                      value={whyNutrifactorDescription}
+                      onChange={(e) =>
+                        setWhyNutrifactorDescription(e.target.value)
+                      }
+                      className="w-full rounded border border-gray-300 px-3 py-2 text-sm"
+                      rows={5}
+                      maxLength={1400}
+                      placeholder="Enter Why Nutrifactor paragraph"
+                    />
+                  </div>
+
+                  <div>
+                    <p className="mb-3 text-sm font-medium text-gray-700">
+                      Section Image (upload 1 image)
+                    </p>
+
+                    {(whyNutrifactorImagePreview || whyNutrifactorImage) && (
+                      <img
+                        src={
+                          whyNutrifactorImagePreview ||
+                          resolveMediaUrl(whyNutrifactorImage)
+                        }
+                        alt="Why Nutrifactor preview"
+                        className="mb-3 h-44 w-full max-w-2xl rounded-lg border object-cover"
+                      />
+                    )}
+
+                    <input
+                      type="file"
+                      accept="image/*"
+                      onChange={(e) =>
+                        handleWhyNutrifactorImageChange(e.target.files[0])
+                      }
+                      className="w-full max-w-sm rounded border border-gray-300 px-3 py-2 text-sm"
+                    />
+
+                    <button
+                      type="button"
+                      onClick={handleRemoveWhyNutrifactorImage}
+                      className="mt-2 rounded border border-red-200 px-3 py-2 text-xs text-red-600 hover:bg-red-50"
+                    >
+                      Clear Section Image
+                    </button>
+                  </div>
+
+                  <button
+                    type="submit"
+                    disabled={savingWhyNutrifactorSection}
+                    className="inline-flex items-center space-x-2 rounded bg-[#68a300] px-4 py-2 text-white hover:bg-[#5f9600] disabled:opacity-60"
+                  >
+                    <FaCheck />
+                    <span>
+                      {savingWhyNutrifactorSection
+                        ? "Saving..."
+                        : "Save Section"}
+                    </span>
+                  </button>
+                </form>
+              </div>
+
+              <div className="rounded-xl border bg-white p-6 shadow-sm">
+                <div className="mb-6 flex flex-wrap items-center justify-between gap-3">
+                  <h2 className="text-2xl font-semibold">
+                    Our Mission Section
+                  </h2>
+                  <button
+                    type="button"
+                    onClick={handleResetMissionSectionDefaults}
+                    className="rounded border border-gray-300 px-3 py-2 text-sm text-gray-700 hover:bg-gray-50"
+                  >
+                    Reset Defaults
+                  </button>
+                </div>
+
+                <form className="space-y-6" onSubmit={handleSaveMissionSection}>
+                  <div>
+                    <label className="mb-2 block text-sm font-medium text-gray-700">
+                      Heading
+                    </label>
+                    <input
+                      type="text"
+                      value={missionHeading}
+                      onChange={(e) => setMissionHeading(e.target.value)}
+                      className="w-full rounded border border-gray-300 px-3 py-2 text-sm"
+                      maxLength={180}
+                      placeholder="Enter mission heading"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="mb-2 block text-sm font-medium text-gray-700">
+                      Descriptive Paragraph
+                    </label>
+                    <textarea
+                      value={missionDescription}
+                      onChange={(e) => setMissionDescription(e.target.value)}
+                      className="w-full rounded border border-gray-300 px-3 py-2 text-sm"
+                      rows={5}
+                      maxLength={1500}
+                      placeholder="Enter mission paragraph"
+                    />
+                  </div>
+
+                  <div>
+                    <p className="mb-3 text-sm font-medium text-gray-700">
+                      Section Image (upload 1 image)
+                    </p>
+
+                    {(missionImagePreview || missionImage) && (
+                      <img
+                        src={
+                          missionImagePreview || resolveMediaUrl(missionImage)
+                        }
+                        alt="Mission section preview"
+                        className="mb-3 h-44 w-full max-w-2xl rounded-lg border object-cover"
+                      />
+                    )}
+
+                    <input
+                      type="file"
+                      accept="image/*"
+                      onChange={(e) =>
+                        handleMissionImageChange(e.target.files[0])
+                      }
+                      className="w-full max-w-sm rounded border border-gray-300 px-3 py-2 text-sm"
+                    />
+
+                    <button
+                      type="button"
+                      onClick={handleRemoveMissionImage}
+                      className="mt-2 rounded border border-red-200 px-3 py-2 text-xs text-red-600 hover:bg-red-50"
+                    >
+                      Clear Section Image
+                    </button>
+                  </div>
+
+                  <button
+                    type="submit"
+                    disabled={savingMissionSection}
+                    className="inline-flex items-center space-x-2 rounded bg-[#68a300] px-4 py-2 text-white hover:bg-[#5f9600] disabled:opacity-60"
+                  >
+                    <FaCheck />
+                    <span>
+                      {savingMissionSection ? "Saving..." : "Save Section"}
+                    </span>
+                  </button>
+                </form>
+              </div>
+
+              <div className="rounded-xl border bg-white p-6 shadow-sm">
+                <div className="mb-6 flex flex-wrap items-center justify-between gap-3">
+                  <h2 className="text-2xl font-semibold">
+                    Your Health, Our Priority Section
+                  </h2>
+                  <button
+                    type="button"
+                    onClick={handleResetHealthPrioritySectionDefaults}
+                    className="rounded border border-gray-300 px-3 py-2 text-sm text-gray-700 hover:bg-gray-50"
+                  >
+                    Reset Defaults
+                  </button>
+                </div>
+
+                <form
+                  className="space-y-6"
+                  onSubmit={handleSaveHealthPrioritySection}
+                >
+                  <div>
+                    <label className="mb-2 block text-sm font-medium text-gray-700">
+                      Heading
+                    </label>
+                    <input
+                      type="text"
+                      value={healthPriorityHeading}
+                      onChange={(e) => setHealthPriorityHeading(e.target.value)}
+                      className="w-full rounded border border-gray-300 px-3 py-2 text-sm"
+                      maxLength={180}
+                      placeholder="e.g. YOUR HEALTH, OUR PRIORITY"
+                    />
+                  </div>
+
+                  {[0, 1, 2].map((index) => (
+                    <div
+                      key={`health-item-${index}`}
+                      className="rounded-lg border bg-gray-50 p-4"
+                    >
+                      <p className="mb-3 text-sm font-semibold text-gray-700">
+                        Text Block {index + 1}
                       </p>
-                      <button
-                        type="button"
-                        onClick={() => handleRemoveTeamMember(index)}
-                        className="rounded border border-red-200 px-3 py-1 text-xs text-red-600 hover:bg-red-50"
-                      >
-                        Remove
-                      </button>
-                    </div>
-
-                    <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
                       <input
                         type="text"
-                        value={member.name || ""}
+                        value={healthPriorityItems[index]?.title || ""}
                         onChange={(e) =>
-                          handleTeamMemberChange(index, "name", e.target.value)
+                          handleHealthPriorityItemChange(
+                            index,
+                            "title",
+                            e.target.value,
+                          )
                         }
-                        className="w-full rounded border border-gray-300 px-3 py-2 text-sm"
-                        placeholder="Name"
-                        maxLength={120}
-                      />
-                      <input
-                        type="text"
-                        value={member.role || ""}
-                        onChange={(e) =>
-                          handleTeamMemberChange(index, "role", e.target.value)
-                        }
-                        className="w-full rounded border border-gray-300 px-3 py-2 text-sm"
-                        placeholder="Role"
+                        className="mb-3 w-full rounded border border-gray-300 px-3 py-2 text-sm"
                         maxLength={180}
+                        placeholder="Title"
                       />
-                    </div>
-
-                    <div className="mt-3 grid grid-cols-1 gap-3 md:grid-cols-[1fr,260px]">
                       <textarea
-                        value={member.bio || ""}
+                        value={healthPriorityItems[index]?.description || ""}
                         onChange={(e) =>
-                          handleTeamMemberChange(index, "bio", e.target.value)
+                          handleHealthPriorityItemChange(
+                            index,
+                            "description",
+                            e.target.value,
+                          )
                         }
                         className="w-full rounded border border-gray-300 px-3 py-2 text-sm"
                         rows={3}
-                        placeholder="Bio"
                         maxLength={1000}
+                        placeholder="Description"
                       />
+                    </div>
+                  ))}
 
-                      <div className="rounded border bg-white p-2">
-                        <p className="mb-2 text-xs font-semibold uppercase text-gray-500">
-                          Member Image
-                        </p>
-                        {(teamMemberImagePreviews[index] || member.image) && (
-                          <img
-                            src={
-                              teamMemberImagePreviews[index] ||
-                              resolveMediaUrl(member.image)
-                            }
-                            alt={`Team member ${index + 1} preview`}
-                            className="mb-2 h-24 w-full rounded object-cover"
-                          />
-                        )}
+                  <div>
+                    <p className="mb-3 text-sm font-medium text-gray-700">
+                      Image Grid (upload up to 4 images)
+                    </p>
+                    <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+                      {[0, 1, 2, 3].map((index) => {
+                        const preview =
+                          healthPriorityImagePreviews[index] ||
+                          resolveMediaUrl(healthPriorityImages[index]);
 
-                        <input
-                          type="file"
-                          accept="image/*"
-                          onChange={(e) =>
-                            handleTeamMemberImageChange(
-                              index,
-                              e.target.files[0],
-                            )
-                          }
-                          className="w-full rounded border border-gray-300 px-2 py-2 text-xs"
-                        />
-                        <button
-                          type="button"
-                          onClick={() => handleRemoveTeamMemberImage(index)}
-                          className="mt-2 w-full rounded border border-red-200 px-2 py-2 text-xs text-red-600 hover:bg-red-50"
-                        >
-                          Clear Image
-                        </button>
-                      </div>
+                        return (
+                          <div
+                            key={`health-image-${index}`}
+                            className="rounded-lg border bg-gray-50 p-3"
+                          >
+                            <p className="mb-2 text-xs font-semibold uppercase text-gray-500">
+                              Image {index + 1}
+                            </p>
+                            {preview ? (
+                              <img
+                                src={preview}
+                                alt={`Health Priority preview ${index + 1}`}
+                                className="mb-3 h-32 w-full rounded object-cover"
+                              />
+                            ) : (
+                              <div className="mb-3 flex h-32 items-center justify-center rounded border-2 border-dashed border-gray-300 text-xs text-gray-400">
+                                No image selected
+                              </div>
+                            )}
+                            <input
+                              type="file"
+                              accept="image/*"
+                              onChange={(e) =>
+                                handleHealthPriorityImageChange(
+                                  index,
+                                  e.target.files[0],
+                                )
+                              }
+                              className="w-full rounded border border-gray-300 px-2 py-2 text-xs"
+                            />
+                            <button
+                              type="button"
+                              onClick={() =>
+                                handleRemoveHealthPriorityImage(index)
+                              }
+                              className="mt-2 w-full rounded border border-red-200 px-2 py-2 text-xs text-red-600 hover:bg-red-50"
+                            >
+                              Clear
+                            </button>
+                          </div>
+                        );
+                      })}
                     </div>
                   </div>
-                ))}
 
-                <button
-                  type="submit"
-                  disabled={savingTeamMembers}
-                  className="inline-flex items-center space-x-2 rounded bg-[#68a300] px-4 py-2 text-white hover:bg-[#5f9600] disabled:opacity-60"
-                >
-                  <FaCheck />
-                  <span>
-                    {savingTeamMembers ? "Saving..." : "Save Team Members"}
-                  </span>
-                </button>
-              </form>
-            </div>
-          </div>
-        )}
+                  <button
+                    type="submit"
+                    disabled={savingHealthPrioritySection}
+                    className="inline-flex items-center space-x-2 rounded bg-[#68a300] px-4 py-2 text-white hover:bg-[#5f9600] disabled:opacity-60"
+                  >
+                    <FaCheck />
+                    <span>
+                      {savingHealthPrioritySection
+                        ? "Saving..."
+                        : "Save Section"}
+                    </span>
+                  </button>
+                </form>
+              </div>
 
-        {/* Announcements Tab */}
-        {activeTab === "announcements" && (
-          <div className="p-6">
-            <div className="flex items-center justify-between mb-6">
-              <h2 className="text-2xl font-semibold">Announcements</h2>
-              <button
-                onClick={() => {
-                  setEditingAnnouncement(null);
-                  setAnnouncementForm({
-                    title: "",
-                    message: "",
-                    type: "info",
-                    isActive: true,
-                    startDate: "",
-                    endDate: "",
-                  });
-                  setShowAnnouncementModal(true);
-                }}
-                className="bg-[#68a300] text-white px-4 py-2 rounded hover:bg-[#5f9600] flex items-center space-x-2"
-              >
-                <FaPlus />
-                <span>New Announcement</span>
-              </button>
-            </div>
-            <div className="overflow-x-auto">
-              <table className="min-w-full table-auto">
-                <thead>
-                  <tr className="bg-gray-50">
-                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">
-                      Title
-                    </th>
-                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">
-                      Message
-                    </th>
-                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">
-                      Type
-                    </th>
-                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">
-                      Status
-                    </th>
-                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">
-                      Expires
-                    </th>
-                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">
-                      Actions
-                    </th>
-                  </tr>
-                </thead>
-                <tbody className="bg-white divide-y divide-gray-200">
-                  {announcements.map((ann) => (
-                    <tr key={ann._id}>
-                      <td className="px-4 py-4 text-sm font-medium text-gray-900">
-                        {ann.title}
-                      </td>
-                      <td className="px-4 py-4 text-sm text-gray-500 max-w-xs truncate">
-                        {ann.message}
-                      </td>
-                      <td className="px-4 py-4">
-                        <span
-                          className={`px-2 py-1 text-xs rounded capitalize ${
-                            ann.type === "promo"
-                              ? "bg-green-100 text-green-800"
-                              : ann.type === "warning"
-                                ? "bg-yellow-100 text-yellow-800"
-                                : ann.type === "success"
-                                  ? "bg-emerald-100 text-emerald-800"
-                                  : "bg-blue-100 text-blue-800"
-                          }`}
-                        >
-                          {ann.type}
-                        </span>
-                      </td>
-                      <td className="px-4 py-4">
-                        <span
-                          className={`px-2 py-1 text-xs rounded ${ann.isActive ? "bg-green-100 text-green-800" : "bg-gray-100 text-gray-800"}`}
-                        >
-                          {ann.isActive ? "Active" : "Inactive"}
-                        </span>
-                      </td>
-                      <td className="px-4 py-4 text-sm text-gray-500">
-                        {ann.endDate
-                          ? new Date(ann.endDate).toLocaleDateString()
-                          : "Never"}
-                      </td>
-                      <td className="px-4 py-4 text-sm font-medium space-x-3">
-                        <button
-                          onClick={() => {
-                            setEditingAnnouncement(ann);
-                            setAnnouncementForm({
-                              title: ann.title,
-                              message: ann.message,
-                              type: ann.type,
-                              isActive: ann.isActive,
-                              startDate: ann.startDate
-                                ? ann.startDate.slice(0, 10)
-                                : "",
-                              endDate: ann.endDate
-                                ? ann.endDate.slice(0, 10)
-                                : "",
-                            });
-                            setShowAnnouncementModal(true);
-                          }}
-                          className="text-blue-600 hover:text-blue-900"
-                        >
-                          <FaEdit />
-                        </button>
-                        <button
-                          onClick={async () => {
-                            if (window.confirm("Delete this announcement?")) {
-                              try {
-                                await dispatch(
-                                  deleteAnnouncement(ann._id),
-                                ).unwrap();
-                                toast.success("Announcement deleted");
-                              } catch {
-                                toast.error("Failed to delete announcement");
-                              }
-                            }
-                          }}
-                          className="text-red-600 hover:text-red-900"
-                        >
-                          <FaTrash />
-                        </button>
-                      </td>
-                    </tr>
-                  ))}
-                  {announcements.length === 0 && (
-                    <tr>
-                      <td
-                        colSpan={6}
-                        className="px-4 py-8 text-center text-gray-400"
-                      >
-                        No announcements yet.
-                      </td>
-                    </tr>
+              <div className="rounded-xl border bg-white p-6 shadow-sm">
+                <div className="mb-6 flex flex-wrap items-center justify-between gap-3">
+                  <h2 className="text-2xl font-semibold">
+                    Meet Our Team Members
+                  </h2>
+                  <div className="flex items-center gap-3">
+                    <button
+                      type="button"
+                      onClick={handleResetTeamMembersDefaults}
+                      className="rounded border border-gray-300 px-3 py-2 text-sm text-gray-700 hover:bg-gray-50"
+                    >
+                      Clear All
+                    </button>
+                    <button
+                      type="button"
+                      onClick={handleAddTeamMember}
+                      className="rounded bg-[#68a300] px-3 py-2 text-sm text-white hover:bg-[#5f9600]"
+                    >
+                      Add Member
+                    </button>
+                  </div>
+                </div>
+
+                <form className="space-y-5" onSubmit={handleSaveTeamMembers}>
+                  {teamMembers.length === 0 && (
+                    <div className="rounded-lg border border-dashed border-gray-300 bg-gray-50 p-4 text-sm text-gray-500">
+                      No team members added yet. Click Add Member to start.
+                    </div>
                   )}
-                </tbody>
-              </table>
+
+                  {teamMembers.map((member, index) => (
+                    <div
+                      key={`team-member-${index}`}
+                      className="rounded-lg border bg-gray-50 p-4"
+                    >
+                      <div className="mb-3 flex items-center justify-between">
+                        <p className="text-sm font-semibold text-gray-700">
+                          Member {index + 1}
+                        </p>
+                        <button
+                          type="button"
+                          onClick={() => handleRemoveTeamMember(index)}
+                          className="rounded border border-red-200 px-3 py-1 text-xs text-red-600 hover:bg-red-50"
+                        >
+                          Remove
+                        </button>
+                      </div>
+
+                      <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
+                        <input
+                          type="text"
+                          value={member.name || ""}
+                          onChange={(e) =>
+                            handleTeamMemberChange(
+                              index,
+                              "name",
+                              e.target.value,
+                            )
+                          }
+                          className="w-full rounded border border-gray-300 px-3 py-2 text-sm"
+                          placeholder="Name"
+                          maxLength={120}
+                        />
+                        <input
+                          type="text"
+                          value={member.role || ""}
+                          onChange={(e) =>
+                            handleTeamMemberChange(
+                              index,
+                              "role",
+                              e.target.value,
+                            )
+                          }
+                          className="w-full rounded border border-gray-300 px-3 py-2 text-sm"
+                          placeholder="Role"
+                          maxLength={180}
+                        />
+                      </div>
+
+                      <div className="mt-3 grid grid-cols-1 gap-3 md:grid-cols-[1fr,260px]">
+                        <textarea
+                          value={member.bio || ""}
+                          onChange={(e) =>
+                            handleTeamMemberChange(index, "bio", e.target.value)
+                          }
+                          className="w-full rounded border border-gray-300 px-3 py-2 text-sm"
+                          rows={3}
+                          placeholder="Bio"
+                          maxLength={1000}
+                        />
+
+                        <div className="rounded border bg-white p-2">
+                          <p className="mb-2 text-xs font-semibold uppercase text-gray-500">
+                            Member Image
+                          </p>
+                          {(teamMemberImagePreviews[index] || member.image) && (
+                            <img
+                              src={
+                                teamMemberImagePreviews[index] ||
+                                resolveMediaUrl(member.image)
+                              }
+                              alt={`Team member ${index + 1} preview`}
+                              className="mb-2 h-24 w-full rounded object-cover"
+                            />
+                          )}
+
+                          <input
+                            type="file"
+                            accept="image/*"
+                            onChange={(e) =>
+                              handleTeamMemberImageChange(
+                                index,
+                                e.target.files[0],
+                              )
+                            }
+                            className="w-full rounded border border-gray-300 px-2 py-2 text-xs"
+                          />
+                          <button
+                            type="button"
+                            onClick={() => handleRemoveTeamMemberImage(index)}
+                            className="mt-2 w-full rounded border border-red-200 px-2 py-2 text-xs text-red-600 hover:bg-red-50"
+                          >
+                            Clear Image
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+
+                  <button
+                    type="submit"
+                    disabled={savingTeamMembers}
+                    className="inline-flex items-center space-x-2 rounded bg-[#68a300] px-4 py-2 text-white hover:bg-[#5f9600] disabled:opacity-60"
+                  >
+                    <FaCheck />
+                    <span>
+                      {savingTeamMembers ? "Saving..." : "Save Team Members"}
+                    </span>
+                  </button>
+                </form>
+              </div>
             </div>
-          </div>
-        )}
+          )}
+
+          {/* Announcements Tab */}
+          {activeTab === "announcements" && (
+            <div className="p-6">
+              <div className="flex items-center justify-between mb-6">
+                <h2 className="text-2xl font-semibold">Announcements</h2>
+                <button
+                  onClick={() => {
+                    setEditingAnnouncement(null);
+                    setAnnouncementForm({
+                      title: "",
+                      message: "",
+                      type: "info",
+                      isActive: true,
+                      startDate: "",
+                      endDate: "",
+                    });
+                    setShowAnnouncementModal(true);
+                  }}
+                  className="bg-[#68a300] text-white px-4 py-2 rounded hover:bg-[#5f9600] flex items-center space-x-2"
+                >
+                  <FaPlus />
+                  <span>New Announcement</span>
+                </button>
+              </div>
+              <div className="overflow-x-auto">
+                <table className="min-w-full table-auto">
+                  <thead>
+                    <tr className="bg-gray-50">
+                      <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+                        Title
+                      </th>
+                      <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+                        Message
+                      </th>
+                      <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+                        Type
+                      </th>
+                      <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+                        Status
+                      </th>
+                      <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+                        Expires
+                      </th>
+                      <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+                        Actions
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody className="bg-white divide-y divide-gray-200">
+                    {announcements.map((ann) => (
+                      <tr key={ann._id}>
+                        <td className="px-4 py-4 text-sm font-medium text-gray-900">
+                          {ann.title}
+                        </td>
+                        <td className="px-4 py-4 text-sm text-gray-500 max-w-xs truncate">
+                          {ann.message}
+                        </td>
+                        <td className="px-4 py-4">
+                          <span
+                            className={`px-2 py-1 text-xs rounded capitalize ${
+                              ann.type === "promo"
+                                ? "bg-green-100 text-green-800"
+                                : ann.type === "warning"
+                                  ? "bg-yellow-100 text-yellow-800"
+                                  : ann.type === "success"
+                                    ? "bg-emerald-100 text-emerald-800"
+                                    : "bg-blue-100 text-blue-800"
+                            }`}
+                          >
+                            {ann.type}
+                          </span>
+                        </td>
+                        <td className="px-4 py-4">
+                          <span
+                            className={`px-2 py-1 text-xs rounded ${ann.isActive ? "bg-green-100 text-green-800" : "bg-gray-100 text-gray-800"}`}
+                          >
+                            {ann.isActive ? "Active" : "Inactive"}
+                          </span>
+                        </td>
+                        <td className="px-4 py-4 text-sm text-gray-500">
+                          {ann.endDate
+                            ? new Date(ann.endDate).toLocaleDateString()
+                            : "Never"}
+                        </td>
+                        <td className="px-4 py-4 text-sm font-medium space-x-3">
+                          <button
+                            onClick={() => {
+                              setEditingAnnouncement(ann);
+                              setAnnouncementForm({
+                                title: ann.title,
+                                message: ann.message,
+                                type: ann.type,
+                                isActive: ann.isActive,
+                                startDate: ann.startDate
+                                  ? ann.startDate.slice(0, 10)
+                                  : "",
+                                endDate: ann.endDate
+                                  ? ann.endDate.slice(0, 10)
+                                  : "",
+                              });
+                              setShowAnnouncementModal(true);
+                            }}
+                            className="text-blue-600 hover:text-blue-900"
+                          >
+                            <FaEdit />
+                          </button>
+                          <button
+                            onClick={async () => {
+                              if (window.confirm("Delete this announcement?")) {
+                                try {
+                                  await dispatch(
+                                    deleteAnnouncement(ann._id),
+                                  ).unwrap();
+                                  toast.success("Announcement deleted");
+                                } catch {
+                                  toast.error("Failed to delete announcement");
+                                }
+                              }
+                            }}
+                            className="text-red-600 hover:text-red-900"
+                          >
+                            <FaTrash />
+                          </button>
+                        </td>
+                      </tr>
+                    ))}
+                    {announcements.length === 0 && (
+                      <tr>
+                        <td
+                          colSpan={6}
+                          className="px-4 py-8 text-center text-gray-400"
+                        >
+                          No announcements yet.
+                        </td>
+                      </tr>
+                    )}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          )}
         </div>
       </div>
 

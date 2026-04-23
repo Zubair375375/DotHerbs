@@ -40,7 +40,10 @@ const productSchema = new mongoose.Schema(
     briefDescription: {
       type: String,
       trim: true,
-      maxlength: [2000, "Brief description cannot be more than 2000 characters"],
+      maxlength: [
+        2000,
+        "Brief description cannot be more than 2000 characters",
+      ],
       default: "",
     },
     briefDescriptionPoints: {
@@ -48,7 +51,10 @@ const productSchema = new mongoose.Schema(
         {
           type: String,
           trim: true,
-          maxlength: [300, "Each brief description point cannot exceed 300 characters"],
+          maxlength: [
+            300,
+            "Each brief description point cannot exceed 300 characters",
+          ],
         },
       ],
       default: [],
@@ -91,6 +97,19 @@ const productSchema = new mongoose.Schema(
       trim: true,
       maxlength: [600, "Helps to content cannot be more than 600 characters"],
       default: "",
+    },
+    directions: {
+      type: [
+        {
+          type: String,
+          trim: true,
+          maxlength: [
+            300,
+            "Each direction step cannot exceed 300 characters",
+          ],
+        },
+      ],
+      default: [],
     },
     images: [
       {

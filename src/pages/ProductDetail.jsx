@@ -38,6 +38,9 @@ const ProductDetail = () => {
   const [quantity, setQuantity] = useState(1);
   const [isWishlisted, setIsWishlisted] = useState(false);
 
+  const directionsPoints = Array.isArray(product?.directions) && product.directions.length > 0
+    ? product.directions
+    : [];
   const briefDescriptionPoints = Array.isArray(product?.briefDescriptionPoints)
     ? product.briefDescriptionPoints
         .map((point) => String(point).trim())
@@ -341,6 +344,19 @@ const ProductDetail = () => {
                 </p>
               )}
             </div>
+
+            {directionsPoints.length > 0 && (
+              <div className="mt-6">
+                <h4 className="text-sm font-semibold uppercase tracking-wide text-gray-700">
+                  Directions
+                </h4>
+                <ol className="mt-2 list-decimal space-y-1 pl-5 text-sm text-gray-600">
+                  {directionsPoints.map((step, index) => (
+                    <li key={`dir-${index}`}>{step}</li>
+                  ))}
+                </ol>
+              </div>
+            )}
           </div>
 
           {/* Reviews Section */}

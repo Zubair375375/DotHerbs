@@ -25,6 +25,7 @@ const CreateProduct = ({ onClose, onSuccess }) => {
     name: "",
     description: "",
     briefDescriptionPoints: [""],
+    directions: [""],
     helpsTo: "",
     price: "",
     costPrice: "",
@@ -100,6 +101,31 @@ const CreateProduct = ({ onClose, onSuccess }) => {
     });
   };
 
+  const handleDirectionChange = (index, value) => {
+    setFormData((prev) => {
+      const updated = [...prev.directions];
+      updated[index] = value;
+      return { ...prev, directions: updated };
+    });
+  };
+
+  const addDirection = () => {
+    setFormData((prev) => ({
+      ...prev,
+      directions: [...prev.directions, ""],
+    }));
+  };
+
+  const removeDirection = (index) => {
+    setFormData((prev) => {
+      if (prev.directions.length <= 1) return prev;
+      return {
+        ...prev,
+        directions: prev.directions.filter((_, i) => i !== index),
+      };
+    });
+  };
+
   const handleImageChange = (e) => {
     const file = e.target.files[0];
     if (file) {
@@ -144,6 +170,7 @@ const CreateProduct = ({ onClose, onSuccess }) => {
       name,
       description,
       briefDescriptionPoints,
+      directions,
       helpsTo,
       price,
       costPrice,
@@ -169,7 +196,10 @@ const CreateProduct = ({ onClose, onSuccess }) => {
       return;
     }
 
-    const previewWordCount = description.trim().split(/\s+/).filter(Boolean).length;
+    const previewWordCount = description
+      .trim()
+      .split(/\s+/)
+      .filter(Boolean).length;
     if (previewWordCount > 50) {
       toast.error("Product preview description must be 50 words or fewer.");
       return;
@@ -185,7 +215,9 @@ const CreateProduct = ({ onClose, onSuccess }) => {
     }
 
     if (normalizedBriefPoints.some((point) => point.length > 300)) {
-      toast.error("Each brief description point must be 300 characters or fewer.");
+      toast.error(
+        "Each brief description point must be 300 characters or fewer.",
+      );
       return;
     }
 
@@ -233,6 +265,7 @@ const CreateProduct = ({ onClose, onSuccess }) => {
         description: description.trim(),
         briefDescription: normalizedBriefPoints.join("\n"),
         briefDescriptionPoints: normalizedBriefPoints,
+        directions: (directions || []).map((s) => s.trim()).filter(Boolean),
         helpsTo: helpsTo.trim(),
         price: Number(price),
         costPrice: Number(costPrice),
@@ -405,7 +438,6 @@ const CreateProduct = ({ onClose, onSuccess }) => {
               required
             />
           </div>
-
         </div>
 
         <div>
@@ -474,7 +506,9 @@ const CreateProduct = ({ onClose, onSuccess }) => {
                 <input
                   type="text"
                   value={point}
-                  onChange={(e) => handleBriefPointChange(index, e.target.value)}
+                  onChange={(e) =>
+                    handleBriefPointChange(index, e.target.value)
+                  }
                   className="block w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500 sm:text-sm"
                   placeholder={`Point ${index + 1}`}
                 />
@@ -497,7 +531,45 @@ const CreateProduct = ({ onClose, onSuccess }) => {
             + Add Point
           </button>
           <p className="mt-1 text-xs text-gray-500">
-            Add as many points as needed. Each point can be up to 300 characters.
+            Add as many points as needed. Each point can be up to 300
+            characters.
+          </p>
+        </div>
+
+        <div>
+          <label className="block text-sm font-medium text-gray-700">
+            Directions (How to Use)
+          </label>
+          <div className="mt-2 space-y-2">
+            {formData.directions.map((step, index) => (
+              <div key={`dir-${index}`} className="flex gap-2">
+                <input
+                  type="text"
+                  value={step}
+                  onChange={(e) => handleDirectionChange(index, e.target.value)}
+                  className="block w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500 sm:text-sm"
+                  placeholder={`Step ${index + 1}`}
+                />
+                <button
+                  type="button"
+                  onClick={() => removeDirection(index)}
+                  disabled={formData.directions.length <= 1}
+                  className="rounded-md border border-gray-300 px-3 py-2 text-sm text-gray-700 hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50"
+                >
+                  Remove
+                </button>
+              </div>
+            ))}
+          </div>
+          <button
+            type="button"
+            onClick={addDirection}
+            className="mt-2 rounded-md border border-green-600 px-3 py-1.5 text-sm font-medium text-green-700 hover:bg-green-50"
+          >
+            + Add Step
+          </button>
+          <p className="mt-1 text-xs text-gray-500">
+            Add usage instructions step by step. Each step up to 300 characters.
           </p>
         </div>
 
@@ -516,7 +588,9 @@ const CreateProduct = ({ onClose, onSuccess }) => {
             onChange={handleChange}
             maxLength={600}
             className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500 sm:text-sm"
-            placeholder={"Enter one point per line, for example:\n- Helps improve immunity\n- Supports digestion\n- Maintains daily energy"}
+            placeholder={
+              "Enter one point per line, for example:\n- Helps improve immunity\n- Supports digestion\n- Maintains daily energy"
+            }
           />
           <p className="mt-1 text-xs text-gray-500">
             Add benefits as points, one per line (max 600 characters total).
