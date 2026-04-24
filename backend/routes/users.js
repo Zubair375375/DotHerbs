@@ -32,6 +32,14 @@ const updateUserValidation = [
     .optional({ values: "falsy" })
     .isString()
     .withMessage("Avatar must be a valid string path"),
+  body("phone")
+    .optional({ values: "falsy" })
+    .isString()
+    .withMessage("Phone must be a valid string"),
+  body("addressBook")
+    .optional()
+    .isArray()
+    .withMessage("Address book must be an array"),
 ];
 
 const updateProfileValidation = [
@@ -49,6 +57,14 @@ const updateProfileValidation = [
     .optional({ values: "falsy" })
     .isString()
     .withMessage("Avatar must be a valid string path"),
+  body("phone")
+    .optional({ values: "falsy" })
+    .isString()
+    .withMessage("Phone must be a valid string"),
+  body("addressBook")
+    .optional()
+    .isArray()
+    .withMessage("Address book must be an array"),
 ];
 
 const changePasswordValidation = [

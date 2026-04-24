@@ -1,6 +1,51 @@
 import mongoose from "mongoose";
 import bcrypt from "bcryptjs";
 
+const addressBookEntrySchema = new mongoose.Schema(
+  {
+    _id: {
+      type: String,
+      default: () => new mongoose.Types.ObjectId().toString(),
+    },
+    label: {
+      type: String,
+      trim: true,
+      maxlength: [50, "Address label cannot be more than 50 characters"],
+      default: "",
+    },
+    street: {
+      type: String,
+      trim: true,
+      default: "",
+    },
+    city: {
+      type: String,
+      trim: true,
+      default: "",
+    },
+    state: {
+      type: String,
+      trim: true,
+      default: "",
+    },
+    zipCode: {
+      type: String,
+      trim: true,
+      default: "",
+    },
+    country: {
+      type: String,
+      trim: true,
+      default: "",
+    },
+    isDefault: {
+      type: Boolean,
+      default: false,
+    },
+  },
+  { _id: false },
+);
+
 const userSchema = new mongoose.Schema(
   {
     name: {
@@ -36,12 +81,22 @@ const userSchema = new mongoose.Schema(
       type: String,
       default: "",
     },
+    phone: {
+      type: String,
+      trim: true,
+      maxlength: [30, "Phone cannot be more than 30 characters"],
+      default: "",
+    },
     shippingAddress: {
       street: String,
       city: String,
       state: String,
       zipCode: String,
       country: String,
+    },
+    addressBook: {
+      type: [addressBookEntrySchema],
+      default: [],
     },
     resetPasswordToken: String,
     resetPasswordExpire: Date,

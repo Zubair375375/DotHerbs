@@ -74,6 +74,45 @@ const ProductDetail = () => {
   const [submittingAdminAnswerId, setSubmittingAdminAnswerId] = useState("");
   const [deletingAdminAnswerId, setDeletingAdminAnswerId] = useState("");
   const [deletingQuestionId, setDeletingQuestionId] = useState("");
+  const API_URL = import.meta.env.VITE_API_URL || "http://localhost:5000/api";
+  const SERVER_URL = API_URL.replace(/\/api\/?$/, "");
+
+  const getWishlistItems = () => {
+    try {
+      const raw = localStorage.getItem("wishlistItems");
+      const parsed = raw ? JSON.parse(raw) : [];
+      return Array.isArray(parsed) ? parsed : [];
+    } catch {
+      return [];
+    }
+  };
+
+  const saveWishlistItems = (items) => {
+    localStorage.setItem("wishlistItems", JSON.stringify(items));
+  };
+
+  const getRecentlyViewedItems = () => {
+    try {
+      const raw = localStorage.getItem("recentlyViewedItems");
+      const parsed = raw ? JSON.parse(raw) : [];
+      return Array.isArray(parsed) ? parsed : [];
+    } catch {
+      return [];
+    }
+  };
+
+  const saveRecentlyViewedItems = (items) => {
+    localStorage.setItem("recentlyViewedItems", JSON.stringify(items));
+  };
+
+  const getPrimaryProductImage = (item) => {
+    const rawImage =
+      item?.image || item?.images?.[0]?.url || item?.images?.[0] || "";
+    if (!rawImage) return "/placeholder-product.jpg";
+    if (/^https?:\/\//i.test(rawImage)) return rawImage;
+    if (rawImage.startsWith("/")) return `${SERVER_URL}${rawImage}`;
+    return rawImage;
+  };
 
   const directionsPoints =
     Array.isArray(product?.directions) && product.directions.length > 0
@@ -555,6 +594,40 @@ const ProductDetail = () => {
   }, [product]);
 
   useEffect(() => {
+    if (!product?._id) return;
+
+    const recentlyViewed = getRecentlyViewedItems().filter(
+      (item) => String(item?._id) !== String(product._id),
+    );
+
+    const nextItems = [
+      {
+        _id: product._id,
+        name: product.name,
+        price: product.price,
+        image: getPrimaryProductImage(product),
+        category: product.category,
+        viewedAt: new Date().toISOString(),
+      },
+      ...recentlyViewed,
+    ].slice(0, 8);
+
+    saveRecentlyViewedItems(nextItems);
+  }, [product?._id]);
+
+  useEffect(() => {
+    if (!product?._id) {
+      setIsWishlisted(false);
+      return;
+    }
+
+    const wishlistItems = getWishlistItems();
+    setIsWishlisted(
+      wishlistItems.some((item) => String(item?._id) === String(product._id)),
+    );
+  }, [product?._id]);
+
+  useEffect(() => {
     setReviewForm((prev) => ({
       ...prev,
       displayName: user?.name || prev.displayName,
@@ -625,6 +698,35 @@ const ProductDetail = () => {
       navigator.clipboard.writeText(window.location.href);
       toast.success("Link copied to clipboard!");
     }
+  };
+
+  const handleToggleWishlist = () => {
+    if (!product?._id) return;
+
+    const wishlistItems = getWishlistItems();
+    const existingIndex = wishlistItems.findIndex(
+      (item) => String(item?._id) === String(product._id),
+    );
+
+    if (existingIndex !== -1) {
+      wishlistItems.splice(existingIndex, 1);
+      saveWishlistItems(wishlistItems);
+      setIsWishlisted(false);
+      toast.success("Removed from wishlist");
+      return;
+    }
+
+    const wishlistProduct = {
+      _id: product._id,
+      name: product.name,
+      price: product.price,
+      image: getPrimaryProductImage(product),
+      category: product.category,
+    };
+
+    saveWishlistItems([wishlistProduct, ...wishlistItems]);
+    setIsWishlisted(true);
+    toast.success("Added to wishlist");
   };
 
   const renderStars = (rating) => {
@@ -815,7 +917,7 @@ const ProductDetail = () => {
               </button>
 
               <button
-                onClick={() => setIsWishlisted(!isWishlisted)}
+                onClick={handleToggleWishlist}
                 className={`p-3 rounded-lg border ${
                   isWishlisted
                     ? "bg-red-50 border-red-200 text-red-600"

@@ -25,6 +25,17 @@ const Cart = () => {
   const [promoCode, setPromoCode] = useState("");
   const [discount, setDiscount] = useState(0);
 
+  const getProductImage = (product) => {
+    const rawImage =
+      product?.image || product?.images?.[0]?.url || product?.images?.[0];
+    if (!rawImage) return "/placeholder-product.jpg";
+    if (/^https?:\/\//i.test(rawImage)) return rawImage;
+    if (rawImage === "/placeholder-product.jpg") return rawImage;
+    if (rawImage.startsWith("/uploads/"))
+      return `http://localhost:5000${rawImage}`;
+    return rawImage;
+  };
+
   useEffect(() => {
     if (!isAuthenticated) {
       navigate("/login");
@@ -133,13 +144,7 @@ const Cart = () => {
               >
                 <div className="flex space-x-4">
                   <img
-                    src={
-                      item.product.image
-                        ? `http://localhost:5000${item.product.image}`
-                        : item.product.images?.[0]?.url ||
-                          item.product.images?.[0] ||
-                          "/placeholder-product.jpg"
-                    }
+                    src={getProductImage(item.product)}
                     alt={item.product.name}
                     className="w-24 h-24 object-cover rounded"
                   />

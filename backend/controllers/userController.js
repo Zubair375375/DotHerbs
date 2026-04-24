@@ -1,6 +1,54 @@
 import { validationResult } from "express-validator";
 import User from "../models/User.js";
 
+const normalizeAddressEntry = (entry = {}) => ({
+  _id: entry?._id,
+  label: String(entry?.label || "").trim(),
+  street: String(entry?.street || "").trim(),
+  city: String(entry?.city || "").trim(),
+  state: String(entry?.state || "").trim(),
+  zipCode: String(entry?.zipCode || "").trim(),
+  country: String(entry?.country || "").trim(),
+  isDefault: Boolean(entry?.isDefault),
+});
+
+const hasAddressContent = (entry = {}) =>
+  Boolean(
+    entry.street ||
+    entry.city ||
+    entry.state ||
+    entry.zipCode ||
+    entry.country ||
+    entry.label,
+  );
+
+const syncAddressBook = (user, addressBook) => {
+  if (!Array.isArray(addressBook)) {
+    return;
+  }
+
+  const normalizedEntries = addressBook
+    .map(normalizeAddressEntry)
+    .filter(hasAddressContent);
+
+  let hasDefault = normalizedEntries.some((entry) => entry.isDefault);
+  user.addressBook = normalizedEntries.map((entry, index) => ({
+    ...entry,
+    isDefault: hasDefault ? entry.isDefault : index === 0,
+  }));
+
+  const defaultEntry = user.addressBook.find((entry) => entry.isDefault);
+  if (defaultEntry) {
+    user.shippingAddress = {
+      street: defaultEntry.street,
+      city: defaultEntry.city,
+      state: defaultEntry.state,
+      zipCode: defaultEntry.zipCode,
+      country: defaultEntry.country,
+    };
+  }
+};
+
 // @desc    Get all users
 // @route   GET /api/users
 // @access  Private/Admin
@@ -129,17 +177,20 @@ export const updateUser = async (req, res) => {
       });
     }
 
-    const { name, email, role, avatar, shippingAddress } = req.body;
+    const { name, email, role, avatar, phone, shippingAddress, addressBook } =
+      req.body;
 
     user.name = name || user.name;
     user.email = email || user.email;
     user.role = role || user.role;
+    user.phone = typeof phone === "string" ? phone.trim() : user.phone;
     if (typeof avatar === "string") {
       user.avatar = avatar;
     }
     if (shippingAddress) {
       user.shippingAddress = { ...user.shippingAddress, ...shippingAddress };
     }
+    syncAddressBook(user, addressBook);
 
     await user.save();
 
@@ -199,16 +250,19 @@ export const updateProfile = async (req, res) => {
   try {
     const user = await User.findById(req.user._id);
 
-    const { name, email, avatar, shippingAddress } = req.body;
+    const { name, email, avatar, phone, shippingAddress, addressBook } =
+      req.body;
 
     user.name = name || user.name;
     user.email = email || user.email;
+    user.phone = typeof phone === "string" ? phone.trim() : user.phone;
     if (typeof avatar === "string") {
       user.avatar = avatar;
     }
     if (shippingAddress) {
       user.shippingAddress = { ...user.shippingAddress, ...shippingAddress };
     }
+    syncAddressBook(user, addressBook);
 
     await user.save();
 

@@ -7,7 +7,10 @@ import {
   selectCartItemCount,
   clearCart,
 } from "../store/slices/cartSlice";
-import { selectIsAuthenticated } from "../store/slices/authSlice";
+import {
+  selectAuthUser,
+  selectIsAuthenticated,
+} from "../store/slices/authSlice";
 import { createOrder } from "../store/slices/orderSlice";
 import Loader from "../components/Loader";
 import toast from "react-hot-toast";
@@ -21,6 +24,7 @@ const Checkout = () => {
   const cartTotal = useSelector(selectCartTotal);
   const itemCount = useSelector(selectCartItemCount);
   const isAuthenticated = useSelector(selectIsAuthenticated);
+  const user = useSelector(selectAuthUser);
 
   const [shippingAddress, setShippingAddress] = useState({
     street: "",
@@ -29,9 +33,21 @@ const Checkout = () => {
     zipCode: "",
     country: "",
   });
+  const [selectedAddressId, setSelectedAddressId] = useState("");
 
   const [paymentMethod] = useState("demo");
   const [isProcessing, setIsProcessing] = useState(false);
+
+  const getProductImage = (product) => {
+    const rawImage =
+      product?.image || product?.images?.[0]?.url || product?.images?.[0];
+    if (!rawImage) return "/placeholder-product.jpg";
+    if (/^https?:\/\//i.test(rawImage)) return rawImage;
+    if (rawImage === "/placeholder-product.jpg") return rawImage;
+    if (rawImage.startsWith("/uploads/"))
+      return `http://localhost:5000${rawImage}`;
+    return rawImage;
+  };
 
   useEffect(() => {
     if (!isAuthenticated) {
@@ -45,12 +61,60 @@ const Checkout = () => {
     }
   }, [isAuthenticated, itemCount, navigate]);
 
+  useEffect(() => {
+    if (!user) return;
+
+    const savedAddresses = Array.isArray(user.addressBook)
+      ? user.addressBook.filter(
+          (entry) =>
+            entry?.street ||
+            entry?.city ||
+            entry?.state ||
+            entry?.zipCode ||
+            entry?.country,
+        )
+      : [];
+
+    const defaultAddress =
+      savedAddresses.find((entry) => entry.isDefault) ||
+      (user.shippingAddress?.street ||
+      user.shippingAddress?.city ||
+      user.shippingAddress?.state ||
+      user.shippingAddress?.zipCode ||
+      user.shippingAddress?.country
+        ? user.shippingAddress
+        : null);
+
+    if (defaultAddress) {
+      setShippingAddress({
+        street: defaultAddress.street || "",
+        city: defaultAddress.city || "",
+        state: defaultAddress.state || "",
+        zipCode: defaultAddress.zipCode || "",
+        country: defaultAddress.country || "",
+      });
+      setSelectedAddressId(defaultAddress._id || "manual");
+    }
+  }, [user]);
+
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     setShippingAddress({
       ...shippingAddress,
       [name]: value,
     });
+    setSelectedAddressId("manual");
+  };
+
+  const handleSelectSavedAddress = (entry) => {
+    setShippingAddress({
+      street: entry.street || "",
+      city: entry.city || "",
+      state: entry.state || "",
+      zipCode: entry.zipCode || "",
+      country: entry.country || "",
+    });
+    setSelectedAddressId(entry._id || "manual");
   };
 
   const handleSubmit = async (e) => {
@@ -109,6 +173,17 @@ const Checkout = () => {
     return <Loader />;
   }
 
+  const savedAddresses = Array.isArray(user?.addressBook)
+    ? user.addressBook.filter(
+        (entry) =>
+          entry?.street ||
+          entry?.city ||
+          entry?.state ||
+          entry?.zipCode ||
+          entry?.country,
+      )
+    : [];
+
   return (
     <div className="container mx-auto px-4 py-8">
       <div className="max-w-4xl mx-auto">
@@ -129,13 +204,7 @@ const Checkout = () => {
                   className="flex items-center space-x-4"
                 >
                   <img
-                    src={
-                      item.product.image
-                        ? `http://localhost:5000${item.product.image}`
-                        : item.product.images?.[0]?.url ||
-                          item.product.images?.[0] ||
-                          "/placeholder-product.jpg"
-                    }
+                    src={getProductImage(item.product)}
                     alt={item.product.name}
                     className="w-16 h-16 object-cover rounded"
                   />
@@ -168,6 +237,53 @@ const Checkout = () => {
                 <FaMapMarkerAlt className="mr-2" />
                 Shipping Address
               </h2>
+
+              {savedAddresses.length > 0 ? (
+                <div className="mb-6 space-y-3">
+                  <div className="flex items-center justify-between gap-4">
+                    <p className="text-sm font-medium text-gray-700">
+                      Saved Addresses
+                    </p>
+                    <button
+                      type="button"
+                      onClick={() => navigate("/profile")}
+                      className="text-sm text-green-700 hover:text-green-800"
+                    >
+                      Manage in Profile
+                    </button>
+                  </div>
+                  <div className="grid gap-3 md:grid-cols-2">
+                    {savedAddresses.map((entry) => (
+                      <button
+                        key={entry._id}
+                        type="button"
+                        onClick={() => handleSelectSavedAddress(entry)}
+                        className={`rounded-lg border p-4 text-left transition ${
+                          String(selectedAddressId) === String(entry._id)
+                            ? "border-green-400 bg-green-50"
+                            : "border-gray-200 hover:bg-gray-50"
+                        }`}
+                      >
+                        <p className="font-medium text-gray-800">
+                          {entry.label || "Saved Address"}
+                        </p>
+                        {entry.isDefault ? (
+                          <p className="mt-1 text-xs uppercase tracking-wide text-green-700">
+                            Default
+                          </p>
+                        ) : null}
+                        <p className="mt-2 text-sm text-gray-600">
+                          {entry.street}
+                        </p>
+                        <p className="text-sm text-gray-600">
+                          {entry.city}, {entry.state} {entry.zipCode}
+                        </p>
+                        <p className="text-sm text-gray-600">{entry.country}</p>
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              ) : null}
 
               <form onSubmit={handleSubmit} className="space-y-4">
                 <div>

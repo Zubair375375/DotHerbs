@@ -146,9 +146,7 @@ export const getCurrentUser = createAsyncThunk(
         (error?.message === "Network Error"
           ? "Cannot reach backend API. Ensure server is running on http://localhost:5000"
           : error?.message);
-      return rejectWithValue(
-        detailedMessage || "Failed to get user",
-      );
+      return rejectWithValue(detailedMessage || "Failed to get user");
     }
   },
 );

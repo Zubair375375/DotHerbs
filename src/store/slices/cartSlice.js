@@ -27,7 +27,7 @@ const saveCartToStorage = (cart) => {
   const key = getUserCartKey();
   localStorage.setItem(key, JSON.stringify(cart));
 };
- // Initial state
+// Initial state
 const initialState = {
   ...getCartFromStorage(),
   isLoading: false,
@@ -98,6 +98,36 @@ const cartSlice = createSlice({
       state.total = 0;
       saveCartToStorage(state);
     },
+    addItemsToCart: (state, action) => {
+      const items = Array.isArray(action.payload) ? action.payload : [];
+
+      items.forEach(({ product, quantity = 1, price }) => {
+        if (!product?._id) {
+          return;
+        }
+
+        const existingItem = state.items.find(
+          (item) => item.product._id === product._id,
+        );
+
+        if (existingItem) {
+          existingItem.quantity += quantity;
+        } else {
+          state.items.push({
+            product,
+            quantity,
+            price: price ?? product.price,
+          });
+        }
+      });
+
+      state.total = state.items.reduce(
+        (total, item) => total + item.price * item.quantity,
+        0,
+      );
+
+      saveCartToStorage(state);
+    },
     resetCart: (state) => {
       // Clear cart completely when user logs out
       state.items = [];
@@ -117,6 +147,7 @@ const cartSlice = createSlice({
 
 export const {
   addToCart,
+  addItemsToCart,
   removeFromCart,
   updateQuantity,
   clearCart,

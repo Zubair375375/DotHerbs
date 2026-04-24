@@ -12,6 +12,7 @@ import {
   logout,
 } from "../store/slices/authSlice";
 import { selectOrders, getMyOrders } from "../store/slices/orderSlice";
+import { addItemsToCart } from "../store/slices/cartSlice";
 import Loader from "../components/Loader";
 import toast from "react-hot-toast";
 import {
@@ -26,6 +27,9 @@ import {
   FaCamera,
   FaEye,
   FaEyeSlash,
+  FaClock,
+  FaBell,
+  FaMapMarkerAlt,
 } from "react-icons/fa";
 
 const Profile = () => {
@@ -53,6 +57,25 @@ const Profile = () => {
     newPassword: false,
     confirmPassword: false,
   });
+  const [wishlistItems, setWishlistItems] = useState([]);
+  const [recentlyViewedItems, setRecentlyViewedItems] = useState([]);
+  const [addressBook, setAddressBook] = useState([]);
+  const [addressForm, setAddressForm] = useState({
+    _id: "",
+    label: "",
+    street: "",
+    city: "",
+    state: "",
+    zipCode: "",
+    country: "",
+    isDefault: false,
+  });
+  const [isEditingAddress, setIsEditingAddress] = useState(false);
+  const [preferences, setPreferences] = useState({
+    orderUpdates: true,
+    promotions: false,
+    restockAlerts: true,
+  });
   const [formData, setFormData] = useState({
     name: "",
     email: "",
@@ -78,13 +101,31 @@ const Profile = () => {
         email: user.email || "",
         phone: user.phone || "",
         address: {
-          street: user.address?.street || "",
-          city: user.address?.city || "",
-          state: user.address?.state || "",
-          zipCode: user.address?.zipCode || "",
-          country: user.address?.country || "",
+          street: user.shippingAddress?.street || "",
+          city: user.shippingAddress?.city || "",
+          state: user.shippingAddress?.state || "",
+          zipCode: user.shippingAddress?.zipCode || "",
+          country: user.shippingAddress?.country || "",
         },
       });
+      setAddressBook(
+        Array.isArray(user.addressBook) && user.addressBook.length > 0
+          ? user.addressBook
+          : user.shippingAddress?.street ||
+              user.shippingAddress?.city ||
+              user.shippingAddress?.state ||
+              user.shippingAddress?.zipCode ||
+              user.shippingAddress?.country
+            ? [
+                {
+                  _id: "primary-address",
+                  label: "Primary",
+                  ...user.shippingAddress,
+                  isDefault: true,
+                },
+              ]
+            : [],
+      );
     }
 
     if (activeTab === "orders") {
@@ -98,6 +139,40 @@ const Profile = () => {
       setActiveTab("orders");
     }
   }, [location.state]);
+
+  useEffect(() => {
+    try {
+      const raw = localStorage.getItem("profilePreferences");
+      const parsed = raw ? JSON.parse(raw) : null;
+      if (parsed && typeof parsed === "object") {
+        setPreferences((prev) => ({ ...prev, ...parsed }));
+      }
+    } catch {
+      // ignore malformed local storage data
+    }
+  }, []);
+
+  useEffect(() => {
+    if (activeTab !== "wishlist") return;
+    try {
+      const raw = localStorage.getItem("wishlistItems");
+      const parsed = raw ? JSON.parse(raw) : [];
+      setWishlistItems(Array.isArray(parsed) ? parsed : []);
+    } catch {
+      setWishlistItems([]);
+    }
+  }, [activeTab]);
+
+  useEffect(() => {
+    if (activeTab !== "recently-viewed") return;
+    try {
+      const raw = localStorage.getItem("recentlyViewedItems");
+      const parsed = raw ? JSON.parse(raw) : [];
+      setRecentlyViewedItems(Array.isArray(parsed) ? parsed : []);
+    } catch {
+      setRecentlyViewedItems([]);
+    }
+  }, [activeTab]);
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -120,7 +195,14 @@ const Profile = () => {
 
   const handleSaveProfile = async () => {
     try {
-      await dispatch(updateProfile(formData)).unwrap();
+      await dispatch(
+        updateProfile({
+          name: formData.name,
+          email: formData.email,
+          phone: formData.phone,
+          shippingAddress: formData.address,
+        }),
+      ).unwrap();
       setIsEditing(false);
       toast.success("Profile updated successfully!");
     } catch (error) {
@@ -137,11 +219,11 @@ const Profile = () => {
         email: user.email || "",
         phone: user.phone || "",
         address: {
-          street: user.address?.street || "",
-          city: user.address?.city || "",
-          state: user.address?.state || "",
-          zipCode: user.address?.zipCode || "",
-          country: user.address?.country || "",
+          street: user.shippingAddress?.street || "",
+          city: user.shippingAddress?.city || "",
+          state: user.shippingAddress?.state || "",
+          zipCode: user.shippingAddress?.zipCode || "",
+          country: user.shippingAddress?.country || "",
         },
       });
     }
@@ -235,6 +317,205 @@ const Profile = () => {
     } finally {
       e.target.value = "";
     }
+  };
+
+  const handleRemoveWishlistItem = (productId) => {
+    const nextItems = wishlistItems.filter(
+      (item) => String(item?._id) !== String(productId),
+    );
+    setWishlistItems(nextItems);
+    localStorage.setItem("wishlistItems", JSON.stringify(nextItems));
+    toast.success("Removed from wishlist");
+  };
+
+  const handleAddressFieldChange = (e) => {
+    const { name, value, type, checked } = e.target;
+    setAddressForm((prev) => ({
+      ...prev,
+      [name]: type === "checkbox" ? checked : value,
+    }));
+  };
+
+  const resetAddressForm = () => {
+    setAddressForm({
+      _id: "",
+      label: "",
+      street: "",
+      city: "",
+      state: "",
+      zipCode: "",
+      country: "",
+      isDefault: false,
+    });
+    setIsEditingAddress(false);
+  };
+
+  const persistAddressBook = async (nextAddressBook, message) => {
+    const normalizedBook = nextAddressBook.map((entry, index) => ({
+      ...entry,
+      isDefault: nextAddressBook.some((item) => item.isDefault)
+        ? entry.isDefault
+        : index === 0,
+    }));
+
+    try {
+      await dispatch(updateProfile({ addressBook: normalizedBook })).unwrap();
+      setAddressBook(normalizedBook);
+      if (message) {
+        toast.success(message);
+      }
+    } catch (error) {
+      toast.error(error || "Failed to update address book");
+    }
+  };
+
+  const handleSaveAddress = async () => {
+    if (
+      !addressForm.street.trim() ||
+      !addressForm.city.trim() ||
+      !addressForm.state.trim() ||
+      !addressForm.zipCode.trim() ||
+      !addressForm.country.trim()
+    ) {
+      toast.error("Please fill in all address fields.");
+      return;
+    }
+
+    const entryId =
+      addressForm._id || `${Date.now()}-${Math.random().toString(16).slice(2)}`;
+    const nextEntry = {
+      ...addressForm,
+      _id: entryId,
+      label: addressForm.label.trim() || `Address ${addressBook.length + 1}`,
+      street: addressForm.street.trim(),
+      city: addressForm.city.trim(),
+      state: addressForm.state.trim(),
+      zipCode: addressForm.zipCode.trim(),
+      country: addressForm.country.trim(),
+    };
+
+    let nextAddressBook = isEditingAddress
+      ? addressBook.map((entry) =>
+          String(entry._id) === String(entryId) ? nextEntry : entry,
+        )
+      : [nextEntry, ...addressBook];
+
+    if (nextEntry.isDefault || nextAddressBook.length === 1) {
+      nextAddressBook = nextAddressBook.map((entry) => ({
+        ...entry,
+        isDefault: String(entry._id) === String(entryId),
+      }));
+    }
+
+    await persistAddressBook(
+      nextAddressBook,
+      isEditingAddress ? "Address updated" : "Address added",
+    );
+    resetAddressForm();
+  };
+
+  const handleEditAddress = (entry) => {
+    setAddressForm({
+      _id: entry._id,
+      label: entry.label || "",
+      street: entry.street || "",
+      city: entry.city || "",
+      state: entry.state || "",
+      zipCode: entry.zipCode || "",
+      country: entry.country || "",
+      isDefault: Boolean(entry.isDefault),
+    });
+    setIsEditingAddress(true);
+    setActiveTab("addresses");
+  };
+
+  const handleDeleteAddress = async (entryId) => {
+    let nextAddressBook = addressBook.filter(
+      (entry) => String(entry._id) !== String(entryId),
+    );
+    if (
+      nextAddressBook.length > 0 &&
+      !nextAddressBook.some((entry) => entry.isDefault)
+    ) {
+      nextAddressBook = nextAddressBook.map((entry, index) => ({
+        ...entry,
+        isDefault: index === 0,
+      }));
+    }
+    await persistAddressBook(nextAddressBook, "Address removed");
+    if (String(addressForm._id) === String(entryId)) {
+      resetAddressForm();
+    }
+  };
+
+  const handleSetDefaultAddress = async (entryId) => {
+    const nextAddressBook = addressBook.map((entry) => ({
+      ...entry,
+      isDefault: String(entry._id) === String(entryId),
+    }));
+    await persistAddressBook(nextAddressBook, "Default address updated");
+  };
+
+  const handleReorder = (order) => {
+    const reorderItems = (order?.orderItems || [])
+      .map((item) => {
+        const productId = item?.product?._id || item?.product;
+        if (!productId) return null;
+
+        return {
+          product: {
+            _id: productId,
+            name: item?.product?.name || item?.name || "Product",
+            image: item?.product?.image || item?.image || "",
+            images: item?.product?.images || [],
+            description: item?.product?.description || "",
+            price: Number(item?.price || 0),
+            stock: Number(item?.product?.stock || 9999),
+          },
+          quantity: Number(item?.quantity || 1),
+          price: Number(item?.price || 0),
+        };
+      })
+      .filter(Boolean);
+
+    if (reorderItems.length === 0) {
+      toast.error("No reorderable items found in this order.");
+      return;
+    }
+
+    dispatch(addItemsToCart(reorderItems));
+    toast.success("Items added to cart");
+    navigate("/cart");
+  };
+
+  const getProductImage = (product, fallback = "") => {
+    const rawImage =
+      product?.image ||
+      product?.images?.[0]?.url ||
+      product?.images?.[0] ||
+      fallback;
+    if (!rawImage) return "/placeholder-product.jpg";
+    if (/^https?:\/\//i.test(rawImage)) return rawImage;
+    if (rawImage === "/placeholder-product.jpg") return rawImage;
+    if (rawImage.startsWith("/uploads/")) return `${SERVER_URL}${rawImage}`;
+    return rawImage;
+  };
+
+  const handleClearWishlist = () => {
+    setWishlistItems([]);
+    localStorage.setItem("wishlistItems", JSON.stringify([]));
+    toast.success("Wishlist cleared");
+  };
+
+  const handleTogglePreference = (key) => {
+    setPreferences((prev) => {
+      const next = {
+        ...prev,
+        [key]: !prev[key],
+      };
+      localStorage.setItem("profilePreferences", JSON.stringify(next));
+      return next;
+    });
   };
 
   const getOrderStatusColor = (status) => {
@@ -344,6 +625,30 @@ const Profile = () => {
                 </button>
 
                 <button
+                  onClick={() => setActiveTab("addresses")}
+                  className={`w-full flex items-center space-x-3 px-4 py-3 rounded-lg text-left ${
+                    activeTab === "addresses"
+                      ? "bg-green-50 text-green-700 border border-green-200"
+                      : "text-gray-700 hover:bg-gray-50"
+                  }`}
+                >
+                  <FaMapMarkerAlt />
+                  <span>Addresses</span>
+                </button>
+
+                <button
+                  onClick={() => setActiveTab("recently-viewed")}
+                  className={`w-full flex items-center space-x-3 px-4 py-3 rounded-lg text-left ${
+                    activeTab === "recently-viewed"
+                      ? "bg-green-50 text-green-700 border border-green-200"
+                      : "text-gray-700 hover:bg-gray-50"
+                  }`}
+                >
+                  <FaClock />
+                  <span>Recently Viewed</span>
+                </button>
+
+                <button
                   onClick={() => setActiveTab("settings")}
                   className={`w-full flex items-center space-x-3 px-4 py-3 rounded-lg text-left ${
                     activeTab === "settings"
@@ -441,6 +746,35 @@ const Profile = () => {
                     {authError}
                   </div>
                 )}
+
+                <div className="mb-6 grid grid-cols-1 gap-4 md:grid-cols-3">
+                  <div className="rounded-lg border border-gray-200 bg-gray-50 p-4">
+                    <p className="text-xs uppercase tracking-wide text-gray-500">
+                      Wishlist Items
+                    </p>
+                    <p className="mt-2 text-2xl font-semibold text-gray-800">
+                      {wishlistItems.length}
+                    </p>
+                  </div>
+                  <div className="rounded-lg border border-gray-200 bg-gray-50 p-4">
+                    <p className="text-xs uppercase tracking-wide text-gray-500">
+                      Orders Placed
+                    </p>
+                    <p className="mt-2 text-2xl font-semibold text-gray-800">
+                      {userOrders.length}
+                    </p>
+                  </div>
+                  <div className="rounded-lg border border-gray-200 bg-gray-50 p-4">
+                    <p className="text-xs uppercase tracking-wide text-gray-500">
+                      Member Since
+                    </p>
+                    <p className="mt-2 text-sm font-semibold text-gray-800">
+                      {new Date(
+                        user.createdAt || Date.now(),
+                      ).toLocaleDateString()}
+                    </p>
+                  </div>
+                </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div>
@@ -618,10 +952,7 @@ const Profile = () => {
                             className="flex items-center space-x-4"
                           >
                             <img
-                              src={
-                                item.product?.images?.[0] ||
-                                "/placeholder-product.jpg"
-                              }
+                              src={getProductImage(item.product, item.image)}
                               alt={item.product?.name}
                               className="w-12 h-12 object-cover rounded"
                             />
@@ -653,9 +984,18 @@ const Profile = () => {
                               : order.paymentMethod}
                           </p>
                         </div>
-                        <button className="text-green-600 hover:text-green-800 text-sm font-medium">
-                          View Details
-                        </button>
+                        <div className="flex items-center gap-4">
+                          <button className="text-green-600 hover:text-green-800 text-sm font-medium">
+                            View Details
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => handleReorder(order)}
+                            className="rounded border border-green-200 px-3 py-2 text-sm font-medium text-green-700 hover:bg-green-50"
+                          >
+                            Reorder
+                          </button>
+                        </div>
                       </div>
                     </div>
                   ))
@@ -663,27 +1003,313 @@ const Profile = () => {
               </div>
             )}
 
+            {activeTab === "addresses" && (
+              <div className="space-y-6">
+                <div className="bg-white rounded-lg shadow-md p-6">
+                  <div className="mb-6 flex items-center gap-2">
+                    <FaMapMarkerAlt className="text-gray-500" />
+                    <h3 className="text-2xl font-semibold text-gray-800">
+                      Address Book
+                    </h3>
+                  </div>
+
+                  <div className="grid gap-6 lg:grid-cols-[1.1fr_0.9fr]">
+                    <div className="space-y-4">
+                      {addressBook.length === 0 ? (
+                        <div className="rounded-lg border border-dashed border-gray-300 p-8 text-center text-gray-500">
+                          No saved addresses yet.
+                        </div>
+                      ) : (
+                        addressBook.map((entry) => (
+                          <div
+                            key={entry._id}
+                            className="rounded-lg border border-gray-200 p-4"
+                          >
+                            <div className="flex items-start justify-between gap-4">
+                              <div>
+                                <p className="font-semibold text-gray-800">
+                                  {entry.label}
+                                </p>
+                                {entry.isDefault ? (
+                                  <p className="mt-1 text-xs font-medium uppercase tracking-wide text-green-700">
+                                    Default address
+                                  </p>
+                                ) : null}
+                                <p className="mt-2 text-sm text-gray-600">
+                                  {entry.street}
+                                </p>
+                                <p className="text-sm text-gray-600">
+                                  {entry.city}, {entry.state} {entry.zipCode}
+                                </p>
+                                <p className="text-sm text-gray-600">
+                                  {entry.country}
+                                </p>
+                              </div>
+                              <div className="flex flex-col gap-2">
+                                {!entry.isDefault ? (
+                                  <button
+                                    type="button"
+                                    onClick={() =>
+                                      handleSetDefaultAddress(entry._id)
+                                    }
+                                    className="rounded border border-green-200 px-3 py-2 text-sm text-green-700 hover:bg-green-50"
+                                  >
+                                    Set Default
+                                  </button>
+                                ) : null}
+                                <button
+                                  type="button"
+                                  onClick={() => handleEditAddress(entry)}
+                                  className="rounded border border-gray-300 px-3 py-2 text-sm text-gray-700 hover:bg-gray-50"
+                                >
+                                  Edit
+                                </button>
+                                <button
+                                  type="button"
+                                  onClick={() => handleDeleteAddress(entry._id)}
+                                  className="rounded border border-red-200 px-3 py-2 text-sm text-red-600 hover:bg-red-50"
+                                >
+                                  Remove
+                                </button>
+                              </div>
+                            </div>
+                          </div>
+                        ))
+                      )}
+                    </div>
+
+                    <div className="rounded-lg border border-gray-200 p-5">
+                      <h4 className="mb-4 text-lg font-medium text-gray-800">
+                        {isEditingAddress ? "Edit Address" : "Add New Address"}
+                      </h4>
+                      <div className="space-y-4">
+                        <input
+                          type="text"
+                          name="label"
+                          value={addressForm.label}
+                          onChange={handleAddressFieldChange}
+                          placeholder="Label (e.g. Home, Office)"
+                          className="w-full rounded-md border border-gray-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-green-500"
+                        />
+                        <input
+                          type="text"
+                          name="street"
+                          value={addressForm.street}
+                          onChange={handleAddressFieldChange}
+                          placeholder="Street address"
+                          className="w-full rounded-md border border-gray-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-green-500"
+                        />
+                        <div className="grid grid-cols-2 gap-4">
+                          <input
+                            type="text"
+                            name="city"
+                            value={addressForm.city}
+                            onChange={handleAddressFieldChange}
+                            placeholder="City"
+                            className="w-full rounded-md border border-gray-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-green-500"
+                          />
+                          <input
+                            type="text"
+                            name="state"
+                            value={addressForm.state}
+                            onChange={handleAddressFieldChange}
+                            placeholder="State"
+                            className="w-full rounded-md border border-gray-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-green-500"
+                          />
+                        </div>
+                        <div className="grid grid-cols-2 gap-4">
+                          <input
+                            type="text"
+                            name="zipCode"
+                            value={addressForm.zipCode}
+                            onChange={handleAddressFieldChange}
+                            placeholder="ZIP code"
+                            className="w-full rounded-md border border-gray-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-green-500"
+                          />
+                          <input
+                            type="text"
+                            name="country"
+                            value={addressForm.country}
+                            onChange={handleAddressFieldChange}
+                            placeholder="Country"
+                            className="w-full rounded-md border border-gray-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-green-500"
+                          />
+                        </div>
+                        <label className="flex items-center gap-2 text-sm text-gray-700">
+                          <input
+                            type="checkbox"
+                            name="isDefault"
+                            checked={addressForm.isDefault}
+                            onChange={handleAddressFieldChange}
+                          />
+                          Set as default shipping address
+                        </label>
+                        <div className="flex gap-3">
+                          <button
+                            type="button"
+                            onClick={handleSaveAddress}
+                            disabled={isLoading}
+                            className="rounded bg-green-600 px-4 py-2 text-white hover:bg-green-700 disabled:opacity-50"
+                          >
+                            {isEditingAddress
+                              ? "Update Address"
+                              : "Save Address"}
+                          </button>
+                          {isEditingAddress ? (
+                            <button
+                              type="button"
+                              onClick={resetAddressForm}
+                              className="rounded border border-gray-300 px-4 py-2 text-gray-700 hover:bg-gray-50"
+                            >
+                              Cancel
+                            </button>
+                          ) : null}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
+
             {/* Wishlist Tab */}
             {activeTab === "wishlist" && (
               <div className="bg-white rounded-lg shadow-md p-6">
-                <h3 className="text-2xl font-semibold text-gray-800 mb-6">
-                  Wishlist
-                </h3>
-                <div className="text-center py-12">
-                  <FaHeart className="mx-auto text-4xl text-gray-300 mb-4" />
-                  <h4 className="text-lg font-medium text-gray-600 mb-2">
-                    Your wishlist is empty
-                  </h4>
-                  <p className="text-gray-500 mb-4">
-                    Save items you love for later.
-                  </p>
-                  <button
-                    onClick={() => navigate("/products")}
-                    className="bg-green-600 text-white px-6 py-2 rounded hover:bg-green-700"
-                  >
-                    Browse Products
-                  </button>
+                <div className="mb-6 flex items-center justify-between gap-4">
+                  <h3 className="text-2xl font-semibold text-gray-800">
+                    Wishlist
+                  </h3>
+                  {wishlistItems.length > 0 ? (
+                    <button
+                      type="button"
+                      onClick={handleClearWishlist}
+                      className="rounded border border-gray-300 px-3 py-2 text-sm text-gray-700 hover:bg-gray-50"
+                    >
+                      Clear All
+                    </button>
+                  ) : null}
                 </div>
+                {wishlistItems.length === 0 ? (
+                  <div className="text-center py-12">
+                    <FaHeart className="mx-auto text-4xl text-gray-300 mb-4" />
+                    <h4 className="text-lg font-medium text-gray-600 mb-2">
+                      Your wishlist is empty
+                    </h4>
+                    <p className="text-gray-500 mb-4">
+                      Save items you love for later.
+                    </p>
+                    <button
+                      onClick={() => navigate("/products")}
+                      className="bg-green-600 text-white px-6 py-2 rounded hover:bg-green-700"
+                    >
+                      Browse Products
+                    </button>
+                  </div>
+                ) : (
+                  <div className="space-y-4">
+                    {wishlistItems.map((item) => (
+                      <div
+                        key={item._id}
+                        className="flex items-center justify-between gap-4 rounded border border-gray-200 p-4"
+                      >
+                        <div className="flex min-w-0 items-center gap-4">
+                          <img
+                            src={item.image || "/placeholder-product.jpg"}
+                            alt={item.name}
+                            className="h-14 w-14 rounded object-cover"
+                          />
+                          <div className="min-w-0">
+                            <p className="truncate font-medium text-gray-800">
+                              {item.name}
+                            </p>
+                            <p className="text-sm text-gray-600">
+                              ${Number(item.price || 0).toFixed(2)}
+                            </p>
+                          </div>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <button
+                            type="button"
+                            onClick={() => navigate(`/products/${item._id}`)}
+                            className="rounded bg-green-600 px-3 py-2 text-sm text-white hover:bg-green-700"
+                          >
+                            View
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => handleRemoveWishlistItem(item._id)}
+                            className="rounded border border-red-200 px-3 py-2 text-sm text-red-600 hover:bg-red-50"
+                          >
+                            Remove
+                          </button>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            )}
+
+            {activeTab === "recently-viewed" && (
+              <div className="bg-white rounded-lg shadow-md p-6">
+                <h3 className="mb-6 text-2xl font-semibold text-gray-800">
+                  Recently Viewed
+                </h3>
+                {recentlyViewedItems.length === 0 ? (
+                  <div className="text-center py-12">
+                    <FaClock className="mx-auto mb-4 text-4xl text-gray-300" />
+                    <h4 className="mb-2 text-lg font-medium text-gray-600">
+                      No recently viewed products
+                    </h4>
+                    <p className="mb-4 text-gray-500">
+                      Products you open will appear here for quick access.
+                    </p>
+                    <button
+                      onClick={() => navigate("/products")}
+                      className="rounded bg-green-600 px-6 py-2 text-white hover:bg-green-700"
+                    >
+                      Browse Products
+                    </button>
+                  </div>
+                ) : (
+                  <div className="space-y-4">
+                    {recentlyViewedItems.map((item) => (
+                      <div
+                        key={item._id}
+                        className="flex items-center justify-between gap-4 rounded border border-gray-200 p-4"
+                      >
+                        <div className="flex min-w-0 items-center gap-4">
+                          <img
+                            src={item.image || "/placeholder-product.jpg"}
+                            alt={item.name}
+                            className="h-14 w-14 rounded object-cover"
+                          />
+                          <div className="min-w-0">
+                            <p className="truncate font-medium text-gray-800">
+                              {item.name}
+                            </p>
+                            <p className="text-sm text-gray-600">
+                              ${Number(item.price || 0).toFixed(2)}
+                            </p>
+                            <p className="text-xs text-gray-500">
+                              Viewed{" "}
+                              {new Date(
+                                item.viewedAt || Date.now(),
+                              ).toLocaleString()}
+                            </p>
+                          </div>
+                        </div>
+                        <button
+                          type="button"
+                          onClick={() => navigate(`/products/${item._id}`)}
+                          className="rounded bg-green-600 px-3 py-2 text-sm text-white hover:bg-green-700"
+                        >
+                          View
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                )}
               </div>
             )}
 
@@ -695,6 +1321,43 @@ const Profile = () => {
                 </h3>
 
                 <div className="space-y-6">
+                  <div>
+                    <div className="mb-4 flex items-center gap-2">
+                      <FaBell className="text-gray-500" />
+                      <h4 className="text-lg font-medium">Notifications</h4>
+                    </div>
+                    <div className="space-y-3 rounded-lg border border-gray-200 p-4">
+                      {[
+                        ["orderUpdates", "Order updates"],
+                        ["promotions", "Promotions and offers"],
+                        ["restockAlerts", "Restock alerts"],
+                      ].map(([key, label]) => (
+                        <label
+                          key={key}
+                          className="flex items-center justify-between gap-4"
+                        >
+                          <span className="text-sm text-gray-700">{label}</span>
+                          <button
+                            type="button"
+                            onClick={() => handleTogglePreference(key)}
+                            className={`relative h-6 w-11 rounded-full transition-colors ${
+                              preferences[key] ? "bg-green-600" : "bg-gray-300"
+                            }`}
+                            aria-pressed={preferences[key]}
+                          >
+                            <span
+                              className={`absolute top-0.5 h-5 w-5 rounded-full bg-white transition-transform ${
+                                preferences[key]
+                                  ? "translate-x-5"
+                                  : "translate-x-0.5"
+                              }`}
+                            />
+                          </button>
+                        </label>
+                      ))}
+                    </div>
+                  </div>
+
                   <div>
                     <h4 className="text-lg font-medium mb-4">
                       Change Password
@@ -723,7 +1386,11 @@ const Profile = () => {
                               : "Show current password"
                           }
                         >
-                          {showPassword.currentPassword ? <FaEyeSlash /> : <FaEye />}
+                          {showPassword.currentPassword ? (
+                            <FaEyeSlash />
+                          ) : (
+                            <FaEye />
+                          )}
                         </button>
                       </div>
                       <div className="relative">
@@ -737,7 +1404,9 @@ const Profile = () => {
                         />
                         <button
                           type="button"
-                          onClick={() => togglePasswordVisibility("newPassword")}
+                          onClick={() =>
+                            togglePasswordVisibility("newPassword")
+                          }
                           className="absolute right-3 top-1/2 -translate-y-1/2 border-0 bg-transparent text-gray-500 hover:text-gray-700 focus:outline-none focus:ring-0 focus-visible:outline-none"
                           aria-label={
                             showPassword.newPassword
@@ -745,7 +1414,11 @@ const Profile = () => {
                               : "Show new password"
                           }
                         >
-                          {showPassword.newPassword ? <FaEyeSlash /> : <FaEye />}
+                          {showPassword.newPassword ? (
+                            <FaEyeSlash />
+                          ) : (
+                            <FaEye />
+                          )}
                         </button>
                       </div>
                       <div className="relative">
@@ -771,7 +1444,11 @@ const Profile = () => {
                               : "Show confirm password"
                           }
                         >
-                          {showPassword.confirmPassword ? <FaEyeSlash /> : <FaEye />}
+                          {showPassword.confirmPassword ? (
+                            <FaEyeSlash />
+                          ) : (
+                            <FaEye />
+                          )}
                         </button>
                       </div>
                       <button
