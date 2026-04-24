@@ -681,7 +681,7 @@ const ProductDetail = () => {
       <div className="mx-auto w-full lg:w-[70%]">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
         {/* Product Images */}
-        <div className="space-y-4">
+        <div className="space-y-4 lg:sticky lg:top-20 lg:self-start">
           <div className="aspect-square bg-gray-100 rounded-lg overflow-hidden">
             <img
               src={
