@@ -722,7 +722,7 @@ const ProductDetail = () => {
         {/* Product Info */}
         <div className="space-y-6">
           <div>
-            <h1 className="text-3xl font-bold text-gray-800 mb-2">
+            <h1 className="text-2xl font-bold text-gray-800 mb-2">
               {product.name}
             </h1>
             <div className="flex items-center space-x-2 mb-4">
@@ -734,7 +734,7 @@ const ProductDetail = () => {
               </span>
             </div>
 
-            <div className="text-3xl mb-4">${product.price?.toFixed(2)}</div>
+            <div className="text-2xl mb-4">${product.price?.toFixed(2)}</div>
 
             {product.helpsTo && (
               <div className="mb-6 rounded-lg border border-green-100 bg-green-50 px-4 py-3">
@@ -827,7 +827,6 @@ const ProductDetail = () => {
 
           {/* Product Details */}
           <div className="border-t pt-6">
-            <h3 className="text-lg font-semibold mb-4">Product Details</h3>
             <div className="grid grid-cols-2 gap-4 text-sm">
               <div>
                 <span className="font-medium text-gray-600">Category:</span>
@@ -841,7 +840,7 @@ const ProductDetail = () => {
 
             <div className="mt-6">
               <h4 className="text-sm font-semibold uppercase tracking-wide text-gray-700">
-                Brief Description
+                Product Details
               </h4>
               {briefDescriptionPoints.length > 0 ? (
                 <ul className="mt-2 list-disc space-y-1 pl-5 text-sm text-gray-600">
