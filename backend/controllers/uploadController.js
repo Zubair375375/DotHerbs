@@ -1,5 +1,6 @@
 import path from "path";
 import fs from "fs";
+import User from "../models/User.js";
 
 // @desc    Upload image to local /uploads folder
 // @route   POST /api/upload
@@ -50,6 +51,41 @@ export const uploadVideo = async (req, res) => {
   } catch (error) {
     console.error(error);
     res.status(500).json({ success: false, error: "Video upload failed" });
+  }
+};
+
+// @desc    Upload and save user avatar
+// @route   POST /api/upload/avatar
+// @access  Private
+export const uploadAvatar = async (req, res) => {
+  try {
+    if (!req.file) {
+      return res
+        .status(400)
+        .json({ success: false, error: "No file uploaded" });
+    }
+
+    const imageUrl = `/uploads/${req.file.filename}`;
+    const user = await User.findById(req.user._id);
+
+    if (!user) {
+      return res.status(404).json({ success: false, error: "User not found" });
+    }
+
+    user.avatar = imageUrl;
+    await user.save();
+
+    res.json({
+      success: true,
+      data: {
+        user,
+        url: imageUrl,
+        public_id: req.file.filename,
+      },
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ success: false, error: "Avatar upload failed" });
   }
 };
 

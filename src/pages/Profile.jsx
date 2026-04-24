@@ -5,6 +5,7 @@ import {
   selectAuthUser,
   selectIsAuthenticated,
   updateProfile,
+  uploadProfilePhoto,
   selectAuthIsLoading,
   selectAuthError,
   logout,
@@ -21,6 +22,7 @@ import {
   FaEdit,
   FaSave,
   FaTimes,
+  FaCamera,
 } from "react-icons/fa";
 
 const Profile = () => {
@@ -32,6 +34,8 @@ const Profile = () => {
   const isLoading = useSelector(selectAuthIsLoading);
   const authError = useSelector(selectAuthError);
   const userOrders = useSelector(selectOrders);
+  const API_URL = import.meta.env.VITE_API_URL || "http://localhost:5000/api";
+  const SERVER_URL = API_URL.replace(/\/api\/?$/, "");
 
   const [activeTab, setActiveTab] = useState("profile");
   const [showOrderThanks, setShowOrderThanks] = useState(false);
@@ -136,6 +140,40 @@ const Profile = () => {
     navigate("/");
   };
 
+  const getAvatarUrl = () => {
+    if (!user?.avatar) return "";
+    if (user.avatar.startsWith("http://") || user.avatar.startsWith("https://")) {
+      return user.avatar;
+    }
+    return `${SERVER_URL}${user.avatar}`;
+  };
+
+  const handleAvatarChange = async (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (!file.type.startsWith("image/")) {
+      toast.error("Please select a valid image file.");
+      e.target.value = "";
+      return;
+    }
+
+    if (file.size > 5 * 1024 * 1024) {
+      toast.error("Image size must be 5MB or less.");
+      e.target.value = "";
+      return;
+    }
+
+    try {
+      await dispatch(uploadProfilePhoto(file)).unwrap();
+      toast.success("Profile photo updated successfully!");
+    } catch (error) {
+      toast.error(error || "Failed to upload profile photo");
+    } finally {
+      e.target.value = "";
+    }
+  };
+
   const getOrderStatusColor = (status) => {
     switch (status) {
       case "pending":
@@ -169,8 +207,35 @@ const Profile = () => {
           <div className="lg:col-span-1">
             <div className="bg-white rounded-lg shadow-md p-6">
               <div className="text-center mb-6">
-                <div className="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                  <FaUser className="text-green-600 text-2xl" />
+                <div className="relative mx-auto mb-4 h-20 w-20">
+                  <div className="h-20 w-20 overflow-hidden rounded-full bg-green-100">
+                    {user.avatar ? (
+                      <img
+                        src={getAvatarUrl()}
+                        alt={user.name}
+                        className="h-full w-full object-cover"
+                      />
+                    ) : (
+                      <div className="flex h-full w-full items-center justify-center">
+                        <FaUser className="text-2xl text-green-600" />
+                      </div>
+                    )}
+                  </div>
+                  <label
+                    htmlFor="profile-photo-upload"
+                    className="absolute bottom-0 right-0 cursor-pointer rounded-full bg-green-600 p-1.5 text-white hover:bg-green-700"
+                    title="Upload profile photo"
+                  >
+                    <FaCamera className="text-xs" />
+                  </label>
+                  <input
+                    id="profile-photo-upload"
+                    type="file"
+                    accept="image/*"
+                    className="hidden"
+                    onChange={handleAvatarChange}
+                    disabled={isLoading}
+                  />
                 </div>
                 <h2 className="text-xl font-semibold text-gray-800">
                   {user.name}

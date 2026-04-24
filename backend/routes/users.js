@@ -28,6 +28,10 @@ const updateUserValidation = [
     .optional()
     .isIn(["user", "admin"])
     .withMessage("Role must be either user or admin"),
+  body("avatar")
+    .optional({ values: "falsy" })
+    .isString()
+    .withMessage("Avatar must be a valid string path"),
 ];
 
 const updateProfileValidation = [
@@ -41,6 +45,10 @@ const updateProfileValidation = [
     .isEmail()
     .normalizeEmail()
     .withMessage("Please provide a valid email"),
+  body("avatar")
+    .optional({ values: "falsy" })
+    .isString()
+    .withMessage("Avatar must be a valid string path"),
 ];
 
 const changePasswordValidation = [
@@ -54,23 +62,27 @@ const changePasswordValidation = [
 
 // Routes
 router.get("/", protect, authorize("admin"), getUsers);
-router.get("/:id", protect, authorize("admin"), getUser);
-router.put(
-  "/:id",
-  protect,
-  authorize("admin"),
-  updateUserValidation,
-  updateUser,
-);
-router.delete("/:id", protect, authorize("admin"), deleteUser);
-
-// Profile routes
+router.put("/me/profile", protect, updateProfileValidation, updateProfile);
 router.put("/profile", protect, updateProfileValidation, updateProfile);
 router.put(
   "/changepassword",
   protect,
   changePasswordValidation,
   changePassword,
+);
+router.get("/:id([0-9a-fA-F]{24})", protect, authorize("admin"), getUser);
+router.put(
+  "/:id([0-9a-fA-F]{24})",
+  protect,
+  authorize("admin"),
+  updateUserValidation,
+  updateUser,
+);
+router.delete(
+  "/:id([0-9a-fA-F]{24})",
+  protect,
+  authorize("admin"),
+  deleteUser,
 );
 
 export default router;

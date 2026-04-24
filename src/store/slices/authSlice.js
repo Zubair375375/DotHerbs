@@ -166,6 +166,43 @@ export const updateProfile = createAsyncThunk(
   },
 );
 
+export const uploadProfilePhoto = createAsyncThunk(
+  "auth/uploadProfilePhoto",
+  async (file, { getState, rejectWithValue }) => {
+    try {
+      const { auth } = getState();
+
+      if (!auth.accessToken) {
+        return rejectWithValue("Not authorized, no token");
+      }
+
+      const formData = new FormData();
+      formData.append("image", file);
+
+      const uploadResponse = await axios.post(`${API_URL}/upload/avatar`, formData, {
+        headers: {
+          Authorization: `Bearer ${auth.accessToken}`,
+        },
+      });
+
+      const updatedUser = uploadResponse?.data?.data?.user;
+      if (!updatedUser) {
+        return rejectWithValue("Image upload failed");
+      }
+
+      return updatedUser;
+    } catch (error) {
+      const serverMessage =
+        error?.response?.data?.error ||
+        error?.response?.data?.message ||
+        `${error?.message || "Request failed"}${error?.config?.url ? ` (${error.config.url})` : ""}`;
+      return rejectWithValue(
+        serverMessage || "Profile photo upload failed",
+      );
+    }
+  },
+);
+
 export const changePassword = createAsyncThunk(
   "auth/changePassword",
   async (passwordData, { getState, rejectWithValue }) => {
@@ -298,6 +335,19 @@ const authSlice = createSlice({
         state.user = action.payload;
       })
       .addCase(updateProfile.rejected, (state, action) => {
+        state.isLoading = false;
+        state.error = action.payload;
+      })
+      // Upload profile photo
+      .addCase(uploadProfilePhoto.pending, (state) => {
+        state.isLoading = true;
+        state.error = null;
+      })
+      .addCase(uploadProfilePhoto.fulfilled, (state, action) => {
+        state.isLoading = false;
+        state.user = action.payload;
+      })
+      .addCase(uploadProfilePhoto.rejected, (state, action) => {
         state.isLoading = false;
         state.error = action.payload;
       })

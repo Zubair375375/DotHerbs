@@ -44,8 +44,21 @@ const Header = () => {
   const authChecked = useSelector(selectAuthChecked);
   const authLoading = useSelector(selectAuthIsLoading);
   const cartItemCount = useSelector(selectCartItemCount);
+  const API_URL = import.meta.env.VITE_API_URL || "http://localhost:5000/api";
+  const SERVER_URL = API_URL.replace(/\/api\/?$/, "");
   const showAuthPendingState =
     !!accessToken && (!authChecked || (authLoading && !user));
+
+  const getAvatarUrl = () => {
+    if (!user?.avatar) return "";
+    if (
+      user.avatar.startsWith("http://") ||
+      user.avatar.startsWith("https://")
+    ) {
+      return user.avatar;
+    }
+    return `${SERVER_URL}${user.avatar}`;
+  };
 
   useEffect(() => {
     dispatch(fetchCategories());
@@ -207,7 +220,15 @@ const Header = () => {
             }}
             className="rounded-full p-1.5 hover:bg-gray-100"
           >
-            <MdPerson className="text-xl" />
+            {user?.avatar ? (
+              <img
+                src={getAvatarUrl()}
+                alt={user?.name || "Profile"}
+                className="h-7 w-7 rounded-full object-cover"
+              />
+            ) : (
+              <MdPerson className="text-xl" />
+            )}
           </button>
 
           {isProfileMenuOpen && (

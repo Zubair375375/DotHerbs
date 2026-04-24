@@ -129,11 +129,14 @@ export const updateUser = async (req, res) => {
       });
     }
 
-    const { name, email, role, shippingAddress } = req.body;
+    const { name, email, role, avatar, shippingAddress } = req.body;
 
     user.name = name || user.name;
     user.email = email || user.email;
     user.role = role || user.role;
+    if (typeof avatar === "string") {
+      user.avatar = avatar;
+    }
     if (shippingAddress) {
       user.shippingAddress = { ...user.shippingAddress, ...shippingAddress };
     }
@@ -196,10 +199,13 @@ export const updateProfile = async (req, res) => {
   try {
     const user = await User.findById(req.user._id);
 
-    const { name, email, shippingAddress } = req.body;
+    const { name, email, avatar, shippingAddress } = req.body;
 
     user.name = name || user.name;
     user.email = email || user.email;
+    if (typeof avatar === "string") {
+      user.avatar = avatar;
+    }
     if (shippingAddress) {
       user.shippingAddress = { ...user.shippingAddress, ...shippingAddress };
     }

@@ -6,6 +6,7 @@ import crypto from "crypto";
 import {
   uploadImage,
   uploadVideo,
+  uploadAvatar,
   deleteImage,
 } from "../controllers/uploadController.js";
 import { protect, authorize } from "../middleware/auth.js";
@@ -53,6 +54,7 @@ const videoUpload = multer({
 });
 
 router.post("/", protect, upload.single("image"), uploadImage);
+router.post("/avatar", protect, upload.single("image"), uploadAvatar);
 router.post("/video", protect, videoUpload.single("video"), uploadVideo);
 router.delete("/:filename", protect, authorize("admin"), deleteImage);
 
