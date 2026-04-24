@@ -7,6 +7,7 @@ import userReducer from "./slices/userSlice";
 import announcementReducer from "./slices/announcementSlice";
 import heroSlideReducer from "./slices/heroSlideSlice";
 import productBannerReducer from "./slices/productBannerSlice";
+import trendingReducer from "./slices/trendingSlice";
 
 export const store = configureStore({
   reducer: {
@@ -18,6 +19,7 @@ export const store = configureStore({
     announcements: announcementReducer,
     heroSlides: heroSlideReducer,
     productBanners: productBannerReducer,
+    trending: trendingReducer,
   },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware({

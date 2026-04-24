@@ -9,6 +9,7 @@ import {
   fetchProduct,
 } from "../store/slices/productSlice";
 import { addToCart } from "../store/slices/cartSlice";
+import { trackProductView, trackAddToCart } from "../utils/trendingMetricsTracker";
 import {
   selectAuthUser,
   selectIsAuthenticated,
@@ -584,6 +585,7 @@ const ProductDetail = () => {
   useEffect(() => {
     if (id) {
       dispatch(fetchProduct(id));
+      trackProductView(id);
     }
   }, [dispatch, id]);
 
@@ -677,6 +679,7 @@ const ProductDetail = () => {
       }),
     );
 
+    trackAddToCart(product._id);
     toast.success(`${product.name} added to cart!`);
   };
 

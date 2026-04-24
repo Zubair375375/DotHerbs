@@ -15,6 +15,13 @@ import {
   deleteProductQuestion,
   getCategories,
 } from "../controllers/productController.js";
+import {
+  getTrendingProducts,
+  recordView,
+  recordCart,
+  recordSale,
+  clearCache,
+} from "../controllers/trendingProductController.js";
 import { protect, authorize } from "../middleware/auth.js";
 
 const router = express.Router();
@@ -335,6 +342,16 @@ const answerQuestionValidation = [
 ];
 
 // Routes
+// Trending products (must be before /:id to avoid conflicts)
+router.get("/trending", getTrendingProducts);
+router.post("/trending/cache/clear", protect, authorize("admin"), clearCache);
+
+// Product views and interactions
+router.post("/:id/view", recordView);
+router.post("/:id/add-to-cart", recordCart);
+router.post("/:id/sale", protect, authorize("admin"), recordSale);
+
+// Main product routes
 router.get("/", getProducts);
 router.get("/categories", getCategories);
 router.get("/:id", getProduct);

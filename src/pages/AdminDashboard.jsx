@@ -2680,7 +2680,9 @@ const AdminDashboard = () => {
                                 />
                                 <button
                                   type="button"
-                                  onClick={() => handleRemovePendingHeroBadge(index)}
+                                  onClick={() =>
+                                    handleRemovePendingHeroBadge(index)
+                                  }
                                   className="absolute right-0 top-0 bg-black/70 px-1 text-[10px] font-semibold text-white"
                                 >
                                   ×
@@ -2734,7 +2736,8 @@ const AdminDashboard = () => {
                                 Order: {slide.displayOrder || 0}
                               </p>
                               <p className="text-sm text-gray-500">
-                                Badges: {slide.certificateBadgeImages?.length || 0}
+                                Badges:{" "}
+                                {slide.certificateBadgeImages?.length || 0}
                               </p>
                             </div>
                             <button

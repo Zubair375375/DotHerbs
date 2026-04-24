@@ -7,6 +7,7 @@ import {
   deductStockFIFO,
   getStockTotalsByProductIds,
 } from "../services/inventoryService.js";
+import { recordProductSale } from "../services/trendingProductService.js";
 
 // @desc    Create new order
 // @route   POST /api/orders
@@ -99,6 +100,16 @@ export const createOrder = async (req, res) => {
     });
 
     session.endSession();
+
+    // Record product sales for trending algorithm
+    try {
+      for (const item of orderItems) {
+        await recordProductSale(item.product, item.quantity);
+      }
+    } catch (trendingError) {
+      // Fire-and-forget: don't fail order if trending tracking fails
+      console.warn("[Trending] Failed to record product sales:", trendingError.message);
+    }
 
     res.status(201).json({
       success: true,

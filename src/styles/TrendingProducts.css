@@ -1,0 +1,188 @@
+/* Trending Products Section Styles */
+.trending-section {
+  padding: 4rem 1rem;
+  background: linear-gradient(135deg, #f5f7fa 0%, #f9fafb 100%);
+  margin: 3rem 0;
+  border-top: 1px solid #e5e7eb;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.trending-container {
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+/* Header */
+.trending-header {
+  text-align: center;
+  margin-bottom: 3rem;
+}
+
+.trending-title-group {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+  margin-bottom: 0.5rem;
+}
+
+.trending-icon {
+  font-size: 2rem;
+  color: #f59e0b;
+  animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.7;
+  }
+}
+
+.trending-title {
+  font-size: 2.5rem;
+  font-weight: 700;
+  color: #1f2937;
+  margin: 0;
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.trending-subtitle {
+  font-size: 1rem;
+  color: #6b7280;
+  margin: 0.5rem 0 0 0;
+  font-weight: 400;
+}
+
+/* Products Grid */
+.trending-products-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 1.5rem;
+  margin-bottom: 2rem;
+}
+
+.trending-product-wrapper {
+  position: relative;
+  height: 100%;
+}
+
+.trending-badge {
+  position: absolute;
+  top: 0.75rem;
+  right: 0.75rem;
+  background: linear-gradient(135deg, #f59e0b 0%, #f97316 100%);
+  color: white;
+  padding: 0.5rem 0.75rem;
+  border-radius: 0.5rem;
+  font-size: 0.875rem;
+  font-weight: 600;
+  box-shadow: 0 4px 12px rgba(245, 158, 11, 0.3);
+  animation: slideIn 0.4s ease-out;
+}
+
+@keyframes slideIn {
+  from {
+    transform: translateX(20px);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+.trending-score {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+/* Footer */
+.trending-footer {
+  display: flex;
+  justify-content: center;
+  padding-top: 2rem;
+  border-top: 1px solid #e5e7eb;
+}
+
+.trending-view-all {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1.5rem;
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+  color: white;
+  text-decoration: none;
+  border-radius: 0.5rem;
+  font-weight: 600;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+}
+
+.trending-view-all:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(16, 185, 129, 0.4);
+}
+
+.trending-chevron {
+  font-size: 1.25rem;
+  transition: transform 0.3s ease;
+}
+
+.trending-view-all:hover .trending-chevron {
+  transform: translateX(4px);
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .trending-section {
+    padding: 2rem 1rem;
+    margin: 2rem 0;
+  }
+
+  .trending-title {
+    font-size: 1.75rem;
+  }
+
+  .trending-subtitle {
+    font-size: 0.875rem;
+  }
+
+  .trending-products-grid {
+    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+    gap: 1rem;
+  }
+
+  .trending-icon {
+    font-size: 1.5rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .trending-section {
+    padding: 1.5rem 0.75rem;
+    margin: 1.5rem 0;
+  }
+
+  .trending-title {
+    font-size: 1.5rem;
+  }
+
+  .trending-products-grid {
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    gap: 0.75rem;
+  }
+
+  .trending-badge {
+    top: 0.5rem;
+    right: 0.5rem;
+    padding: 0.35rem 0.6rem;
+    font-size: 0.75rem;
+  }
+}

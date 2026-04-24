@@ -263,6 +263,46 @@ const productSchema = new mongoose.Schema(
       type: Boolean,
       default: true,
     },
+    // Trending metrics (for weekly tracking)
+    totalSales: {
+      type: Number,
+      default: 0,
+      min: 0,
+    },
+    recentSales: {
+      type: Number,
+      default: 0,
+      min: 0,
+    },
+    previousPeriodSales: {
+      type: Number,
+      default: 0,
+      min: 0,
+    },
+    views: {
+      type: Number,
+      default: 0,
+      min: 0,
+    },
+    addToCartCount: {
+      type: Number,
+      default: 0,
+      min: 0,
+    },
+    trendingScore: {
+      type: Number,
+      default: 0,
+      min: 0,
+    },
+    isTrending: {
+      type: Boolean,
+      default: false,
+    },
+    // Track when metrics were last reset/updated
+    metricsLastUpdatedAt: {
+      type: Date,
+      default: Date.now,
+    },
   },
   {
     timestamps: true,

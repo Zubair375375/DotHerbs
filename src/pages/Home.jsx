@@ -11,6 +11,7 @@ import {
   fetchHeroSlides,
   selectHeroSlides,
 } from "../store/slices/heroSlideSlice";
+import TrendingProducts from "../components/TrendingProducts";
 
 const BADGE_MARQUEE_STYLE = `
 @keyframes heroBadgesMarquee {
@@ -348,6 +349,9 @@ const Home = () => {
           </div>
         </div>
       </section>
+
+      {/* Trending Products */}
+      <TrendingProducts />
 
       {/* Features */}
       <section className="py-16 bg-white grid grid-cols-1 md:grid-cols-4 gap-8 text-center px-6">
