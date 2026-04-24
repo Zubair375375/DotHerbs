@@ -19,6 +19,10 @@ const heroSlideSchema = new mongoose.Schema(
       default: "",
       maxlength: [220, "Subtitle cannot be more than 220 characters"],
     },
+    certificateBadgeImages: {
+      type: [String],
+      default: [],
+    },
     isActive: {
       type: Boolean,
       default: true,

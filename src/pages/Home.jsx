@@ -12,12 +12,28 @@ import {
   selectHeroSlides,
 } from "../store/slices/heroSlideSlice";
 
+const BADGE_MARQUEE_STYLE = `
+@keyframes heroBadgesMarquee {
+  0% { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
+}
+
+.hero-badge-marquee-track {
+  display: flex;
+  width: max-content;
+  will-change: transform;
+  animation: heroBadgesMarquee 24s linear infinite;
+}
+`;
+
 const Home = () => {
   const dispatch = useDispatch();
   const categories = useSelector(selectCategories);
   const heroSlides = useSelector(selectHeroSlides);
   const [currentSlide, setCurrentSlide] = useState(0);
   const [isTransitionEnabled, setIsTransitionEnabled] = useState(true);
+  const API_URL = import.meta.env.VITE_API_URL || "http://localhost:5000/api";
+  const API_ORIGIN = API_URL.replace(/\/api\/?$/, "");
 
   const toHeroImageUrl = (image) => {
     if (!image) {
@@ -29,6 +45,13 @@ const Home = () => {
     }
 
     return `http://localhost:5000${image}`;
+  };
+
+  const resolveMediaUrl = (url) => {
+    if (!url) return "";
+    if (url.startsWith("http://") || url.startsWith("https://")) return url;
+    if (url.startsWith("/uploads/")) return `${API_ORIGIN}${url}`;
+    return url;
   };
 
   useEffect(() => {
@@ -65,6 +88,24 @@ const Home = () => {
 
     return [...slides, slides[0]];
   }, [slides]);
+
+  const heroCertificateBadges = useMemo(() => {
+    if (!heroSlides.length) {
+      return [];
+    }
+
+    const sortedSlides = [...heroSlides].sort(
+      (a, b) => Number(a.displayOrder || 0) - Number(b.displayOrder || 0),
+    );
+
+    const firstSlideWithBadges = sortedSlides.find(
+      (slide) =>
+        Array.isArray(slide.certificateBadgeImages) &&
+        slide.certificateBadgeImages.length > 0,
+    );
+
+    return firstSlideWithBadges?.certificateBadgeImages || [];
+  }, [heroSlides]);
 
   useEffect(() => {
     setCurrentSlide(0);
@@ -219,16 +260,55 @@ const Home = () => {
         </div>
       </section>
 
+      {/* Certificates Strip */}
+      {heroCertificateBadges.length > 0 && (
+        <section className="bg-[#ffffff] py-8">
+          <style>{BADGE_MARQUEE_STYLE}</style>
+          <div className="flex w-full flex-col items-center gap-6 px-4 lg:flex-row lg:items-center">
+            <div className="w-full rounded-2xl bg-gradient-to-r from-[#2f80ed] to-[#1f63d8] px-6 py-5 text-white lg:max-w-[34rem]">
+              <h3 className="text-center text-3xl font-extrabold leading-tight lg:text-left">
+                20+ Certificates
+              </h3>
+              <p className="mt-1 text-center text-xl font-medium lg:text-left">
+                From Global Regulatory Authorities
+              </p>
+            </div>
+
+            <div className="relative w-full overflow-hidden pb-2 lg:pl-2">
+              <div className="pointer-events-none absolute left-0 top-0 z-10 h-full w-14 bg-gradient-to-r from-white via-white/90 to-transparent" />
+              <div className="pointer-events-none absolute right-0 top-0 z-10 h-full w-14 bg-gradient-to-l from-white via-white/90 to-transparent" />
+              <div className="hero-badge-marquee-track items-start gap-5 pr-2">
+                {[...heroCertificateBadges, ...heroCertificateBadges].map(
+                  (badgeImage, index) => (
+                    <div
+                      key={`${badgeImage}-${index}`}
+                      className="flex w-24 flex-col items-center"
+                    >
+                      <div className="flex h-20 w-20 items-center justify-center overflow-hidden rounded-full border-2 border-[#ccb8d9] bg-white shadow-sm">
+                        <img
+                          src={resolveMediaUrl(badgeImage)}
+                          alt={`Certificate badge ${(index % heroCertificateBadges.length) + 1}`}
+                          className="h-full w-full object-cover"
+                        />
+                      </div>
+                    </div>
+                  ),
+                )}
+              </div>
+            </div>
+          </div>
+        </section>
+      )}
+
       {/* Categories */}
       <section className="bg-white py-16 px-6">
         <div className="max-w-7xl mx-auto">
-          <div className="text-center mb-10">
-            <p className="text-[#68a300] font-semibold uppercase tracking-[0.2em] text-sm mb-3">
-              Shop by Category
-            </p>
-            <h2 className="text-3xl md:text-4xl font-bold text-gray-900">
+          <div className="mb-12 flex items-center justify-center gap-6">
+            <span className="hidden h-px flex-1 bg-[#1f2937] md:block" />
+            <h2 className="text-center text-sm font-extrabold uppercase tracking-[0.06em] text-[#0f1f34] sm:text-base md:text-lg">
               Herbal Choice For Your Health
             </h2>
+            <span className="hidden h-px flex-1 bg-[#1f2937] md:block" />
           </div>
 
           <div className="grid grid-cols-[repeat(auto-fit,minmax(170px,170px))] justify-center gap-4">

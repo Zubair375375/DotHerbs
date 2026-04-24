@@ -40,6 +40,12 @@ export const createHeroSlide = async (req, res) => {
     const image = req.body.image?.trim();
     const title = req.body.title?.trim() || "";
     const subtitle = req.body.subtitle?.trim() || "";
+    const certificateBadgeImages = Array.isArray(req.body.certificateBadgeImages)
+      ? req.body.certificateBadgeImages
+          .map((item) => (typeof item === "string" ? item.trim() : ""))
+          .filter(Boolean)
+          .slice(0, 20)
+      : [];
     const displayOrder = Number(req.body.displayOrder || 0);
 
     if (!image) {
@@ -52,10 +58,40 @@ export const createHeroSlide = async (req, res) => {
       image,
       title,
       subtitle,
+      certificateBadgeImages,
       displayOrder,
     });
 
     res.status(201).json({ success: true, data: slide });
+  } catch (error) {
+    res.status(500).json({ success: false, error: "Server error" });
+  }
+};
+
+// @desc    Update hero slide certificate badges
+// @route   PUT /api/hero-slides/:id/badges
+// @access  Private/Admin
+export const updateHeroSlideBadges = async (req, res) => {
+  try {
+    const slide = await HeroSlide.findById(req.params.id);
+
+    if (!slide) {
+      return res
+        .status(404)
+        .json({ success: false, error: "Hero slide not found" });
+    }
+
+    const certificateBadgeImages = Array.isArray(req.body.certificateBadgeImages)
+      ? req.body.certificateBadgeImages
+          .map((item) => (typeof item === "string" ? item.trim() : ""))
+          .filter(Boolean)
+          .slice(0, 20)
+      : [];
+
+    slide.certificateBadgeImages = certificateBadgeImages;
+    await slide.save();
+
+    res.json({ success: true, data: slide });
   } catch (error) {
     res.status(500).json({ success: false, error: "Server error" });
   }

@@ -59,6 +59,7 @@ import {
 import {
   fetchAllHeroSlides,
   createHeroSlide,
+  updateHeroSlideBadges,
   deleteHeroSlide,
   selectAllHeroSlides,
 } from "../store/slices/heroSlideSlice";
@@ -111,6 +112,11 @@ const AdminDashboard = () => {
   });
   const [heroImageFile, setHeroImageFile] = useState(null);
   const [heroImagePreview, setHeroImagePreview] = useState(null);
+  const [heroBadgeImageFiles, setHeroBadgeImageFiles] = useState([]);
+  const [heroBadgeImagePreviews, setHeroBadgeImagePreviews] = useState([]);
+  const [selectedHeroSlideIdForBadges, setSelectedHeroSlideIdForBadges] =
+    useState("");
+  const [updatingHeroBadges, setUpdatingHeroBadges] = useState(false);
   const [uploadingHeroImage, setUploadingHeroImage] = useState(false);
   const [aboutVideoFile, setAboutVideoFile] = useState(null);
   const [aboutVideoPreview, setAboutVideoPreview] = useState("");
@@ -555,6 +561,22 @@ const AdminDashboard = () => {
 
     fetchProductBatches(productId);
   }, [activeTab, products, selectedBatchProductId]);
+
+  useEffect(() => {
+    if (activeTab !== "hero") return;
+    if (!heroSlides.length) {
+      setSelectedHeroSlideIdForBadges("");
+      return;
+    }
+
+    const selectedExists = heroSlides.some(
+      (slide) => slide._id === selectedHeroSlideIdForBadges,
+    );
+
+    if (!selectedExists) {
+      setSelectedHeroSlideIdForBadges(heroSlides[0]._id);
+    }
+  }, [activeTab, heroSlides, selectedHeroSlideIdForBadges]);
 
   useEffect(() => {
     return () => {
@@ -1489,6 +1511,7 @@ const AdminDashboard = () => {
     try {
       setUploadingHeroImage(true);
       const imageUrl = await uploadDashboardImage(heroImageFile);
+
       await dispatch(
         createHeroSlide({
           image: imageUrl,
@@ -1557,6 +1580,96 @@ const AdminDashboard = () => {
       toast.success("Hero slide deleted successfully");
     } catch (error) {
       toast.error(error || "Failed to delete hero slide");
+    }
+  };
+
+  const handleHeroBadgeImageSelection = (files) => {
+    if (!files?.length) {
+      return;
+    }
+
+    const allowedCount = Math.max(0, 20 - heroBadgeImageFiles.length);
+    const selectedFiles = Array.from(files).slice(0, allowedCount);
+
+    if (selectedFiles.length < files.length) {
+      toast.error("Maximum 20 certificate badges are allowed per hero slide");
+    }
+
+    if (!selectedFiles.length) {
+      return;
+    }
+
+    setHeroBadgeImageFiles((prev) => [...prev, ...selectedFiles]);
+
+    selectedFiles.forEach((file) => {
+      const reader = new FileReader();
+      reader.onload = (event) => {
+        setHeroBadgeImagePreviews((prev) => [
+          ...prev,
+          event.target?.result || "",
+        ]);
+      };
+      reader.readAsDataURL(file);
+    });
+  };
+
+  const handleRemovePendingHeroBadge = (index) => {
+    setHeroBadgeImageFiles((prev) => prev.filter((_, i) => i !== index));
+    setHeroBadgeImagePreviews((prev) => prev.filter((_, i) => i !== index));
+  };
+
+  const handleSaveHeroBadges = async (e) => {
+    e.preventDefault();
+
+    if (!selectedHeroSlideIdForBadges) {
+      toast.error("Please select a hero slide");
+      return;
+    }
+
+    if (!heroBadgeImageFiles.length) {
+      toast.error("Please select at least one badge image");
+      return;
+    }
+
+    const targetSlide = heroSlides.find(
+      (slide) => slide._id === selectedHeroSlideIdForBadges,
+    );
+
+    if (!targetSlide) {
+      toast.error("Selected hero slide not found");
+      return;
+    }
+
+    try {
+      setUpdatingHeroBadges(true);
+
+      const uploadedBadgeImages = [];
+      for (const file of heroBadgeImageFiles) {
+        const uploadedUrl = await uploadDashboardImage(file);
+        uploadedBadgeImages.push(uploadedUrl);
+      }
+
+      const mergedBadges = [
+        ...(Array.isArray(targetSlide.certificateBadgeImages)
+          ? targetSlide.certificateBadgeImages
+          : []),
+        ...uploadedBadgeImages,
+      ].slice(0, 20);
+
+      await dispatch(
+        updateHeroSlideBadges({
+          id: selectedHeroSlideIdForBadges,
+          certificateBadgeImages: mergedBadges,
+        }),
+      ).unwrap();
+
+      setHeroBadgeImageFiles([]);
+      setHeroBadgeImagePreviews([]);
+      toast.success("Hero certificate badges updated successfully");
+    } catch (error) {
+      toast.error(error || "Failed to update hero certificate badges");
+    } finally {
+      setUpdatingHeroBadges(false);
     }
   };
 
@@ -2444,68 +2557,154 @@ const AdminDashboard = () => {
           {activeTab === "hero" && (
             <div className="p-6">
               <div className="grid grid-cols-1 gap-8 lg:grid-cols-[380px,1fr]">
-                <div className="rounded-lg border bg-gray-50 p-5">
-                  <h2 className="mb-4 text-2xl font-semibold">
-                    Add Hero Slide
-                  </h2>
-                  <form className="space-y-4" onSubmit={handleCreateHeroSlide}>
-                    <div>
-                      <label className="mb-2 block text-sm font-medium text-gray-700">
-                        Hero Image
-                      </label>
-                      {heroImagePreview && (
-                        <img
-                          src={heroImagePreview}
-                          alt="Hero preview"
-                          className="mb-3 h-40 w-full rounded-lg object-cover"
-                        />
-                      )}
-                      <input
-                        type="file"
-                        accept="image/*"
-                        onChange={(e) => {
-                          const file = e.target.files[0];
-                          if (!file) {
-                            return;
-                          }
-
-                          setHeroImageFile(file);
-                          const reader = new FileReader();
-                          reader.onload = (event) =>
-                            setHeroImagePreview(event.target.result);
-                          reader.readAsDataURL(file);
-                        }}
-                        className="w-full rounded border border-gray-300 px-3 py-2 text-sm"
-                      />
-                    </div>
-                    <div>
-                      <label className="mb-2 block text-sm font-medium text-gray-700">
-                        Display Order
-                      </label>
-                      <input
-                        type="number"
-                        value={heroForm.displayOrder}
-                        onChange={(e) =>
-                          setHeroForm((prev) => ({
-                            ...prev,
-                            displayOrder: e.target.value,
-                          }))
-                        }
-                        className="w-full rounded border border-gray-300 px-3 py-2"
-                        min="0"
-                      />
-                    </div>
-                    <button
-                      type="submit"
-                      disabled={uploadingHeroImage}
-                      className="flex items-center space-x-2 rounded bg-[#68a300] px-4 py-2 text-white hover:bg-[#5f9600] disabled:opacity-60"
+                <div className="space-y-6">
+                  <div className="rounded-lg border bg-gray-50 p-5">
+                    <h2 className="mb-4 text-2xl font-semibold">
+                      Add Hero Slide
+                    </h2>
+                    <form
+                      className="space-y-4"
+                      onSubmit={handleCreateHeroSlide}
                     >
-                      <FaPlus />
-                      <span>
-                        {uploadingHeroImage ? "Uploading..." : "Add Hero Slide"}
-                      </span>
-                    </button>
-                  </form>
+                      <div>
+                        <label className="mb-2 block text-sm font-medium text-gray-700">
+                          Hero Image
+                        </label>
+                        {heroImagePreview && (
+                          <img
+                            src={heroImagePreview}
+                            alt="Hero preview"
+                            className="mb-3 h-40 w-full rounded-lg object-cover"
+                          />
+                        )}
+                        <input
+                          type="file"
+                          accept="image/*"
+                          onChange={(e) => {
+                            const file = e.target.files[0];
+                            if (!file) {
+                              return;
+                            }
+
+                            setHeroImageFile(file);
+                            const reader = new FileReader();
+                            reader.onload = (event) =>
+                              setHeroImagePreview(event.target.result);
+                            reader.readAsDataURL(file);
+                          }}
+                          className="w-full rounded border border-gray-300 px-3 py-2 text-sm"
+                        />
+                      </div>
+                      <div>
+                        <label className="mb-2 block text-sm font-medium text-gray-700">
+                          Display Order
+                        </label>
+                        <input
+                          type="number"
+                          value={heroForm.displayOrder}
+                          onChange={(e) =>
+                            setHeroForm((prev) => ({
+                              ...prev,
+                              displayOrder: e.target.value,
+                            }))
+                          }
+                          className="w-full rounded border border-gray-300 px-3 py-2"
+                          min="0"
+                        />
+                      </div>
+
+                      <button
+                        type="submit"
+                        disabled={uploadingHeroImage}
+                        className="flex items-center space-x-2 rounded bg-[#68a300] px-4 py-2 text-white hover:bg-[#5f9600] disabled:opacity-60"
+                      >
+                        <FaPlus />
+                        <span>
+                          {uploadingHeroImage
+                            ? "Uploading..."
+                            : "Add Hero Slide"}
+                        </span>
+                      </button>
+                    </form>
+                  </div>
+
+                  <div className="rounded-lg border bg-gray-50 p-5">
+                    <h2 className="mb-4 text-2xl font-semibold">
+                      Hero Certificate Badges
+                    </h2>
+                    <form className="space-y-4" onSubmit={handleSaveHeroBadges}>
+                      <div>
+                        <label className="mb-2 block text-sm font-medium text-gray-700">
+                          Select Hero Slide
+                        </label>
+                        <select
+                          value={selectedHeroSlideIdForBadges}
+                          onChange={(e) =>
+                            setSelectedHeroSlideIdForBadges(e.target.value)
+                          }
+                          className="w-full rounded border border-gray-300 px-3 py-2 text-sm"
+                        >
+                          <option value="">Select slide</option>
+                          {heroSlides.map((slide) => (
+                            <option key={slide._id} value={slide._id}>
+                              Hero Slide (Order {slide.displayOrder || 0})
+                            </option>
+                          ))}
+                        </select>
+                      </div>
+
+                      <div>
+                        <label className="mb-2 block text-sm font-medium text-gray-700">
+                          Certificate Badges
+                        </label>
+                        <input
+                          type="file"
+                          accept="image/*"
+                          multiple
+                          onChange={(e) =>
+                            handleHeroBadgeImageSelection(e.target.files)
+                          }
+                          className="w-full rounded border border-gray-300 px-3 py-2 text-sm"
+                        />
+                        {heroBadgeImagePreviews.length > 0 && (
+                          <div className="mt-3 grid grid-cols-4 gap-2">
+                            {heroBadgeImagePreviews.map((preview, index) => (
+                              <div
+                                key={`hero-badge-preview-${index}`}
+                                className="relative overflow-hidden rounded-full border"
+                              >
+                                <img
+                                  src={preview}
+                                  alt={`Hero badge preview ${index + 1}`}
+                                  className="h-14 w-14 object-cover"
+                                />
+                                <button
+                                  type="button"
+                                  onClick={() => handleRemovePendingHeroBadge(index)}
+                                  className="absolute right-0 top-0 bg-black/70 px-1 text-[10px] font-semibold text-white"
+                                >
+                                  ×
+                                </button>
+                              </div>
+                            ))}
+                          </div>
+                        )}
+                      </div>
+
+                      <button
+                        type="submit"
+                        disabled={updatingHeroBadges}
+                        className="flex items-center space-x-2 rounded bg-[#5b3f95] px-4 py-2 text-white hover:bg-[#4d337f] disabled:opacity-60"
+                      >
+                        <FaPlus />
+                        <span>
+                          {updatingHeroBadges
+                            ? "Saving..."
+                            : "Save Certificate Badges"}
+                        </span>
+                      </button>
+                    </form>
+                  </div>
                 </div>
 
                 <div>
@@ -2534,6 +2733,9 @@ const AdminDashboard = () => {
                               <p className="text-sm text-gray-500">
                                 Order: {slide.displayOrder || 0}
                               </p>
+                              <p className="text-sm text-gray-500">
+                                Badges: {slide.certificateBadgeImages?.length || 0}
+                              </p>
                             </div>
                             <button
                               onClick={() => handleDeleteHeroSlide(slide._id)}
@@ -2542,6 +2744,22 @@ const AdminDashboard = () => {
                               <FaTrash />
                             </button>
                           </div>
+
+                          {Array.isArray(slide.certificateBadgeImages) &&
+                            slide.certificateBadgeImages.length > 0 && (
+                              <div className="flex flex-wrap gap-2 pt-1">
+                                {slide.certificateBadgeImages
+                                  .slice(0, 8)
+                                  .map((badge, index) => (
+                                    <img
+                                      key={`${slide._id}-badge-${index}`}
+                                      src={resolveMediaUrl(badge)}
+                                      alt={`Badge ${index + 1}`}
+                                      className="h-8 w-8 rounded-full border object-cover"
+                                    />
+                                  ))}
+                              </div>
+                            )}
                         </div>
                       </div>
                     ))}
