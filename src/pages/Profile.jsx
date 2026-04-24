@@ -6,6 +6,7 @@ import {
   selectIsAuthenticated,
   updateProfile,
   uploadProfilePhoto,
+  changePassword,
   selectAuthIsLoading,
   selectAuthError,
   logout,
@@ -23,6 +24,8 @@ import {
   FaSave,
   FaTimes,
   FaCamera,
+  FaEye,
+  FaEyeSlash,
 } from "react-icons/fa";
 
 const Profile = () => {
@@ -40,6 +43,16 @@ const Profile = () => {
   const [activeTab, setActiveTab] = useState("profile");
   const [showOrderThanks, setShowOrderThanks] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
+  const [passwordForm, setPasswordForm] = useState({
+    currentPassword: "",
+    newPassword: "",
+    confirmPassword: "",
+  });
+  const [showPassword, setShowPassword] = useState({
+    currentPassword: false,
+    newPassword: false,
+    confirmPassword: false,
+  });
   const [formData, setFormData] = useState({
     name: "",
     email: "",
@@ -138,6 +151,53 @@ const Profile = () => {
     dispatch(logout());
     toast.success("Logged out successfully");
     navigate("/");
+  };
+
+  const handlePasswordFieldChange = (e) => {
+    const { name, value } = e.target;
+    setPasswordForm((prev) => ({ ...prev, [name]: value }));
+  };
+
+  const togglePasswordVisibility = (field) => {
+    setShowPassword((prev) => ({
+      ...prev,
+      [field]: !prev[field],
+    }));
+  };
+
+  const handleChangePassword = async () => {
+    if (!passwordForm.currentPassword.trim()) {
+      toast.error("Current password is required.");
+      return;
+    }
+
+    if (passwordForm.newPassword.length < 6) {
+      toast.error("New password must be at least 6 characters long.");
+      return;
+    }
+
+    if (passwordForm.newPassword !== passwordForm.confirmPassword) {
+      toast.error("New password and confirm password must match.");
+      return;
+    }
+
+    try {
+      await dispatch(
+        changePassword({
+          currentPassword: passwordForm.currentPassword,
+          newPassword: passwordForm.newPassword,
+        }),
+      ).unwrap();
+
+      setPasswordForm({
+        currentPassword: "",
+        newPassword: "",
+        confirmPassword: "",
+      });
+      toast.success("Password changed successfully!");
+    } catch (error) {
+      toast.error(error || "Failed to change password");
+    }
   };
 
   const getAvatarUrl = () => {
@@ -243,7 +303,7 @@ const Profile = () => {
                 <h2 className="text-xl font-semibold text-gray-800">
                   {user.name}
                 </h2>
-                <p className="text-gray-600">{user.email}</p>
+                <p className="break-all text-gray-600">{user.email}</p>
               </div>
 
               <nav className="space-y-2">
@@ -639,19 +699,88 @@ const Profile = () => {
                     <h4 className="text-lg font-medium mb-4">
                       Change Password
                     </h4>
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                      <input
-                        type="password"
-                        placeholder="Current password"
-                        className="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
-                      />
-                      <input
-                        type="password"
-                        placeholder="New password"
-                        className="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
-                      />
-                      <button className="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700">
-                        Update Password
+                    <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                      <div className="relative">
+                        <input
+                          type={
+                            showPassword.currentPassword ? "text" : "password"
+                          }
+                          placeholder="Current password"
+                          name="currentPassword"
+                          value={passwordForm.currentPassword}
+                          onChange={handlePasswordFieldChange}
+                          className="w-full rounded-md border border-gray-300 px-3 py-2 pr-10 focus:outline-none focus:ring-2 focus:ring-green-500"
+                        />
+                        <button
+                          type="button"
+                          onClick={() =>
+                            togglePasswordVisibility("currentPassword")
+                          }
+                          className="absolute right-3 top-1/2 -translate-y-1/2 border-0 bg-transparent text-gray-500 hover:text-gray-700 focus:outline-none focus:ring-0 focus-visible:outline-none"
+                          aria-label={
+                            showPassword.currentPassword
+                              ? "Hide current password"
+                              : "Show current password"
+                          }
+                        >
+                          {showPassword.currentPassword ? <FaEyeSlash /> : <FaEye />}
+                        </button>
+                      </div>
+                      <div className="relative">
+                        <input
+                          type={showPassword.newPassword ? "text" : "password"}
+                          placeholder="New password"
+                          name="newPassword"
+                          value={passwordForm.newPassword}
+                          onChange={handlePasswordFieldChange}
+                          className="w-full rounded-md border border-gray-300 px-3 py-2 pr-10 focus:outline-none focus:ring-2 focus:ring-green-500"
+                        />
+                        <button
+                          type="button"
+                          onClick={() => togglePasswordVisibility("newPassword")}
+                          className="absolute right-3 top-1/2 -translate-y-1/2 border-0 bg-transparent text-gray-500 hover:text-gray-700 focus:outline-none focus:ring-0 focus-visible:outline-none"
+                          aria-label={
+                            showPassword.newPassword
+                              ? "Hide new password"
+                              : "Show new password"
+                          }
+                        >
+                          {showPassword.newPassword ? <FaEyeSlash /> : <FaEye />}
+                        </button>
+                      </div>
+                      <div className="relative">
+                        <input
+                          type={
+                            showPassword.confirmPassword ? "text" : "password"
+                          }
+                          placeholder="Confirm new password"
+                          name="confirmPassword"
+                          value={passwordForm.confirmPassword}
+                          onChange={handlePasswordFieldChange}
+                          className="w-full rounded-md border border-gray-300 px-3 py-2 pr-10 focus:outline-none focus:ring-2 focus:ring-green-500"
+                        />
+                        <button
+                          type="button"
+                          onClick={() =>
+                            togglePasswordVisibility("confirmPassword")
+                          }
+                          className="absolute right-3 top-1/2 -translate-y-1/2 border-0 bg-transparent text-gray-500 hover:text-gray-700 focus:outline-none focus:ring-0 focus-visible:outline-none"
+                          aria-label={
+                            showPassword.confirmPassword
+                              ? "Hide confirm password"
+                              : "Show confirm password"
+                          }
+                        >
+                          {showPassword.confirmPassword ? <FaEyeSlash /> : <FaEye />}
+                        </button>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={handleChangePassword}
+                        disabled={isLoading}
+                        className="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700 disabled:opacity-50"
+                      >
+                        {isLoading ? "Updating..." : "Update Password"}
                       </button>
                     </div>
                   </div>
