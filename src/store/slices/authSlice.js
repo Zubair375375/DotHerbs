@@ -140,8 +140,14 @@ export const getCurrentUser = createAsyncThunk(
       });
       return response.data.data;
     } catch (error) {
+      const detailedMessage =
+        error?.response?.data?.error ||
+        error?.response?.data?.message ||
+        (error?.message === "Network Error"
+          ? "Cannot reach backend API. Ensure server is running on http://localhost:5000"
+          : error?.message);
       return rejectWithValue(
-        error.response?.data?.error || "Failed to get user",
+        detailedMessage || "Failed to get user",
       );
     }
   },
