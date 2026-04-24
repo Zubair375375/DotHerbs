@@ -78,11 +78,6 @@ router.put(
   updateUserValidation,
   updateUser,
 );
-router.delete(
-  "/:id([0-9a-fA-F]{24})",
-  protect,
-  authorize("admin"),
-  deleteUser,
-);
+router.delete("/:id([0-9a-fA-F]{24})", protect, authorize("admin"), deleteUser);
 
 export default router;

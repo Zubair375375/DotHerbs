@@ -218,7 +218,7 @@ const Header = () => {
               setIsProfileMenuOpen(!isProfileMenuOpen);
               setIsMobileMenuOpen(false);
             }}
-            className="rounded-full p-1.5 hover:bg-gray-100"
+            className="rounded-full border-0 bg-transparent p-1.5 hover:bg-transparent focus:outline-none focus:ring-0 focus-visible:outline-none"
           >
             {user?.avatar ? (
               <img
@@ -232,7 +232,7 @@ const Header = () => {
           </button>
 
           {isProfileMenuOpen && (
-            <div className="absolute right-0 z-[70] mt-2 min-w-[160px] overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-lg">
+            <div className="absolute right-0 z-[70] mt-2 min-w-[160px] overflow-hidden rounded-none border border-gray-200 bg-white shadow-lg">
               <Link
                 to="/profile"
                 onClick={() => setIsProfileMenuOpen(false)}

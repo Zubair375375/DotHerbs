@@ -179,11 +179,15 @@ export const uploadProfilePhoto = createAsyncThunk(
       const formData = new FormData();
       formData.append("image", file);
 
-      const uploadResponse = await axios.post(`${API_URL}/upload/avatar`, formData, {
-        headers: {
-          Authorization: `Bearer ${auth.accessToken}`,
+      const uploadResponse = await axios.post(
+        `${API_URL}/upload/avatar`,
+        formData,
+        {
+          headers: {
+            Authorization: `Bearer ${auth.accessToken}`,
+          },
         },
-      });
+      );
 
       const updatedUser = uploadResponse?.data?.data?.user;
       if (!updatedUser) {
@@ -196,9 +200,7 @@ export const uploadProfilePhoto = createAsyncThunk(
         error?.response?.data?.error ||
         error?.response?.data?.message ||
         `${error?.message || "Request failed"}${error?.config?.url ? ` (${error.config.url})` : ""}`;
-      return rejectWithValue(
-        serverMessage || "Profile photo upload failed",
-      );
+      return rejectWithValue(serverMessage || "Profile photo upload failed");
     }
   },
 );

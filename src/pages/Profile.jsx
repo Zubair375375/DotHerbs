@@ -142,7 +142,10 @@ const Profile = () => {
 
   const getAvatarUrl = () => {
     if (!user?.avatar) return "";
-    if (user.avatar.startsWith("http://") || user.avatar.startsWith("https://")) {
+    if (
+      user.avatar.startsWith("http://") ||
+      user.avatar.startsWith("https://")
+    ) {
       return user.avatar;
     }
     return `${SERVER_URL}${user.avatar}`;
