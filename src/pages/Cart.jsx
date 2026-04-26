@@ -21,6 +21,8 @@ const Cart = () => {
   const cartTotal = useSelector(selectCartTotal);
   const isLoading = useSelector(selectCartIsLoading);
   const isAuthenticated = useSelector(selectIsAuthenticated);
+  const API_URL = import.meta.env.VITE_API_URL || "/api";
+  const SERVER_URL = API_URL.replace(/\/api\/?$/, "");
 
   const [promoCode, setPromoCode] = useState("");
   const [discount, setDiscount] = useState(0);
@@ -32,7 +34,7 @@ const Cart = () => {
     if (/^https?:\/\//i.test(rawImage)) return rawImage;
     if (rawImage === "/placeholder-product.jpg") return rawImage;
     if (rawImage.startsWith("/uploads/"))
-      return `http://localhost:5000${rawImage}`;
+      return `${SERVER_URL}${rawImage}`;
     return rawImage;
   };
 

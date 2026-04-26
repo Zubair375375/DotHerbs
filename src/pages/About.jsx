@@ -141,7 +141,7 @@ const About = () => {
     defaultHealthPrioritySection,
   );
   const [teamMembers, setTeamMembers] = useState([]);
-  const API_URL = import.meta.env.VITE_API_URL || "http://localhost:5000/api";
+  const API_URL = import.meta.env.VITE_API_URL || "/api";
   const API_ORIGIN = API_URL.replace(/\/api\/?$/, "");
 
   const resolveMediaUrl = (url) => {
@@ -747,3 +747,4 @@ const About = () => {
 };
 
 export default About;
+

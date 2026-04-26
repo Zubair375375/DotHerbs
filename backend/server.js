@@ -20,7 +20,8 @@ import aboutContentRoutes from "./routes/aboutContent.js";
 import batchRoutes from "./routes/batches.js";
 import { errorHandler } from "./middleware/errorHandler.js";
 
-const envFileName = process.env.NODE_ENV === "production" ? ".env.production" : ".env";
+const normalizedNodeEnv = (process.env.NODE_ENV || "").toLowerCase();
+const envFileName = normalizedNodeEnv === "production" ? ".env.production" : ".env";
 dotenv.config({ path: path.resolve(process.cwd(), envFileName) });
 dotenv.config();
 
@@ -29,7 +30,7 @@ const __dirname = path.dirname(__filename);
 
 const app = express();
 
-const isProduction = process.env.NODE_ENV === "production";
+const isProduction = (process.env.NODE_ENV || "").toLowerCase() === "production";
 
 const parseAllowedOrigins = () => {
   const explicitOrigins = (process.env.CLIENT_URLS || "")

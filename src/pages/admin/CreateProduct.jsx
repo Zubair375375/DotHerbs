@@ -184,7 +184,7 @@ const CreateProduct = ({ onClose, onSuccess }) => {
     const token = rawToken ? JSON.parse(rawToken) : null;
 
     const response = await fetch(
-      `${import.meta.env.VITE_API_URL || "http://localhost:5000/api"}/upload`,
+      `${import.meta.env.VITE_API_URL || "/api"}/upload`,
       {
         method: "POST",
         headers: { Authorization: `Bearer ${token}` },
@@ -843,3 +843,4 @@ const CreateProduct = ({ onClose, onSuccess }) => {
 };
 
 export default CreateProduct;
+

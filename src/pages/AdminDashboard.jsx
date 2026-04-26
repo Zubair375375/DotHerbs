@@ -210,7 +210,7 @@ const AdminDashboard = () => {
     expiryDate: "",
   });
   const announcements = useSelector(selectAllAnnouncements);
-  const API_URL = import.meta.env.VITE_API_URL || "http://localhost:5000/api";
+  const API_URL = import.meta.env.VITE_API_URL || "/api";
   const API_ORIGIN = API_URL.replace(/\/api\/?$/, "");
   const defaultFacilityHeading =
     "Pakistan's Largest Nutraceutical Manufacturing Facility";
@@ -1462,7 +1462,7 @@ const AdminDashboard = () => {
         const rawToken = localStorage.getItem("accessToken");
         const token = rawToken ? JSON.parse(rawToken) : null;
         const response = await fetch(
-          `${import.meta.env.VITE_API_URL || "http://localhost:5000/api"}/upload`,
+          `${import.meta.env.VITE_API_URL || "/api"}/upload`,
           {
             method: "POST",
             headers: { Authorization: `Bearer ${token}` },
@@ -1951,7 +1951,7 @@ const AdminDashboard = () => {
                             <img
                               src={
                                 product.image
-                                  ? `http://localhost:5000${product.image}`
+                                  ? `${API_ORIGIN}${product.image}`
                                   : product.images?.[0]?.url ||
                                     product.images?.[0] ||
                                     "/placeholder-product.jpg"
@@ -2088,7 +2088,7 @@ const AdminDashboard = () => {
                         className="overflow-hidden rounded-xl border bg-white shadow-sm"
                       >
                         <img
-                          src={`http://localhost:5000${banner.image}`}
+                          src={`${API_ORIGIN}${banner.image}`}
                           alt="Products banner"
                           className="h-32 w-full object-cover"
                         />
@@ -2152,7 +2152,7 @@ const AdminDashboard = () => {
                             <img
                               src={
                                 product.image
-                                  ? `http://localhost:5000${product.image}`
+                                  ? `${API_ORIGIN}${product.image}`
                                   : product.images?.[0]?.url ||
                                     product.images?.[0] ||
                                     "/placeholder-product.jpg"
@@ -2328,7 +2328,7 @@ const AdminDashboard = () => {
                             <td className="px-4 py-4">
                               {category.image ? (
                                 <img
-                                  src={`http://localhost:5000${category.image}`}
+                                  src={`${API_ORIGIN}${category.image}`}
                                   alt={category.name}
                                   className="w-10 h-10 object-cover rounded-full border border-gray-200"
                                 />
@@ -2725,7 +2725,7 @@ const AdminDashboard = () => {
                         className="overflow-hidden rounded-xl border bg-white shadow-sm"
                       >
                         <img
-                          src={`http://localhost:5000${slide.image}`}
+                          src={`${API_ORIGIN}${slide.image}`}
                           alt="Hero slide"
                           className="h-44 w-full object-cover"
                         />
@@ -4246,3 +4246,5 @@ const AdminDashboard = () => {
 };
 
 export default AdminDashboard;
+
+

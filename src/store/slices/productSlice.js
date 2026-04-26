@@ -1,7 +1,7 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import axios from "axios";
 
-const API_URL = import.meta.env.VITE_API_URL || "http://localhost:5000/api";
+const API_URL = import.meta.env.VITE_API_URL || "/api";
 
 // Initial state
 const initialState = {
@@ -375,3 +375,4 @@ export const selectProductsError = (state) => state.products.error;
 export const selectProductsStatus = (state) => state.products.isLoading;
 export const selectProduct = (state) => state.products.product;
 export default productSlice.reducer;
+
