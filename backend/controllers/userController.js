@@ -1,5 +1,11 @@
 import { validationResult } from "express-validator";
+import fs from "fs";
+import path from "path";
+import { fileURLToPath } from "url";
 import User from "../models/User.js";
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 const normalizeAddressEntry = (entry = {}) => ({
   _id: entry?._id,
@@ -310,6 +316,120 @@ export const changePassword = async (req, res) => {
     res.json({
       success: true,
       message: "Password changed successfully",
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      error: "Server error",
+    });
+  }
+};
+
+// @desc    Toggle two-factor authentication
+// @route   PUT /api/users/two-factor
+// @access  Private
+export const updateTwoFactor = async (req, res) => {
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    return res.status(400).json({
+      success: false,
+      error: "Validation error",
+      details: errors.array(),
+    });
+  }
+
+  try {
+    const user = await User.findById(req.user._id).select("+password");
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        error: "User not found",
+      });
+    }
+
+    const { enabled, currentPassword } = req.body;
+
+    if (!(await user.comparePassword(currentPassword))) {
+      return res.status(401).json({
+        success: false,
+        error: "Current password is incorrect",
+      });
+    }
+
+    user.twoFactorEnabled = Boolean(enabled);
+    user.twoFactorCodeHash = undefined;
+    user.twoFactorCodeExpire = undefined;
+
+    await user.save({ validateBeforeSave: false });
+
+    res.json({
+      success: true,
+      data: {
+        twoFactorEnabled: user.twoFactorEnabled,
+      },
+      message: user.twoFactorEnabled
+        ? "Two-factor authentication enabled"
+        : "Two-factor authentication disabled",
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      error: "Server error",
+    });
+  }
+};
+
+// @desc    Delete own account
+// @route   DELETE /api/users/me
+// @access  Private
+export const deleteOwnAccount = async (req, res) => {
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    return res.status(400).json({
+      success: false,
+      error: "Validation error",
+      details: errors.array(),
+    });
+  }
+
+  try {
+    const user = await User.findById(req.user._id).select("+password");
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        error: "User not found",
+      });
+    }
+
+    const { currentPassword } = req.body;
+
+    if (!(await user.comparePassword(currentPassword))) {
+      return res.status(401).json({
+        success: false,
+        error: "Current password is incorrect",
+      });
+    }
+
+    const avatarPath = user.avatar;
+
+    if (typeof avatarPath === "string" && avatarPath.startsWith("/uploads/")) {
+      const localAvatarPath = path.join(__dirname, "..", avatarPath);
+      if (fs.existsSync(localAvatarPath)) {
+        fs.unlinkSync(localAvatarPath);
+      }
+    }
+
+    await user.deleteOne();
+    res.clearCookie("refreshToken", {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
+      path: "/api/auth",
+    });
+
+    res.json({
+      success: true,
+      message: "Account deleted successfully",
     });
   } catch (error) {
     res.status(500).json({

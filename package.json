@@ -7,7 +7,11 @@
     "dev": "vite",
     "build": "vite build",
     "lint": "eslint .",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "backend:install": "npm --prefix backend install --omit=dev",
+    "backend:start": "npm --prefix backend start",
+    "prestart": "npm run backend:install",
+    "start": "npm run backend:start"
   },
   "dependencies": {
     "@reduxjs/toolkit": "^2.2.1",

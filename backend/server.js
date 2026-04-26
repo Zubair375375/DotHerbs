@@ -1,5 +1,6 @@
 import express from "express";
 import cors from "cors";
+import cookieParser from "cookie-parser";
 import helmet from "helmet";
 import rateLimit from "express-rate-limit";
 import dotenv from "dotenv";
@@ -19,12 +20,41 @@ import aboutContentRoutes from "./routes/aboutContent.js";
 import batchRoutes from "./routes/batches.js";
 import { errorHandler } from "./middleware/errorHandler.js";
 
+const envFileName = process.env.NODE_ENV === "production" ? ".env.production" : ".env";
+dotenv.config({ path: path.resolve(process.cwd(), envFileName) });
 dotenv.config();
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 const app = express();
+
+const isProduction = process.env.NODE_ENV === "production";
+
+const parseAllowedOrigins = () => {
+  const explicitOrigins = (process.env.CLIENT_URLS || "")
+    .split(",")
+    .map((origin) => origin.trim())
+    .filter(Boolean);
+
+  if (explicitOrigins.length > 0) {
+    return explicitOrigins;
+  }
+
+  const fallbackOrigin = process.env.CLIENT_URL || "http://localhost:5173";
+  return [
+    fallbackOrigin,
+    "http://localhost:5174",
+    "http://localhost:5175",
+    "http://localhost:5176",
+    "http://localhost:5177",
+    "http://localhost:5178",
+    "http://localhost:5179",
+    "http://localhost:5180",
+  ];
+};
+
+const allowedOrigins = parseAllowedOrigins();
 
 // Connect to MongoDB
 await connectDB();
@@ -33,22 +63,18 @@ await connectDB();
 app.use(helmet());
 app.use(
   cors({
-    origin: [
-      process.env.CLIENT_URL || "http://localhost:5173",
-      "http://localhost:5174",
-      "http://localhost:5175",
-      "http://localhost:5176",
-      "http://localhost:5177",
-      "http://localhost:5178",
-      "http://localhost:5179",
-      "http://localhost:5180",
-    ],
+    origin: (origin, callback) => {
+      if (!origin || allowedOrigins.includes(origin)) {
+        return callback(null, true);
+      }
+
+      return callback(new Error("CORS blocked for this origin"));
+    },
     credentials: true,
   }),
 );
 
 // Rate limiting
-const isProduction = process.env.NODE_ENV === "production";
 const rateLimitWindowMs = Number(
   process.env.RATE_LIMIT_WINDOW_MS || 15 * 60 * 1000,
 );
@@ -92,6 +118,7 @@ app.use("/api/", limiter);
 // Body parsing middleware
 app.use(express.json({ limit: "10mb" }));
 app.use(express.urlencoded({ extended: true, limit: "10mb" }));
+app.use(cookieParser());
 
 // Serve uploaded product images (allow cross-origin loading from frontend)
 app.use(
@@ -126,6 +153,42 @@ app.use(errorHandler);
 
 const PORT = process.env.PORT || 5000;
 
-app.listen(PORT, () => {
+const server = app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
+});
+
+server.on("error", (error) => {
+  if (error.code === "EADDRINUSE") {
+    console.error(
+      `Port ${PORT} is already in use. Ensure only one backend process is running.`,
+    );
+    process.exit(1);
+  }
+
+  console.error("Server failed to start:", error);
+  process.exit(1);
+});
+
+const shutdown = (signal) => {
+  console.log(`${signal} received. Shutting down server gracefully...`);
+  server.close(() => {
+    process.exit(0);
+  });
+
+  setTimeout(() => {
+    console.error("Forced shutdown after timeout.");
+    process.exit(1);
+  }, 10000);
+};
+
+process.on("SIGINT", () => shutdown("SIGINT"));
+process.on("SIGTERM", () => shutdown("SIGTERM"));
+
+process.on("unhandledRejection", (reason) => {
+  console.error("Unhandled Promise Rejection:", reason);
+});
+
+process.on("uncaughtException", (error) => {
+  console.error("Uncaught Exception:", error);
+  process.exit(1);
 });

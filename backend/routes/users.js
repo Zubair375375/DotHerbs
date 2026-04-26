@@ -5,8 +5,10 @@ import {
   getUser,
   updateUser,
   deleteUser,
+  deleteOwnAccount,
   updateProfile,
   changePassword,
+  updateTwoFactor,
 } from "../controllers/userController.js";
 import { protect, authorize } from "../middleware/auth.js";
 
@@ -76,6 +78,21 @@ const changePasswordValidation = [
     .withMessage("New password must be at least 6 characters long"),
 ];
 
+const updateTwoFactorValidation = [
+  body("enabled")
+    .isBoolean()
+    .withMessage("enabled must be a boolean value"),
+  body("currentPassword")
+    .notEmpty()
+    .withMessage("Current password is required to change two-factor settings"),
+];
+
+const deleteOwnAccountValidation = [
+  body("currentPassword")
+    .notEmpty()
+    .withMessage("Current password is required to delete your account"),
+];
+
 // Routes
 router.get("/", protect, authorize("admin"), getUsers);
 router.put("/me/profile", protect, updateProfileValidation, updateProfile);
@@ -85,6 +102,18 @@ router.put(
   protect,
   changePasswordValidation,
   changePassword,
+);
+router.put(
+  "/two-factor",
+  protect,
+  updateTwoFactorValidation,
+  updateTwoFactor,
+);
+router.delete(
+  "/me",
+  protect,
+  deleteOwnAccountValidation,
+  deleteOwnAccount,
 );
 router.get("/:id([0-9a-fA-F]{24})", protect, authorize("admin"), getUser);
 router.put(

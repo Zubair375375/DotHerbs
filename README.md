@@ -156,6 +156,40 @@ For password reset functionality, configure your SMTP settings in the backend `.
 - Set environment variables in your deployment platform
 - Make sure MongoDB is accessible from your deployment environment
 
+### Hostinger Deployment (No-Crash Checklist)
+
+If you are deploying on Hostinger, use this sequence to avoid the common runtime crashes (especially port conflicts and CORS problems):
+
+1. Backend setup on Hostinger:
+   - Upload the `backend` folder.
+   - In Hostinger Node.js app settings, set:
+     - Application mode: `production`
+     - Startup file: `server.js`
+     - Node version: 18+ (20+ recommended)
+   - Run install command in backend directory: `npm install --omit=dev`
+
+2. Backend environment variables:
+   - Use `backend/.env.production.example` as template.
+   - Set `NODE_ENV=production`.
+   - Set `PORT` to the value provided by Hostinger if required by panel.
+   - Set `CLIENT_URLS` with your real frontend domains (comma-separated).
+   - Set all secrets (MongoDB/JWT/SMTP/Stripe/Cloudinary).
+
+3. Frontend build and publish:
+   - In project root, set `.env.production` with:
+     - `VITE_API_URL=https://your-backend-domain/api`
+   - Build frontend: `npm run build`
+   - Upload the generated `dist` contents to your frontend public site path.
+
+4. Start strategy that avoids crashes:
+   - In production, run only one backend instance.
+   - Use `npm start` (not `npm run dev`) in production.
+   - Do not manually start multiple terminals/sessions for the backend.
+
+5. Verify after deploy:
+   - Check `https://your-backend-domain/api/health` returns JSON with `status: OK`.
+   - Confirm login/register requests hit your Hostinger backend domain (not localhost).
+
 ### Frontend Deployment
 
 - Build the project: `npm run build`
