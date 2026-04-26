@@ -9,6 +9,19 @@ import {
 } from "../services/inventoryService.js";
 import { recordProductSale } from "../services/trendingProductService.js";
 
+const withCustomerFallback = (order) => {
+  const orderObject = typeof order.toObject === "function" ? order.toObject() : order;
+
+  if (!orderObject.user && orderObject.customerSnapshot) {
+    orderObject.user = {
+      name: orderObject.customerSnapshot.name || "Deleted user",
+      email: orderObject.customerSnapshot.email || "",
+    };
+  }
+
+  return orderObject;
+};
+
 // @desc    Create new order
 // @route   POST /api/orders
 // @access  Private
@@ -88,6 +101,10 @@ export const createOrder = async (req, res) => {
 
       const order = new Order({
         user: req.user._id,
+        customerSnapshot: {
+          name: req.user.name || "",
+          email: req.user.email || "",
+        },
         orderItems: orderItemsWithBatches,
         shippingAddress,
         paymentMethod,
@@ -161,19 +178,18 @@ export const getOrderById = async (req, res) => {
     }
 
     // Check if user owns the order or is admin
-    if (
-      order.user._id.toString() !== req.user._id.toString() &&
-      req.user.role !== "admin"
-    ) {
-      return res.status(401).json({
-        success: false,
-        error: "Not authorized to view this order",
-      });
+    if (req.user.role !== "admin") {
+      if (!order.user || order.user._id.toString() !== req.user._id.toString()) {
+        return res.status(401).json({
+          success: false,
+          error: "Not authorized to view this order",
+        });
+      }
     }
 
     res.json({
       success: true,
-      data: order,
+      data: withCustomerFallback(order),
     });
   } catch (error) {
     res.status(500).json({
@@ -199,7 +215,7 @@ export const getMyOrders = async (req, res) => {
 
     res.json({
       success: true,
-      data: orders,
+      data: orders.map(withCustomerFallback),
     });
   } catch (error) {
     res.status(500).json({
@@ -228,7 +244,7 @@ export const getOrders = async (req, res) => {
 
     res.json({
       success: true,
-      data: orders,
+      data: orders.map(withCustomerFallback),
       pagination: {
         page,
         limit,
@@ -244,8 +260,8 @@ export const getOrders = async (req, res) => {
   }
 };
 
-// @desc    Update order to delivered
-// @route   PUT /api/orders/:id/deliver
+// @desc    Update order status
+// @route   PUT /api/orders/:id/status
 // @access  Private/Admin
 export const updateOrderToDelivered = async (req, res) => {
   try {

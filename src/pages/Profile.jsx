@@ -4,7 +4,9 @@ import { useLocation, useNavigate } from "react-router-dom";
 import {
   selectAuthUser,
   selectIsAuthenticated,
+  deleteAccount,
   updateProfile,
+  updateTwoFactorSetting,
   uploadProfilePhoto,
   changePassword,
   selectAuthIsLoading,
@@ -76,6 +78,16 @@ const Profile = () => {
     promotions: false,
     restockAlerts: true,
   });
+  const [twoFactorEnabled, setTwoFactorEnabled] = useState(
+    Boolean(user?.twoFactorEnabled),
+  );
+  const [twoFactorPassword, setTwoFactorPassword] = useState("");
+  const [showTwoFactorPassword, setShowTwoFactorPassword] = useState(false);
+  const [deleteAccountForm, setDeleteAccountForm] = useState({
+    currentPassword: "",
+    confirmation: "",
+  });
+  const [showDeletePassword, setShowDeletePassword] = useState(false);
   const [formData, setFormData] = useState({
     name: "",
     email: "",
@@ -126,6 +138,7 @@ const Profile = () => {
               ]
             : [],
       );
+      setTwoFactorEnabled(Boolean(user.twoFactorEnabled));
     }
 
     if (activeTab === "orders") {
@@ -253,8 +266,8 @@ const Profile = () => {
       return;
     }
 
-    if (passwordForm.newPassword.length < 6) {
-      toast.error("New password must be at least 6 characters long.");
+    if (passwordForm.newPassword.length < 8) {
+      toast.error("New password must be at least 8 characters long.");
       return;
     }
 
@@ -516,6 +529,60 @@ const Profile = () => {
       localStorage.setItem("profilePreferences", JSON.stringify(next));
       return next;
     });
+  };
+
+  const handleToggleTwoFactor = async () => {
+    const nextValue = !twoFactorEnabled;
+
+    if (!twoFactorPassword.trim()) {
+      toast.error("Enter your current password to change two-factor settings");
+      return;
+    }
+
+    try {
+      const result = await dispatch(
+        updateTwoFactorSetting({
+          enabled: nextValue,
+          currentPassword: twoFactorPassword,
+        }),
+      ).unwrap();
+
+      setTwoFactorEnabled(Boolean(result.enabled));
+      setTwoFactorPassword("");
+      toast.success(
+        result.message ||
+          (nextValue
+            ? "Two-factor authentication enabled"
+            : "Two-factor authentication disabled"),
+      );
+    } catch (error) {
+      toast.error(error || "Failed to update two-factor settings");
+    }
+  };
+
+  const handleDeleteAccount = async () => {
+    if (!deleteAccountForm.currentPassword.trim()) {
+      toast.error("Enter your current password to delete your account");
+      return;
+    }
+
+    if (deleteAccountForm.confirmation.trim() !== "DELETE") {
+      toast.error('Type "DELETE" to confirm account deletion');
+      return;
+    }
+
+    try {
+      const message = await dispatch(
+        deleteAccount({
+          currentPassword: deleteAccountForm.currentPassword,
+        }),
+      ).unwrap();
+
+      toast.success(message || "Account deleted successfully");
+      navigate("/", { replace: true });
+    } catch (error) {
+      toast.error(error || "Failed to delete account");
+    }
   };
 
   const getOrderStatusColor = (status) => {
@@ -1359,6 +1426,65 @@ const Profile = () => {
                   </div>
 
                   <div>
+                    <h4 className="text-lg font-medium mb-4">Security</h4>
+                    <div className="rounded-lg border border-gray-200 p-4">
+                      <div className="flex items-start justify-between gap-4">
+                        <div className="flex-1">
+                          <p className="text-sm font-medium text-gray-800">
+                            Two-factor authentication (Email OTP)
+                          </p>
+                          <p className="text-xs text-gray-500 mt-1">
+                            When enabled, login requires a 6-digit code sent to
+                            your email.
+                          </p>
+                          <div className="relative mt-4 max-w-sm">
+                            <input
+                              type={showTwoFactorPassword ? "text" : "password"}
+                              value={twoFactorPassword}
+                              onChange={(e) =>
+                                setTwoFactorPassword(e.target.value)
+                              }
+                              placeholder="Current password"
+                              className="w-full rounded-md border border-gray-300 px-3 py-2 pr-10 text-sm focus:outline-none focus:ring-2 focus:ring-green-500"
+                            />
+                            <button
+                              type="button"
+                              onClick={() =>
+                                setShowTwoFactorPassword((prev) => !prev)
+                              }
+                              className="absolute right-3 top-1/2 -translate-y-1/2 border-0 bg-transparent text-gray-500 hover:text-gray-700 focus:outline-none"
+                              aria-label={
+                                showTwoFactorPassword
+                                  ? "Hide current password"
+                                  : "Show current password"
+                              }
+                            >
+                              {showTwoFactorPassword ? <FaEyeSlash /> : <FaEye />}
+                            </button>
+                          </div>
+                        </div>
+                        <button
+                          type="button"
+                          onClick={handleToggleTwoFactor}
+                          disabled={isLoading}
+                          className={`relative h-6 w-11 rounded-full transition-colors ${
+                            twoFactorEnabled ? "bg-green-600" : "bg-gray-300"
+                          } ${isLoading ? "opacity-50" : ""}`}
+                          aria-pressed={twoFactorEnabled}
+                        >
+                          <span
+                            className={`absolute top-0.5 h-5 w-5 rounded-full bg-white transition-transform ${
+                              twoFactorEnabled
+                                ? "translate-x-5"
+                                : "translate-x-0.5"
+                            }`}
+                          />
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div>
                     <h4 className="text-lg font-medium mb-4">
                       Change Password
                     </h4>
@@ -1466,9 +1592,58 @@ const Profile = () => {
                     <h4 className="text-lg font-medium mb-4 text-red-600">
                       Danger Zone
                     </h4>
-                    <button className="bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700">
-                      Delete Account
-                    </button>
+                    <div className="space-y-4 rounded-lg border border-red-200 bg-red-50 p-4">
+                      <p className="text-sm text-red-700">
+                        Deleting your account is permanent. Your profile and
+                        saved account access will be removed.
+                      </p>
+                      <div className="relative max-w-md">
+                        <input
+                          type={showDeletePassword ? "text" : "password"}
+                          value={deleteAccountForm.currentPassword}
+                          onChange={(e) =>
+                            setDeleteAccountForm((prev) => ({
+                              ...prev,
+                              currentPassword: e.target.value,
+                            }))
+                          }
+                          placeholder="Current password"
+                          className="w-full rounded-md border border-red-200 bg-white px-3 py-2 pr-10 text-sm focus:outline-none focus:ring-2 focus:ring-red-500"
+                        />
+                        <button
+                          type="button"
+                          onClick={() => setShowDeletePassword((prev) => !prev)}
+                          className="absolute right-3 top-1/2 -translate-y-1/2 border-0 bg-transparent text-gray-500 hover:text-gray-700 focus:outline-none"
+                          aria-label={
+                            showDeletePassword
+                              ? "Hide delete password"
+                              : "Show delete password"
+                          }
+                        >
+                          {showDeletePassword ? <FaEyeSlash /> : <FaEye />}
+                        </button>
+                      </div>
+                      <input
+                        type="text"
+                        value={deleteAccountForm.confirmation}
+                        onChange={(e) =>
+                          setDeleteAccountForm((prev) => ({
+                            ...prev,
+                            confirmation: e.target.value,
+                          }))
+                        }
+                        placeholder='Type "DELETE" to confirm'
+                        className="max-w-md w-full rounded-md border border-red-200 bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-red-500"
+                      />
+                      <button
+                        type="button"
+                        onClick={handleDeleteAccount}
+                        disabled={isLoading}
+                        className="bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700 disabled:opacity-50"
+                      >
+                        {isLoading ? "Deleting..." : "Delete Account"}
+                      </button>
+                    </div>
                     <p className="text-sm text-gray-500 mt-2">
                       This action cannot be undone. All your data will be
                       permanently deleted.
