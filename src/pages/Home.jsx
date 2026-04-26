@@ -33,7 +33,7 @@ const Home = () => {
   const heroSlides = useSelector(selectHeroSlides);
   const [currentSlide, setCurrentSlide] = useState(0);
   const [isTransitionEnabled, setIsTransitionEnabled] = useState(true);
-  const API_URL = import.meta.env.VITE_API_URL || "http://localhost:5000/api";
+  const API_URL = import.meta.env.VITE_API_URL || "/api";
   const API_ORIGIN = API_URL.replace(/\/api\/?$/, "");
 
   const toHeroImageUrl = (image) => {
@@ -45,7 +45,7 @@ const Home = () => {
       return image;
     }
 
-    return `http://localhost:5000${image}`;
+    return `${API_ORIGIN}${image}`;
   };
 
   const resolveMediaUrl = (url) => {
@@ -323,7 +323,7 @@ const Home = () => {
                   <div className="mx-auto mb-4 flex h-24 w-24 shrink-0 items-center justify-center overflow-hidden rounded-full bg-white transition-all">
                     {category.image ? (
                       <img
-                        src={`http://localhost:5000${category.image}`}
+                        src={`${API_ORIGIN}${category.image}`}
                         alt={category.name}
                         className="h-full w-full rounded-full object-cover"
                       />
@@ -407,3 +407,5 @@ const Home = () => {
 };
 
 export default Home;
+
+

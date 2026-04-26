@@ -1,7 +1,7 @@
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 import axios from "axios";
 
-const API_URL = import.meta.env.VITE_API_URL || "http://localhost:5000/api";
+const API_URL = import.meta.env.VITE_API_URL || "/api";
 
 export const fetchHeroSlides = createAsyncThunk(
   "heroSlides/fetchActive",
@@ -154,3 +154,4 @@ export const selectAllHeroSlides = (state) => state.heroSlides.adminItems;
 export const selectHeroSlidesLoading = (state) => state.heroSlides.isLoading;
 
 export default heroSlideSlice.reducer;
+

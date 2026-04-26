@@ -11,8 +11,10 @@ const ProductCard = ({ product, viewMode = "grid" }) => {
   const isAdmin = user?.role === "admin";
   const ratingValue = product.averageRating ?? product.rating ?? 0;
   const reviewCount = product.numReviews ?? product.reviewCount ?? 0;
+  const API_URL = import.meta.env.VITE_API_URL || "/api";
+  const SERVER_URL = API_URL.replace(/\/api\/?$/, "");
   const productImage = product.image
-    ? `http://localhost:5000${product.image}`
+    ? `${SERVER_URL}${product.image}`
     : product.images?.[0]?.url ||
       product.images?.[0] ||
       "/placeholder-product.jpg";

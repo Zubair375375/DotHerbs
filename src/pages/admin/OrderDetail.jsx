@@ -23,6 +23,8 @@ import {
 import Loader from "../../components/Loader";
 
 const formatCurrency = (amount) => `$${Number(amount || 0).toFixed(2)}`;
+const API_URL = import.meta.env.VITE_API_URL || "/api";
+const SERVER_URL = API_URL.replace(/\/api\/?$/, "");
 
 const getOrderItemImage = (item) => {
   const storedImage = item.image;
@@ -33,20 +35,20 @@ const getOrderItemImage = (item) => {
     storedImage !== "[object Object]"
   ) {
     return storedImage.startsWith("/")
-      ? `http://localhost:5000${storedImage}`
+      ? `${SERVER_URL}${storedImage}`
       : storedImage;
   }
 
   if (storedImage?.url) {
     return storedImage.url.startsWith("/")
-      ? `http://localhost:5000${storedImage.url}`
+      ? `${SERVER_URL}${storedImage.url}`
       : storedImage.url;
   }
 
   const productImage = item.product?.image;
   if (typeof productImage === "string" && productImage) {
     return productImage.startsWith("/")
-      ? `http://localhost:5000${productImage}`
+      ? `${SERVER_URL}${productImage}`
       : productImage;
   }
 
@@ -54,7 +56,7 @@ const getOrderItemImage = (item) => {
     item.product?.images?.[0]?.url || item.product?.images?.[0];
   if (typeof galleryImage === "string" && galleryImage) {
     return galleryImage.startsWith("/")
-      ? `http://localhost:5000${galleryImage}`
+      ? `${SERVER_URL}${galleryImage}`
       : galleryImage;
   }
 

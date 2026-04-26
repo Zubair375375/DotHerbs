@@ -5,7 +5,7 @@ import {
 } from "@reduxjs/toolkit";
 import axios from "axios";
 
-const API_URL = import.meta.env.VITE_API_URL || "http://localhost:5000/api";
+const API_URL = import.meta.env.VITE_API_URL || "/api";
 
 // Fetch active announcements (public)
 export const fetchAnnouncements = createAsyncThunk(
@@ -164,3 +164,4 @@ export const selectAnnouncementsLoading = (state) =>
   state.announcements.isLoading;
 
 export default announcementSlice.reducer;
+

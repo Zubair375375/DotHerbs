@@ -75,7 +75,7 @@ const ProductDetail = () => {
   const [submittingAdminAnswerId, setSubmittingAdminAnswerId] = useState("");
   const [deletingAdminAnswerId, setDeletingAdminAnswerId] = useState("");
   const [deletingQuestionId, setDeletingQuestionId] = useState("");
-  const API_URL = import.meta.env.VITE_API_URL || "http://localhost:5000/api";
+  const API_URL = import.meta.env.VITE_API_URL || "/api";
   const SERVER_URL = API_URL.replace(/\/api\/?$/, "");
 
   const getWishlistItems = () => {
@@ -311,7 +311,7 @@ const ProductDetail = () => {
     try {
       setSubmittingAdminAnswerId(questionId);
       const response = await fetch(
-        `${import.meta.env.VITE_API_URL || "http://localhost:5000/api"}/products/${id}/questions/${questionId}/answer`,
+        `${import.meta.env.VITE_API_URL || "/api"}/products/${id}/questions/${questionId}/answer`,
         {
           method: "PATCH",
           headers: {
@@ -347,7 +347,7 @@ const ProductDetail = () => {
     try {
       setDeletingAdminAnswerId(questionId);
       const response = await fetch(
-        `${import.meta.env.VITE_API_URL || "http://localhost:5000/api"}/products/${id}/questions/${questionId}/answer`,
+        `${import.meta.env.VITE_API_URL || "/api"}/products/${id}/questions/${questionId}/answer`,
         {
           method: "DELETE",
           headers: {
@@ -389,7 +389,7 @@ const ProductDetail = () => {
     try {
       setDeletingQuestionId(questionId);
       const response = await fetch(
-        `${import.meta.env.VITE_API_URL || "http://localhost:5000/api"}/products/${id}/questions/${questionId}`,
+        `${import.meta.env.VITE_API_URL || "/api"}/products/${id}/questions/${questionId}`,
         {
           method: "DELETE",
           headers: {
@@ -419,7 +419,7 @@ const ProductDetail = () => {
 
     const endpoint = isVideo ? "/upload/video" : "/upload";
     const response = await fetch(
-      `${import.meta.env.VITE_API_URL || "http://localhost:5000/api"}${endpoint}`,
+      `${import.meta.env.VITE_API_URL || "/api"}${endpoint}`,
       {
         method: "POST",
         headers: {
@@ -482,7 +482,7 @@ const ProductDetail = () => {
       }
 
       const response = await fetch(
-        `${import.meta.env.VITE_API_URL || "http://localhost:5000/api"}/products/${id}/reviews`,
+        `${import.meta.env.VITE_API_URL || "/api"}/products/${id}/reviews`,
         {
           method: "POST",
           headers: {
@@ -544,7 +544,7 @@ const ProductDetail = () => {
 
     try {
       const response = await fetch(
-        `${import.meta.env.VITE_API_URL || "http://localhost:5000/api"}/products/${id}/questions`,
+        `${import.meta.env.VITE_API_URL || "/api"}/products/${id}/questions`,
         {
           method: "POST",
           headers: {
@@ -799,7 +799,7 @@ const ProductDetail = () => {
               <img
                 src={
                   product.image
-                    ? `http://localhost:5000${product.image}`
+                    ? `${SERVER_URL}${product.image}`
                     : product.images?.[selectedImage]?.url ||
                       "/placeholder-product.jpg"
                 }
@@ -1538,12 +1538,12 @@ const ProductDetail = () => {
                                           <video
                                             className="mt-3 max-h-64 w-full rounded border border-gray-200"
                                             controls
-                                            src={`http://localhost:5000${review.media.url}`}
+                                            src={`${SERVER_URL}${review.media.url}`}
                                           />
                                         ) : (
                                           <img
                                             className="mt-3 max-h-64 rounded border border-gray-200"
-                                            src={`http://localhost:5000${review.media.url}`}
+                                            src={`${SERVER_URL}${review.media.url}`}
                                             alt={parsedReview.title}
                                           />
                                         )
@@ -1734,3 +1734,5 @@ const ProductDetail = () => {
 };
 
 export default ProductDetail;
+
+

@@ -25,6 +25,8 @@ const Checkout = () => {
   const itemCount = useSelector(selectCartItemCount);
   const isAuthenticated = useSelector(selectIsAuthenticated);
   const user = useSelector(selectAuthUser);
+  const API_URL = import.meta.env.VITE_API_URL || "/api";
+  const SERVER_URL = API_URL.replace(/\/api\/?$/, "");
 
   const [shippingAddress, setShippingAddress] = useState({
     street: "",
@@ -45,7 +47,7 @@ const Checkout = () => {
     if (/^https?:\/\//i.test(rawImage)) return rawImage;
     if (rawImage === "/placeholder-product.jpg") return rawImage;
     if (rawImage.startsWith("/uploads/"))
-      return `http://localhost:5000${rawImage}`;
+      return `${SERVER_URL}${rawImage}`;
     return rawImage;
   };
 

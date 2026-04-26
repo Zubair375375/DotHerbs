@@ -3,7 +3,7 @@
  * Utility to record user interactions for trending products algorithm
  */
 
-const API_URL = import.meta.env.VITE_API_URL || "http://localhost:5000/api";
+const API_URL = import.meta.env.VITE_API_URL || "/api";
 
 /**
  * Record that a product was viewed
@@ -162,3 +162,4 @@ export default {
   fetchTrendingProducts,
   clearTrendingCache,
 };
+

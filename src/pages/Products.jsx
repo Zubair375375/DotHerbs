@@ -43,6 +43,8 @@ const Products = () => {
   const [currentBanner, setCurrentBanner] = useState(0);
   const [isBannerTransition, setIsBannerTransition] = useState(true);
   const [viewMode, setViewMode] = useState(getInitialViewMode);
+  const API_URL = import.meta.env.VITE_API_URL || "/api";
+  const API_ORIGIN = API_URL.replace(/\/api\/?$/, "");
 
   const [filters, setFilters] = useState({
     category: initialCategory,
@@ -63,7 +65,7 @@ const Products = () => {
         _id: banner._id,
         image: banner.image?.startsWith("http")
           ? banner.image
-          : `http://localhost:5000${banner.image}`,
+          : `${API_ORIGIN}${banner.image}`,
       }));
     }
 
@@ -73,7 +75,7 @@ const Products = () => {
         image: "/images/banners/hero_banner1.jpg",
       },
     ];
-  }, [productBanners]);
+  }, [API_ORIGIN, productBanners]);
 
   const loopedBannerSlides = useMemo(() => {
     if (bannerSlides.length <= 1) return bannerSlides;

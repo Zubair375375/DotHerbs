@@ -44,7 +44,7 @@ const Header = () => {
   const authChecked = useSelector(selectAuthChecked);
   const authLoading = useSelector(selectAuthIsLoading);
   const cartItemCount = useSelector(selectCartItemCount);
-  const API_URL = import.meta.env.VITE_API_URL || "http://localhost:5000/api";
+  const API_URL = import.meta.env.VITE_API_URL || "/api";
   const SERVER_URL = API_URL.replace(/\/api\/?$/, "");
   const showAuthPendingState =
     !!accessToken && (!authChecked || (authLoading && !user));
@@ -398,3 +398,4 @@ const Header = () => {
 };
 
 export default Header;
+

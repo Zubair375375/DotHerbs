@@ -43,7 +43,7 @@ const Profile = () => {
   const isLoading = useSelector(selectAuthIsLoading);
   const authError = useSelector(selectAuthError);
   const userOrders = useSelector(selectOrders);
-  const API_URL = import.meta.env.VITE_API_URL || "http://localhost:5000/api";
+  const API_URL = import.meta.env.VITE_API_URL || "/api";
   const SERVER_URL = API_URL.replace(/\/api\/?$/, "");
 
   const [activeTab, setActiveTab] = useState("profile");
@@ -1660,3 +1660,4 @@ const Profile = () => {
 };
 
 export default Profile;
+

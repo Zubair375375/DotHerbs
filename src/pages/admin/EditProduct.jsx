@@ -30,7 +30,7 @@ const EditProduct = ({ onClose, onSuccess, product: productProp }) => {
   const user = useSelector(selectAuthUser);
   const isAuthenticated = useSelector(selectIsAuthenticated);
   const accessToken = useSelector((state) => state.auth.accessToken);
-  const API_URL = import.meta.env.VITE_API_URL || "http://localhost:5000/api";
+  const API_URL = import.meta.env.VITE_API_URL || "/api";
   const API_ORIGIN = API_URL.replace(/\/api\/?$/, "");
 
   const [formData, setFormData] = useState({
@@ -461,7 +461,7 @@ const EditProduct = ({ onClose, onSuccess, product: productProp }) => {
     const token = rawToken ? JSON.parse(rawToken) : null;
 
     const response = await fetch(
-      `${import.meta.env.VITE_API_URL || "http://localhost:5000/api"}/upload`,
+      `${import.meta.env.VITE_API_URL || "/api"}/upload`,
       {
         method: "POST",
         headers: { Authorization: `Bearer ${token}` },
@@ -1316,3 +1316,4 @@ const EditProduct = ({ onClose, onSuccess, product: productProp }) => {
 };
 
 export default EditProduct;
+

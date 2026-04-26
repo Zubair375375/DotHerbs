@@ -5,7 +5,7 @@ import axios from "axios";
 const getApiUrl = () => {
   const envUrl = import.meta.env.VITE_API_URL;
   if (envUrl) return envUrl;
-  return import.meta.env.PROD ? "/api" : "http://localhost:5000/api";
+  return import.meta.env.VITE_API_URL || "/api";
 };
 
 const API_URL = getApiUrl();
@@ -59,3 +59,4 @@ const VerifyEmail = () => {
 };
 
 export default VerifyEmail;
+
