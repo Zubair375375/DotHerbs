@@ -21,7 +21,8 @@ const About = lazy(() => import("./pages/About"));
 const AdminDashboard = lazy(() => import("./pages/AdminDashboard"));
 const EditProduct = lazy(() => import("./pages/admin/EditProduct"));
 const OrderDetail = lazy(() => import("./pages/admin/OrderDetail"));
-const UserDetail = lazy(() => import("./pages/admin/UserDetail"));
+
+const NotFound = lazy(() => import("./pages/NotFound"));
 
 function App() {
   const dispatch = useDispatch();
@@ -57,7 +58,9 @@ function App() {
           <Route path="admin/orders/:id" element={<OrderDetail />} />
           <Route path="admin/products/:id" element={<EditProduct />} />
           <Route path="admin/users/:id" element={<UserDetail />} />
+          <Route path="*" element={<NotFound />} />
         </Route>
+        <Route path="*" element={<NotFound />} />
       </Routes>
     </Suspense>
   );
