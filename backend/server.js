@@ -7,9 +7,14 @@ import dotenv from "dotenv";
 import path from "path";
 import { fileURLToPath } from "url";
 
-// Force dotenv to load the correct env file
+// Force dotenv to load the correct env file from backend directory
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 dotenv.config({
-  path: process.env.NODE_ENV === "production" ? ".env.production" : ".env",
+  path: path.join(
+    __dirname,
+    process.env.NODE_ENV === "production" ? ".env.production" : ".env",
+  ),
 });
 
 import connectDB from "./config/database.js";
@@ -25,8 +30,6 @@ import productBannerRoutes from "./routes/productBanners.js";
 import aboutContentRoutes from "./routes/aboutContent.js";
 import batchRoutes from "./routes/batches.js";
 import { errorHandler } from "./middleware/errorHandler.js";
-
-
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
