@@ -211,7 +211,7 @@ export const register = async (req, res) => {
     res.status(201).json({
       success: true,
       message:
-        "Registration successful. Please verify your email before logging in.",
+        "Registration successful! You can now log in. Please verify your email to unlock all features.",
       data: { email: user.email },
     });
   } catch (error) {
