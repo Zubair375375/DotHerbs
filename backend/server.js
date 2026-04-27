@@ -46,21 +46,14 @@ const parseAllowedOrigins = () => {
     .map((origin) => origin.trim())
     .filter(Boolean);
 
-  if (explicitOrigins.length > 0) {
-    return explicitOrigins;
-  }
-
-  const fallbackOrigin = process.env.CLIENT_URL || "http://localhost:5173";
-  return [
-    fallbackOrigin,
-    "http://localhost:5174",
-    "http://localhost:5175",
-    "http://localhost:5176",
-    "http://localhost:5177",
-    "http://localhost:5178",
-    "http://localhost:5179",
-    "http://localhost:5180",
+  // Always allow production domains
+  const prodOrigins = [
+    "https://dotherbs.com",
+    "https://www.dotherbs.com",
+    "https://api.dotherbs.com",
   ];
+
+  return [...new Set([...explicitOrigins, ...prodOrigins])];
 };
 
 const allowedOrigins = parseAllowedOrigins();
