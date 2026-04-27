@@ -30,9 +30,6 @@ import aboutContentRoutes from "./routes/aboutContent.js";
 import batchRoutes from "./routes/batches.js";
 import { errorHandler } from "./middleware/errorHandler.js";
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
-
 const app = express();
 app.set("trust proxy", 1); // Trust first proxy (Hostinger, Heroku, etc.)
 
