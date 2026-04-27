@@ -3,9 +3,23 @@ import cors from "cors";
 import cookieParser from "cookie-parser";
 import helmet from "helmet";
 import rateLimit from "express-rate-limit";
+
 import dotenv from "dotenv";
 import path from "path";
+import fs from "fs";
 import { fileURLToPath } from "url";
+
+// Always use absolute path for dotenv config
+const envFile =
+  process.env.NODE_ENV === "production" ? ".env.production" : ".env";
+const envPath = path.resolve(__dirname, envFile);
+if (!fs.existsSync(envPath)) {
+  console.error(`[FATAL] Environment file not found: ${envPath}`);
+} else {
+  console.log(`[INFO] Loading environment file: ${envPath}`);
+}
+dotenv.config({ path: envPath });
+
 import connectDB from "./config/database.js";
 import authRoutes from "./routes/auth.js";
 import userRoutes from "./routes/users.js";
@@ -20,12 +34,6 @@ import aboutContentRoutes from "./routes/aboutContent.js";
 import batchRoutes from "./routes/batches.js";
 import { errorHandler } from "./middleware/errorHandler.js";
 
-dotenv.config();
-
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
-
-
 const app = express();
 app.set("trust proxy", 1); // Trust first proxy (Hostinger, Heroku, etc.)
 
@@ -38,21 +46,14 @@ const parseAllowedOrigins = () => {
     .map((origin) => origin.trim())
     .filter(Boolean);
 
-  if (explicitOrigins.length > 0) {
-    return explicitOrigins;
-  }
-
-  const fallbackOrigin = process.env.CLIENT_URL || "http://localhost:5173";
-  return [
-    fallbackOrigin,
-    "http://localhost:5174",
-    "http://localhost:5175",
-    "http://localhost:5176",
-    "http://localhost:5177",
-    "http://localhost:5178",
-    "http://localhost:5179",
-    "http://localhost:5180",
+  // Always allow production domains
+  const prodOrigins = [
+    "https://dotherbs.com",
+    "https://www.dotherbs.com",
+    "https://api.dotherbs.com",
   ];
+
+  return [...new Set([...explicitOrigins, ...prodOrigins])];
 };
 
 const allowedOrigins = parseAllowedOrigins();
@@ -139,7 +140,6 @@ const startServer = async () => {
     app.use("/api/about-content", aboutContentRoutes);
     app.use("/api/batches", batchRoutes);
 
-
     // Health check
     app.get("/api/health", (req, res) => {
       res.json({ status: "OK", message: "Server is running" });
@@ -150,7 +150,11 @@ const startServer = async () => {
 
     // Fallback route for SPA (serves index.html for unmatched routes)
     app.use((req, res, next) => {
-      if (req.method === "GET" && !req.path.startsWith("/api") && !req.path.startsWith("/uploads")) {
+      if (
+        req.method === "GET" &&
+        !req.path.startsWith("/api") &&
+        !req.path.startsWith("/uploads")
+      ) {
         res.sendFile(path.join(__dirname, "../dist/index.html"));
       } else {
         next();
@@ -159,7 +163,6 @@ const startServer = async () => {
 
     // Error handling middleware
     app.use(errorHandler);
-
 
     const PORT = process.env.PORT;
     if (!PORT) throw new Error("PORT environment variable is missing");
