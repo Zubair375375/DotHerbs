@@ -3,18 +3,22 @@ import cors from "cors";
 import cookieParser from "cookie-parser";
 import helmet from "helmet";
 import rateLimit from "express-rate-limit";
+
 import dotenv from "dotenv";
 import path from "path";
+import fs from "fs";
 import { fileURLToPath } from "url";
 
-// Force dotenv to load the correct env file from backend directory
-
-dotenv.config({
-  path: path.join(
-    __dirname,
-    process.env.NODE_ENV === "production" ? ".env.production" : ".env",
-  ),
-});
+// Always use absolute path for dotenv config
+const envFile =
+  process.env.NODE_ENV === "production" ? ".env.production" : ".env";
+const envPath = path.resolve(__dirname, envFile);
+if (!fs.existsSync(envPath)) {
+  console.error(`[FATAL] Environment file not found: ${envPath}`);
+} else {
+  console.log(`[INFO] Loading environment file: ${envPath}`);
+}
+dotenv.config({ path: envPath });
 
 import connectDB from "./config/database.js";
 import authRoutes from "./routes/auth.js";
