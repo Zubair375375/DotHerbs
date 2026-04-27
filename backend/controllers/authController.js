@@ -90,7 +90,11 @@ const getClientBaseUrl = () => {
     return clientUrls[0];
   }
 
-  return process.env.CLIENT_URL || process.env.FRONTEND_URL || "http://localhost:5173";
+  return (
+    process.env.CLIENT_URL ||
+    process.env.FRONTEND_URL ||
+    "http://localhost:5173"
+  );
 };
 
 const sendVerificationEmail = async (user) => {
