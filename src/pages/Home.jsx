@@ -202,7 +202,7 @@ const Home = () => {
     <div className="min-h-screen">
       {/* Hero */}
       <section className="relative overflow-hidden">
-        <div className="relative h-[320px] sm:h-[420px] lg:h-[560px]">
+        <div className="relative h-screen">
           <div
             className={`flex h-full ${isTransitionEnabled ? "transition-transform duration-700 ease-in-out" : ""}`}
             style={{ transform: `translateX(-${currentSlide * 100}%)` }}
@@ -407,5 +407,3 @@ const Home = () => {
 };
 
 export default Home;
-
-
