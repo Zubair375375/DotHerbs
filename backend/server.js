@@ -145,10 +145,13 @@ const startServer = async () => {
       res.json({ status: "OK", message: "Server is running" });
     });
 
+    // Serve static frontend files
+    app.use(express.static(path.join(__dirname, "../dist")));
+
     // Fallback route for SPA (serves index.html for unmatched routes)
     app.use((req, res, next) => {
       if (req.method === "GET" && !req.path.startsWith("/api") && !req.path.startsWith("/uploads")) {
-        res.sendFile(path.join(__dirname, "../index.html"));
+        res.sendFile(path.join(__dirname, "../dist/index.html"));
       } else {
         next();
       }
