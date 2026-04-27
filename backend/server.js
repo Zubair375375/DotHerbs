@@ -145,7 +145,9 @@ const startServer = async () => {
     // Error handling middleware
     app.use(errorHandler);
 
-    const PORT = process.env.PORT || 5000;
+
+    const PORT = process.env.PORT;
+    if (!PORT) throw new Error("PORT environment variable is missing");
     const server = app.listen(PORT, () => {
       console.log(`Server running on port ${PORT}`);
     });
