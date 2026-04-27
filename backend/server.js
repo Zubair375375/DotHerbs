@@ -25,7 +25,9 @@ dotenv.config();
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
+
 const app = express();
+app.set("trust proxy", 1); // Trust first proxy (Hostinger, Heroku, etc.)
 
 const isProduction =
   (process.env.NODE_ENV || "").toLowerCase() === "production";
@@ -137,9 +139,19 @@ const startServer = async () => {
     app.use("/api/about-content", aboutContentRoutes);
     app.use("/api/batches", batchRoutes);
 
+
     // Health check
     app.get("/api/health", (req, res) => {
       res.json({ status: "OK", message: "Server is running" });
+    });
+
+    // Fallback route for SPA (serves index.html for unmatched routes)
+    app.use((req, res, next) => {
+      if (req.method === "GET" && !req.path.startsWith("/api") && !req.path.startsWith("/uploads")) {
+        res.sendFile(path.join(__dirname, "../index.html"));
+      } else {
+        next();
+      }
     });
 
     // Error handling middleware
