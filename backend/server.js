@@ -3,9 +3,14 @@ import cors from "cors";
 import cookieParser from "cookie-parser";
 import helmet from "helmet";
 import rateLimit from "express-rate-limit";
+
 import dotenv from "dotenv";
 import path from "path";
 import { fileURLToPath } from "url";
+
+// ES module workaround for __dirname and __filename
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 import connectDB from "./config/database.js";
 import authRoutes from "./routes/auth.js";
 import userRoutes from "./routes/users.js";
@@ -24,7 +29,6 @@ dotenv.config();
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
-
 
 const app = express();
 app.set("trust proxy", 1); // Trust first proxy (Hostinger, Heroku, etc.)
@@ -72,6 +76,14 @@ const startServer = async () => {
           return callback(new Error("CORS blocked for this origin"));
         },
         credentials: true,
+        methods: ["GET", "PUT", "POST", "DELETE", "OPTIONS"],
+        allowedHeaders: [
+          "Origin",
+          "X-Requested-With",
+          "Content-Type",
+          "Accept",
+          "Authorization",
+        ],
       }),
     );
 
@@ -139,7 +151,6 @@ const startServer = async () => {
     app.use("/api/about-content", aboutContentRoutes);
     app.use("/api/batches", batchRoutes);
 
-
     // Health check
     app.get("/api/health", (req, res) => {
       res.json({ status: "OK", message: "Server is running" });
@@ -150,7 +161,11 @@ const startServer = async () => {
 
     // Fallback route for SPA (serves index.html for unmatched routes)
     app.use((req, res, next) => {
-      if (req.method === "GET" && !req.path.startsWith("/api") && !req.path.startsWith("/uploads")) {
+      if (
+        req.method === "GET" &&
+        !req.path.startsWith("/api") &&
+        !req.path.startsWith("/uploads")
+      ) {
         res.sendFile(path.join(__dirname, "../dist/index.html"));
       } else {
         next();
@@ -159,7 +174,6 @@ const startServer = async () => {
 
     // Error handling middleware
     app.use(errorHandler);
-
 
     const PORT = process.env.PORT;
     if (!PORT) throw new Error("PORT environment variable is missing");
