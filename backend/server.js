@@ -14,7 +14,6 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 // Always use absolute path for dotenv config
-import fs from "fs";
 const envFile = process.env.NODE_ENV === "production" ? ".env.production" : ".env";
 const envPath = path.resolve(__dirname, envFile);
 if (!fs.existsSync(envPath)) {
