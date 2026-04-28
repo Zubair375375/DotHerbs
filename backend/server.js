@@ -9,9 +9,13 @@ import path from "path";
 import fs from "fs";
 import { fileURLToPath } from "url";
 
+// ES module workaround for __dirname and __filename
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
 // Always use absolute path for dotenv config
-const envFile =
-  process.env.NODE_ENV === "production" ? ".env.production" : ".env";
+import fs from "fs";
+const envFile = process.env.NODE_ENV === "production" ? ".env.production" : ".env";
 const envPath = path.resolve(__dirname, envFile);
 if (!fs.existsSync(envPath)) {
   console.error(`[FATAL] Environment file not found: ${envPath}`);
@@ -19,7 +23,6 @@ if (!fs.existsSync(envPath)) {
   console.log(`[INFO] Loading environment file: ${envPath}`);
 }
 dotenv.config({ path: envPath });
-
 import connectDB from "./config/database.js";
 import authRoutes from "./routes/auth.js";
 import userRoutes from "./routes/users.js";
