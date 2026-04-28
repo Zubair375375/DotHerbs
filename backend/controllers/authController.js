@@ -90,7 +90,11 @@ const getClientBaseUrl = () => {
     return clientUrls[0];
   }
 
-  return process.env.CLIENT_URL || process.env.FRONTEND_URL || "http://localhost:5173";
+  return (
+    process.env.CLIENT_URL ||
+    process.env.FRONTEND_URL ||
+    "http://localhost:5173"
+  );
 };
 
 const sendVerificationEmail = async (user) => {
@@ -211,7 +215,7 @@ export const register = async (req, res) => {
     res.status(201).json({
       success: true,
       message:
-        "Registration successful. Please verify your email before logging in.",
+        "Registration successful! You can now log in. Please verify your email to unlock all features.",
       data: { email: user.email },
     });
   } catch (error) {

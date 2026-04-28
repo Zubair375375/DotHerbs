@@ -6,11 +6,20 @@ import rateLimit from "express-rate-limit";
 
 import dotenv from "dotenv";
 import path from "path";
+import fs from "fs";
 import { fileURLToPath } from "url";
 
-// ES module workaround for __dirname and __filename
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
+// Always use absolute path for dotenv config
+const envFile =
+  process.env.NODE_ENV === "production" ? ".env.production" : ".env";
+const envPath = path.resolve(__dirname, envFile);
+if (!fs.existsSync(envPath)) {
+  console.error(`[FATAL] Environment file not found: ${envPath}`);
+} else {
+  console.log(`[INFO] Loading environment file: ${envPath}`);
+}
+dotenv.config({ path: envPath });
+
 import connectDB from "./config/database.js";
 import authRoutes from "./routes/auth.js";
 import userRoutes from "./routes/users.js";
@@ -25,11 +34,6 @@ import aboutContentRoutes from "./routes/aboutContent.js";
 import batchRoutes from "./routes/batches.js";
 import { errorHandler } from "./middleware/errorHandler.js";
 
-dotenv.config();
-
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
-
 const app = express();
 app.set("trust proxy", 1); // Trust first proxy (Hostinger, Heroku, etc.)
 
@@ -42,21 +46,14 @@ const parseAllowedOrigins = () => {
     .map((origin) => origin.trim())
     .filter(Boolean);
 
-  if (explicitOrigins.length > 0) {
-    return explicitOrigins;
-  }
-
-  const fallbackOrigin = process.env.CLIENT_URL || "http://localhost:5173";
-  return [
-    fallbackOrigin,
-    "http://localhost:5174",
-    "http://localhost:5175",
-    "http://localhost:5176",
-    "http://localhost:5177",
-    "http://localhost:5178",
-    "http://localhost:5179",
-    "http://localhost:5180",
+  // Always allow production domains
+  const prodOrigins = [
+    "https://dotherbs.com",
+    "https://www.dotherbs.com",
+    "https://api.dotherbs.com",
   ];
+
+  return [...new Set([...explicitOrigins, ...prodOrigins])];
 };
 
 const allowedOrigins = parseAllowedOrigins();
@@ -67,9 +64,13 @@ const startServer = async () => {
 
     // Security middleware
     app.use(helmet());
+
+
+
     app.use(
       cors({
         origin: (origin, callback) => {
+          // Allow requests with no origin (like mobile apps, curl, etc.)
           if (!origin || allowedOrigins.includes(origin)) {
             return callback(null, true);
           }
@@ -77,14 +78,8 @@ const startServer = async () => {
         },
         credentials: true,
         methods: ["GET", "PUT", "POST", "DELETE", "OPTIONS"],
-        allowedHeaders: [
-          "Origin",
-          "X-Requested-With",
-          "Content-Type",
-          "Accept",
-          "Authorization",
-        ],
-      }),
+        allowedHeaders: ["Origin", "X-Requested-With", "Content-Type", "Accept", "Authorization"],
+      })
     );
 
     // Rate limiting
