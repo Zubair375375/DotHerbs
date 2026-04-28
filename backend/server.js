@@ -38,13 +38,16 @@ const parseAllowedOrigins = () => {
     .map((origin) => origin.trim())
     .filter(Boolean);
 
-  if (explicitOrigins.length > 0) {
-    return explicitOrigins;
-  }
+  // Always allow production domains
+  const prodOrigins = [
+    "https://dotherbs.com",
+    "https://www.dotherbs.com",
+    "https://api.dotherbs.com",
+  ];
 
-  const fallbackOrigin = process.env.CLIENT_URL || "http://localhost:5173";
-  return [
-    fallbackOrigin,
+  // Always allow localhost dev ports
+  const devOrigins = [
+    "http://localhost:5173",
     "http://localhost:5174",
     "http://localhost:5175",
     "http://localhost:5176",
@@ -53,6 +56,8 @@ const parseAllowedOrigins = () => {
     "http://localhost:5179",
     "http://localhost:5180",
   ];
+
+  return [...new Set([...explicitOrigins, ...prodOrigins, ...devOrigins])];
 };
 
 const allowedOrigins = parseAllowedOrigins();
@@ -63,16 +68,22 @@ const startServer = async () => {
 
     // Security middleware
     app.use(helmet());
+
+
+
     app.use(
       cors({
         origin: (origin, callback) => {
+          // Allow requests with no origin (like mobile apps, curl, etc.)
           if (!origin || allowedOrigins.includes(origin)) {
             return callback(null, true);
           }
           return callback(new Error("CORS blocked for this origin"));
         },
         credentials: true,
-      }),
+        methods: ["GET", "PUT", "POST", "DELETE", "OPTIONS"],
+        allowedHeaders: ["Origin", "X-Requested-With", "Content-Type", "Accept", "Authorization"],
+      })
     );
 
     // Rate limiting
