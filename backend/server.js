@@ -64,16 +64,22 @@ const startServer = async () => {
 
     // Security middleware
     app.use(helmet());
+
+
+
     app.use(
       cors({
         origin: (origin, callback) => {
+          // Allow requests with no origin (like mobile apps, curl, etc.)
           if (!origin || allowedOrigins.includes(origin)) {
             return callback(null, true);
           }
           return callback(new Error("CORS blocked for this origin"));
         },
         credentials: true,
-      }),
+        methods: ["GET", "PUT", "POST", "DELETE", "OPTIONS"],
+        allowedHeaders: ["Origin", "X-Requested-With", "Content-Type", "Accept", "Authorization"],
+      })
     );
 
     // Rate limiting
