@@ -3,26 +3,11 @@ import cors from "cors";
 import cookieParser from "cookie-parser";
 import helmet from "helmet";
 import rateLimit from "express-rate-limit";
-
 import dotenv from "dotenv";
 import path from "path";
 import fs from "fs";
 import { fileURLToPath } from "url";
 
-// ES module workaround for __dirname and __filename
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
-
-// Always use absolute path for dotenv config
-const envFile =
-  process.env.NODE_ENV === "production" ? ".env.production" : ".env";
-const envPath = path.resolve(__dirname, envFile);
-if (!fs.existsSync(envPath)) {
-  console.error(`[FATAL] Environment file not found: ${envPath}`);
-} else {
-  console.log(`[INFO] Loading environment file: ${envPath}`);
-}
-dotenv.config({ path: envPath });
 import connectDB from "./config/database.js";
 import authRoutes from "./routes/auth.js";
 import userRoutes from "./routes/users.js";
@@ -37,18 +22,39 @@ import aboutContentRoutes from "./routes/aboutContent.js";
 import batchRoutes from "./routes/batches.js";
 import { errorHandler } from "./middleware/errorHandler.js";
 
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+// ENV
+const envFile =
+  process.env.NODE_ENV === "production" ? ".env.production" : ".env";
+
+const envPath = path.resolve(__dirname, envFile);
+
+if (!fs.existsSync(envPath)) {
+  console.error(`[FATAL] Missing env file: ${envPath}`);
+} else {
+  console.log(`[INFO] Loading env: ${envPath}`);
+}
+
+dotenv.config({ path: envPath });
+
 const app = express();
-app.set("trust proxy", 1); // Trust first proxy (Hostinger, Heroku, etc.)
+app.set("trust proxy", 1);
 
-const isProduction =
-  (process.env.NODE_ENV || "").toLowerCase() === "production";
+const isProduction = process.env.NODE_ENV === "production";
 
-const allowedOrigins = [
-  "https://dotherbs.com",
-  "https://www.dotherbs.com"
-];
+const allowedOrigins = ["https://dotherbs.com", "https://www.dotherbs.com"];
 
-const startServer = async () => {
+// ---------------------- SECURITY (Helmet) ----------------------
+app.use(
+  helmet({
+    contentSecurityPolicy: false, // IMPORTANT: disables CSP blocking React/Vite issues
+  }),
+);
+
+// ---------------------- CORS ----------------------
+app.use(
   cors({
     origin: function (origin, callback) {
       if (!origin || allowedOrigins.includes(origin)) {
@@ -58,171 +64,98 @@ const startServer = async () => {
       }
     },
     credentials: true,
-    methods: ["GET", "PUT", "POST", "DELETE", "OPTIONS"],
-    allowedHeaders: ["Origin", "X-Requested-With", "Content-Type", "Accept", "Authorization"],
-  })
-            frameAncestors: ["'self'"],
-            imgSrc: ["'self'", "data:"],
-            objectSrc: ["'none'"],
-            scriptSrc: ["'self'"],
-            scriptSrcAttr: ["'none'"],
-            styleSrc: ["'self'", "https:", "'unsafe-inline'"],
-            upgradeInsecureRequests: [],
-          },
-        },
-      }),
-    );
+  }),
+);
 
-    app.use(
-      cors({
-        origin: (origin, callback) => {
-          // Allow requests with no origin (like mobile apps, curl, etc.)
-          if (!origin || allowedOrigins.includes(origin)) {
-            return callback(null, true);
-          }
-          return callback(new Error("CORS blocked for this origin"));
-        },
-        credentials: true,
-        methods: ["GET", "PUT", "POST", "DELETE", "OPTIONS"],
-        allowedHeaders: [
-          "Origin",
-          "X-Requested-With",
-          "Content-Type",
-          "Accept",
-          "Authorization",
-        ],
-      }),
-    );
+// ---------------------- RATE LIMIT ----------------------
+app.use(
+  rateLimit({
+    windowMs: 15 * 60 * 1000,
+    max: isProduction ? 300 : 5000,
+    standardHeaders: true,
+    legacyHeaders: false,
+  }),
+);
 
-    // Rate limiting
-    const rateLimitWindowMs = Number(
-      process.env.RATE_LIMIT_WINDOW_MS || 15 * 60 * 1000,
-    );
-    const rateLimitMax = Number(
-      process.env.RATE_LIMIT_MAX || (isProduction ? 300 : 5000),
-    );
+// ---------------------- BODY PARSER ----------------------
+app.use(express.json({ limit: "10mb" }));
+app.use(express.urlencoded({ extended: true }));
+app.use(cookieParser());
 
-    const limiter = rateLimit({
-      windowMs: rateLimitWindowMs,
-      max: rateLimitMax,
-      standardHeaders: true,
-      legacyHeaders: false,
-      message: "Too many requests from this IP, please try again later.",
-      skip: (req) => {
-        if (!isProduction) {
-          return true;
-        }
-        if (req.method === "GET") {
-          return (
-            req.originalUrl.startsWith("/api/categories") ||
-            req.originalUrl.startsWith("/api/auth/me") ||
-            req.originalUrl.startsWith("/api/about-content") ||
-            req.originalUrl.startsWith("/api/announcements") ||
-            req.originalUrl.startsWith("/api/products") ||
-            req.originalUrl.startsWith("/api/orders") ||
-            req.originalUrl.startsWith("/api/users") ||
-            req.originalUrl.startsWith("/api/hero-slides") ||
-            req.originalUrl.startsWith("/api/product-banners")
-          );
-        }
-        return false;
-      },
+// ---------------------- STATIC FILES ----------------------
+app.use(
+  "/uploads",
+  (req, res, next) => {
+    res.setHeader("Cross-Origin-Resource-Policy", "cross-origin");
+    next();
+  },
+  express.static(path.join(__dirname, "uploads")),
+);
+
+// ---------------------- ROUTES ----------------------
+app.use("/api/auth", authRoutes);
+app.use("/api/users", userRoutes);
+app.use("/api/products", productRoutes);
+app.use("/api/categories", categoryRoutes);
+app.use("/api/orders", orderRoutes);
+app.use("/api/upload", uploadRoutes);
+app.use("/api/announcements", announcementRoutes);
+app.use("/api/hero-slides", heroSlideRoutes);
+app.use("/api/product-banners", productBannerRoutes);
+app.use("/api/about-content", aboutContentRoutes);
+app.use("/api/batches", batchRoutes);
+
+// ---------------------- HEALTH CHECK ----------------------
+app.get("/api/health", (req, res) => {
+  res.json({ status: "OK", message: "Server running" });
+});
+
+// ---------------------- SERVE FRONTEND ----------------------
+app.use(express.static(path.join(__dirname, "../dist")));
+
+app.get("*", (req, res) => {
+  if (!req.path.startsWith("/api")) {
+    res.sendFile(path.join(__dirname, "../dist/index.html"));
+  }
+});
+
+// ---------------------- ERROR HANDLER ----------------------
+app.use(errorHandler);
+
+// ---------------------- START SERVER ----------------------
+const PORT = process.env.PORT || 5000;
+
+const startServer = async () => {
+  try {
+    await connectDB();
+
+    app.listen(PORT, () => {
+      console.log(`🚀 Server running on port ${PORT}`);
     });
-    app.use("/api/", limiter);
-
-    // Body parsing middleware
-    app.use(express.json({ limit: "10mb" }));
-    app.use(express.urlencoded({ extended: true, limit: "10mb" }));
-    app.use(cookieParser());
-
-    // Serve uploaded product images (allow cross-origin loading from frontend)
-    app.use(
-      "/uploads",
-      (req, res, next) => {
-        res.setHeader("Cross-Origin-Resource-Policy", "cross-origin");
-        next();
-      },
-      express.static(path.join(__dirname, "uploads")),
-    );
-
-    // Routes
-    app.use("/api/auth", authRoutes);
-    app.use("/api/users", userRoutes);
-    app.use("/api/products", productRoutes);
-    app.use("/api/categories", categoryRoutes);
-    app.use("/api/orders", orderRoutes);
-    app.use("/api/upload", uploadRoutes);
-    app.use("/api/announcements", announcementRoutes);
-    app.use("/api/hero-slides", heroSlideRoutes);
-    app.use("/api/product-banners", productBannerRoutes);
-    app.use("/api/about-content", aboutContentRoutes);
-    app.use("/api/batches", batchRoutes);
-
-    // Health check
-    app.get("/api/health", (req, res) => {
-      res.json({ status: "OK", message: "Server is running" });
-    });
-
-    // Serve static frontend files
-    app.use(express.static(path.join(__dirname, "../dist")));
-
-    // Fallback route for SPA (serves index.html for unmatched routes)
-    app.use((req, res, next) => {
-      if (
-        req.method === "GET" &&
-        !req.path.startsWith("/api") &&
-        !req.path.startsWith("/uploads")
-      ) {
-        res.sendFile(path.join(__dirname, "../dist/index.html"));
-      } else {
-        next();
-      }
-    });
-
-    // Error handling middleware
-    app.use(errorHandler);
-
-    const PORT = process.env.PORT;
-    if (!PORT) throw new Error("PORT environment variable is missing");
-    const server = app.listen(PORT, () => {
-      console.log(`Server running on port ${PORT}`);
-    });
-
-    server.on("error", (error) => {
-      if (error.code === "EADDRINUSE") {
-        console.error(
-          `Port ${PORT} is already in use. Ensure only one backend process is running.`,
-        );
-        process.exit(1);
-      }
-      console.error("Server failed to start:", error);
-      process.exit(1);
-    });
-
-    const shutdown = (signal) => {
-      console.log(`${signal} received. Shutting down server gracefully...`);
-      server.close(() => {
-        process.exit(0);
-      });
-      setTimeout(() => {
-        console.error("Forced shutdown after timeout.");
-        process.exit(1);
-      }, 10000);
-    };
-
-    process.on("SIGINT", () => shutdown("SIGINT"));
-    process.on("SIGTERM", () => shutdown("SIGTERM"));
-    process.on("unhandledRejection", (reason) => {
-      console.error("Unhandled Promise Rejection:", reason);
-    });
-    process.on("uncaughtException", (error) => {
-      console.error("Uncaught Exception:", error);
-      process.exit(1);
-    });
-  } catch (error) {
-    console.error("Failed to start server:", error);
+  } catch (err) {
+    console.error("❌ Failed to start server:", err);
     process.exit(1);
   }
 };
 
 startServer();
+
+// ---------------------- GRACEFUL SHUTDOWN ----------------------
+process.on("SIGINT", () => {
+  console.log("SIGINT received, shutting down...");
+  process.exit(0);
+});
+
+process.on("SIGTERM", () => {
+  console.log("SIGTERM received, shutting down...");
+  process.exit(0);
+});
+
+process.on("unhandledRejection", (err) => {
+  console.error("Unhandled Rejection:", err);
+});
+
+process.on("uncaughtException", (err) => {
+  console.error("Uncaught Exception:", err);
+  process.exit(1);
+});
