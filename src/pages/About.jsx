@@ -120,11 +120,7 @@ const defaultFacilitySection = {
   heading: "Pakistan's Largest Nutraceutical Manufacturing Facility",
   description:
     "With over a decade of experience, Dot-Herbs specializes in manufacturing nutraceutical and natural healthcare products. Backed by modern laboratories, strict quality protocols, and scalable production systems, we continue to set standards in safety, consistency, and product innovation.",
-  images: [
-    "/images/banners/hero_banner1.jpg",
-    "/images/banners/hero_banner1.jpg",
-    "/images/banners/hero_banner1.jpg",
-  ],
+  images: ["", "", ""],
 };
 
 const About = () => {

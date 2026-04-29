@@ -38,7 +38,7 @@ const Home = () => {
 
   const toHeroImageUrl = (image) => {
     if (!image) {
-      return "/images/banners/hero_banner1.jpg";
+      return "";
     }
 
     if (image.startsWith("http://") || image.startsWith("https://")) {
@@ -72,14 +72,7 @@ const Home = () => {
       }));
     }
 
-    return [
-      {
-        _id: "fallback-hero",
-        image: "/images/banners/hero_banner1.jpg",
-        title: "Pure Health Pure Life",
-        subtitle: "Premium herbal products for a healthier lifestyle.",
-      },
-    ];
+    return [];
   }, [heroSlides]);
 
   const loopedSlides = useMemo(() => {
