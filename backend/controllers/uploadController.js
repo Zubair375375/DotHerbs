@@ -1,6 +1,6 @@
-import path from "path";
-import fs from "fs";
+
 import User from "../models/User.js";
+import cloudinary from "../config/cloudinary.js";
 
 // @desc    Upload image to local /uploads folder
 // @route   POST /api/upload
@@ -8,18 +8,32 @@ import User from "../models/User.js";
 export const uploadImage = async (req, res) => {
   try {
     if (!req.file) {
-      return res
-        .status(400)
-        .json({ success: false, error: "No file uploaded" });
+      return res.status(400).json({ success: false, error: "No file uploaded" });
     }
 
-    const imageUrl = `/uploads/${req.file.filename}`;
+    let result;
+    try {
+      result = await cloudinary.uploader.upload(req.file.path, {
+        folder: "dot-herbs",
+        resource_type: "image",
+      });
+    } catch (cloudErr) {
+      console.error("Cloudinary upload error:", cloudErr);
+      return res.status(500).json({ success: false, error: "Cloudinary upload failed" });
+    }
+
+    // Optionally, delete the local file after upload
+    try {
+      await import('fs').then(fs => fs.unlinkSync(req.file.path));
+    } catch (e) {
+      console.warn("Failed to delete local file after Cloudinary upload", e);
+    }
 
     res.json({
       success: true,
       data: {
-        url: imageUrl,
-        public_id: req.file.filename,
+        url: result.secure_url,
+        public_id: result.public_id,
       },
     });
   } catch (error) {
