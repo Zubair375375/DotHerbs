@@ -1,9 +1,9 @@
+import dotenv from "dotenv";
 import express from "express";
 import cors from "cors";
 import cookieParser from "cookie-parser";
 import helmet from "helmet";
 import rateLimit from "express-rate-limit";
-import dotenv from "dotenv";
 import path from "path";
 import fs from "fs";
 import { fileURLToPath } from "url";
@@ -26,8 +26,9 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 // ENV
-const envFile =
-  process.env.NODE_ENV === "production" ? ".env.production" : ".env";
+const envFile = process.env.NODE_ENV?.includes("production")
+  ? ".env.production"
+  : ".env";
 
 const envPath = path.resolve(__dirname, envFile);
 
@@ -37,7 +38,12 @@ if (!fs.existsSync(envPath)) {
   console.log(`[INFO] Loading env: ${envPath}`);
 }
 
-dotenv.config({ path: envPath });
+dotenv.config({
+  path:
+    process.env.NODE_ENV === "production"
+      ? path.resolve(__dirname, ".env.production")
+      : path.resolve(__dirname, ".env"),
+});
 
 const app = express();
 app.set("trust proxy", 1);
