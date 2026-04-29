@@ -279,7 +279,6 @@ const AdminDashboard = () => {
         headers: {
           Authorization: `Bearer ${token}`,
         },
-        credentials: "include",
       });
 
       const result = await response.json();
@@ -345,7 +344,6 @@ const AdminDashboard = () => {
           Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify(payload),
-        credentials: "include",
       });
 
       const result = await response.json();
@@ -596,7 +594,6 @@ const AdminDashboard = () => {
       method: "POST",
       headers: { Authorization: `Bearer ${token}` },
       body: formDataUpload,
-      credentials: "include",
     });
 
     if (!response.ok) {
@@ -615,7 +612,6 @@ const AdminDashboard = () => {
       method: "POST",
       headers: { Authorization: `Bearer ${token}` },
       body: formDataUpload,
-      credentials: "include",
     });
 
     const result = await response.json();
@@ -646,7 +642,6 @@ const AdminDashboard = () => {
           Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify({ videoUrl: uploadedVideoUrl }),
-        credentials: "include",
       });
 
       const result = await response.json();
@@ -682,7 +677,6 @@ const AdminDashboard = () => {
         headers: {
           Authorization: `Bearer ${token}`,
         },
-        credentials: "include",
       });
 
       const result = await response.json();
@@ -764,7 +758,6 @@ const AdminDashboard = () => {
           facilityDescription: aboutSectionDescription.trim(),
           facilityImages: uploadedImages,
         }),
-        credentials: "include",
       });
 
       const result = await response.json();
@@ -867,7 +860,6 @@ const AdminDashboard = () => {
           scienceBadgeImages: uploadedBadgeImages,
           scienceImage: uploadedScienceImage,
         }),
-        credentials: "include",
       });
 
       const result = await response.json();
@@ -989,7 +981,6 @@ const AdminDashboard = () => {
           whyNutrifactorDescription: whyNutrifactorDescription.trim(),
           whyNutrifactorImage: uploadedWhyImage,
         }),
-        credentials: "include",
       });
 
       const result = await response.json();
@@ -1078,7 +1069,6 @@ const AdminDashboard = () => {
           missionDescription: missionDescription.trim(),
           missionImage: uploadedMissionImage,
         }),
-        credentials: "include",
       });
 
       const result = await response.json();
@@ -1203,7 +1193,6 @@ const AdminDashboard = () => {
           healthPriorityItems: normalizedItems,
           healthPriorityImages: payloadImages,
         }),
-        credentials: "include",
       });
 
       const result = await response.json();
@@ -1382,7 +1371,6 @@ const AdminDashboard = () => {
         body: JSON.stringify({
           teamMembers: normalizedMembers,
         }),
-        credentials: "include",
       });
 
       const result = await response.json();
@@ -1479,7 +1467,6 @@ const AdminDashboard = () => {
             method: "POST",
             headers: { Authorization: `Bearer ${token}` },
             body: formDataUpload,
-            credentials: "include",
           },
         );
         if (!response.ok) throw new Error("Failed to upload image");
