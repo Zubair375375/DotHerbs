@@ -14,7 +14,8 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 // Always use absolute path for dotenv config
-const envFile = process.env.NODE_ENV === "production" ? ".env.production" : ".env";
+const envFile =
+  process.env.NODE_ENV === "production" ? ".env.production" : ".env";
 const envPath = path.resolve(__dirname, envFile);
 if (!fs.existsSync(envPath)) {
   console.error(`[FATAL] Environment file not found: ${envPath}`);
@@ -65,9 +66,26 @@ const startServer = async () => {
     await connectDB();
 
     // Security middleware
-    app.use(helmet());
-
-
+    app.use(
+      helmet({
+        contentSecurityPolicy: {
+          directives: {
+            defaultSrc: ["'self'"],
+            connectSrc: ["'self'", "https://api.dotherbs.com"],
+            baseUri: ["'self'"],
+            fontSrc: ["'self'", "https:", "data:"],
+            formAction: ["'self'"],
+            frameAncestors: ["'self'"],
+            imgSrc: ["'self'", "data:"],
+            objectSrc: ["'none'"],
+            scriptSrc: ["'self'"],
+            scriptSrcAttr: ["'none'"],
+            styleSrc: ["'self'", "https:", "'unsafe-inline'"],
+            upgradeInsecureRequests: [],
+          },
+        },
+      }),
+    );
 
     app.use(
       cors({
@@ -80,8 +98,14 @@ const startServer = async () => {
         },
         credentials: true,
         methods: ["GET", "PUT", "POST", "DELETE", "OPTIONS"],
-        allowedHeaders: ["Origin", "X-Requested-With", "Content-Type", "Accept", "Authorization"],
-      })
+        allowedHeaders: [
+          "Origin",
+          "X-Requested-With",
+          "Content-Type",
+          "Accept",
+          "Authorization",
+        ],
+      }),
     );
 
     // Rate limiting
