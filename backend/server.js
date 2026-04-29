@@ -50,7 +50,9 @@ app.set("trust proxy", 1);
 
 const isProduction = process.env.NODE_ENV === "production";
 
-const allowedOrigins = ["https://dotherbs.com", "https://www.dotherbs.com"];
+const allowedOrigins = process.env.CLIENT_URLS
+  ? process.env.CLIENT_URLS.split(",")
+  : [];
 
 // ---------------------- SECURITY (Helmet) ----------------------
 app.use(
