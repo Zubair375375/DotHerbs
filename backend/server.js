@@ -43,38 +43,24 @@ app.set("trust proxy", 1); // Trust first proxy (Hostinger, Heroku, etc.)
 const isProduction =
   (process.env.NODE_ENV || "").toLowerCase() === "production";
 
-const parseAllowedOrigins = () => {
-  const explicitOrigins = (process.env.CLIENT_URLS || "")
-    .split(",")
-    .map((origin) => origin.trim())
-    .filter(Boolean);
-
-  // Always allow production domains
-  const prodOrigins = [
-    "https://dotherbs.com",
-    "https://www.dotherbs.com",
-    "https://api.dotherbs.com",
-  ];
-
-  return [...new Set([...explicitOrigins, ...prodOrigins])];
-};
-
-const allowedOrigins = parseAllowedOrigins();
+const allowedOrigins = [
+  "https://dotherbs.com",
+  "https://www.dotherbs.com"
+];
 
 const startServer = async () => {
-  try {
-    await connectDB();
-
-    // Security middleware
-    app.use(
-      helmet({
-        contentSecurityPolicy: {
-          directives: {
-            defaultSrc: ["'self'"],
-            connectSrc: ["'self'", "https://api.dotherbs.com"],
-            baseUri: ["'self'"],
-            fontSrc: ["'self'", "https:", "data:"],
-            formAction: ["'self'"],
+  cors({
+    origin: function (origin, callback) {
+      if (!origin || allowedOrigins.includes(origin)) {
+        callback(null, true);
+      } else {
+        callback(new Error("CORS blocked"));
+      }
+    },
+    credentials: true,
+    methods: ["GET", "PUT", "POST", "DELETE", "OPTIONS"],
+    allowedHeaders: ["Origin", "X-Requested-With", "Content-Type", "Accept", "Authorization"],
+  })
             frameAncestors: ["'self'"],
             imgSrc: ["'self'", "data:"],
             objectSrc: ["'none'"],
