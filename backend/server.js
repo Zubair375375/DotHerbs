@@ -1,3 +1,4 @@
+console.log("CLOUDINARY KEY:", process.env.CLOUDINARY_API_KEY);
 import dotenv from "dotenv";
 import express from "express";
 import cors from "cors";
