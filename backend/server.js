@@ -334,8 +334,6 @@ app.use(errorHandler);
 // ---------------------- START SERVER ----------------------
 const PORT = process.env.PORT || 5000;
 
-=======
->>>>>>> Stashed changes
 const startServer = async () => {
   try {
     await connectDB();
