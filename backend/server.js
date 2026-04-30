@@ -51,22 +51,52 @@ app.set("trust proxy", 1);
 
 const isProduction = process.env.NODE_ENV === "production";
 
-const allowedOrigins = process.env.CLIENT_URLS
-  ? process.env.CLIENT_URLS.split(",")
-  : [];
+
+// Robust CORS: allow all localhost ports in dev, only prod domain in prod
+const allowedOrigins = isProduction
+  ? ["https://dotherbs.com"]
+  : [
+      "http://localhost:5173",
+      "http://localhost:5000",
+      "http://localhost:5174",
+      "http://localhost:5175",
+      "http://localhost:5176",
+      "http://localhost:5177",
+      "http://localhost:5178",
+      "http://localhost:5179",
+      "http://localhost:5180"
+    ];
 
 // ---------------------- SECURITY (Helmet) ----------------------
-app.use(
-  helmet({
-    contentSecurityPolicy: false, // IMPORTANT: disables CSP blocking React/Vite issues
-  }),
-);
 
+// Only enable Helmet CSP in production
+if (isProduction) {
+  app.use(
+    helmet({
+      contentSecurityPolicy: false, // Set to true if you want strict CSP in prod
+    })
+  );
+}
 
 // ---------------------- CORS (Recommended Static Config) ----------------------
+
 app.use(
   cors({
-    origin: "https://dotherbs.com",
+    origin: function (origin, callback) {
+      // Allow requests with no origin (like mobile apps, curl, etc.)
+      if (!origin) return callback(null, true);
+      if (allowedOrigins.includes(origin)) {
+        return callback(null, true);
+      }
+      // Allow all localhost:* in dev
+      if (
+        !isProduction &&
+        /^http:\/\/localhost:\d+$/.test(origin)
+      ) {
+        return callback(null, true);
+      }
+      callback(new Error("CORS blocked: " + origin));
+    },
     methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
     allowedHeaders: ["Content-Type", "Authorization"],
     credentials: true,
