@@ -1,13 +1,11 @@
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
-import axios from "axios";
-
-const API_URL = import.meta.env.VITE_API_URL || "/api";
+import api from "../../api/axios";
 
 export const fetchHeroSlides = createAsyncThunk(
   "heroSlides/fetchActive",
   async (_, { rejectWithValue }) => {
     try {
-      const response = await axios.get(`${API_URL}/hero-slides`);
+      const response = await api.get("/hero-slides");
       return response.data.data;
     } catch (error) {
       return rejectWithValue(
@@ -22,7 +20,7 @@ export const fetchAllHeroSlides = createAsyncThunk(
   async (_, { getState, rejectWithValue }) => {
     try {
       const { auth } = getState();
-      const response = await axios.get(`${API_URL}/hero-slides/all`, {
+      const response = await api.get("/hero-slides/all", {
         headers: { Authorization: `Bearer ${auth.accessToken}` },
       });
       return response.data.data;
@@ -39,7 +37,7 @@ export const createHeroSlide = createAsyncThunk(
   async (slideData, { getState, rejectWithValue }) => {
     try {
       const { auth } = getState();
-      const response = await axios.post(`${API_URL}/hero-slides`, slideData, {
+      const response = await api.post("/hero-slides", slideData, {
         headers: { Authorization: `Bearer ${auth.accessToken}` },
       });
       return response.data.data;
@@ -56,8 +54,8 @@ export const updateHeroSlideBadges = createAsyncThunk(
   async ({ id, certificateBadgeImages }, { getState, rejectWithValue }) => {
     try {
       const { auth } = getState();
-      const response = await axios.put(
-        `${API_URL}/hero-slides/${id}/badges`,
+      const response = await api.put(
+        `/hero-slides/${id}/badges`,
         { certificateBadgeImages },
         {
           headers: { Authorization: `Bearer ${auth.accessToken}` },
@@ -77,7 +75,7 @@ export const deleteHeroSlide = createAsyncThunk(
   async (id, { getState, rejectWithValue }) => {
     try {
       const { auth } = getState();
-      await axios.delete(`${API_URL}/hero-slides/${id}`, {
+      await api.delete(`/hero-slides/${id}`, {
         headers: { Authorization: `Bearer ${auth.accessToken}` },
       });
       return id;
@@ -154,4 +152,3 @@ export const selectAllHeroSlides = (state) => state.heroSlides.adminItems;
 export const selectHeroSlidesLoading = (state) => state.heroSlides.isLoading;
 
 export default heroSlideSlice.reducer;
-

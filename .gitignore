@@ -12,6 +12,9 @@ dist
 dist-ssr
 *.local
 
+# Ignore uploaded files (do not push to repo)
+backend/uploads/
+
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json

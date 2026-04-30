@@ -203,19 +203,25 @@ export const register = async (req, res) => {
       });
     }
 
+
     const user = await User.create({
       name,
       email,
       password,
-      isEmailVerified: false,
+      isEmailVerified: process.env.NODE_ENV !== "production", // auto-verify in dev
     });
 
-    await sendVerificationEmail(user);
+    // Only send verification email in production
+    if (process.env.NODE_ENV === "production") {
+      await sendVerificationEmail(user);
+    }
 
     res.status(201).json({
       success: true,
       message:
-        "Registration successful! You can now log in. Please verify your email to unlock all features.",
+        process.env.NODE_ENV === "production"
+          ? "Registration successful! You can now log in. Please verify your email to unlock all features."
+          : "Registration successful! You can now log in.",
       data: { email: user.email },
     });
   } catch (error) {
@@ -335,7 +341,7 @@ export const login = async (req, res) => {
       });
     }
 
-    if (!user.isEmailVerified) {
+    if (process.env.NODE_ENV === "production" && !user.isEmailVerified) {
       return res.status(403).json({
         success: false,
         error: "Please verify your email before logging in.",

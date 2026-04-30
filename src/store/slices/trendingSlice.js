@@ -1,21 +1,19 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
-import axios from "axios";
-
-const API_URL = import.meta.env.VITE_API_URL || "/api";
+import api from "../../api/axios";
 
 // Async thunk to fetch trending products
 export const fetchTrendingProducts = createAsyncThunk(
   "trending/fetchTrendingProducts",
   async (_, { rejectWithValue }) => {
     try {
-      const response = await axios.get(`${API_URL}/products/trending`);
+      const response = await api.get("/products/trending");
       return response.data;
     } catch (error) {
       return rejectWithValue(
-        error.response?.data?.error || "Failed to fetch trending products"
+        error.response?.data?.error || "Failed to fetch trending products",
       );
     }
-  }
+  },
 );
 
 // Initial state
@@ -62,4 +60,3 @@ export const selectTrendingLastUpdated = (state) => state.trending.lastUpdated;
 
 export const { clearTrendingError } = trendingSlice.actions;
 export default trendingSlice.reducer;
-
