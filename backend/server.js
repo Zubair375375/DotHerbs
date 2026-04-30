@@ -32,8 +32,6 @@ import aboutContentRoutes from "./routes/aboutContent.js";
 import batchRoutes from "./routes/batches.js";
 import { errorHandler } from "./middleware/errorHandler.js";
 
-
-
 const app = express();
 app.set("trust proxy", 1);
 
@@ -50,11 +48,26 @@ if (allowedOrigins.length === 0) {
 }
 
 // ---------------------- SECURITY ----------------------
+// app.use(
+//   helmet({
+//     contentSecurityPolicy: {
+//       directives: {
+//         defaultSrc: ["'self'"],
+//         imgSrc: ["'self'", "data:", "https://res.cloudinary.com"],
+//         scriptSrc: ["'self'", "'unsafe-inline'"],
+//         styleSrc: ["'self'", "'unsafe-inline'"],
+//       },
+//     },
+//   }),
+// );
 app.use(
   helmet({
     contentSecurityPolicy: {
       directives: {
         defaultSrc: ["'self'"],
+
+        connectSrc: ["'self'", process.env.API_URL],
+
         imgSrc: ["'self'", "data:", "https://res.cloudinary.com"],
         scriptSrc: ["'self'", "'unsafe-inline'"],
         styleSrc: ["'self'", "'unsafe-inline'"],
@@ -62,7 +75,6 @@ app.use(
     },
   }),
 );
-
 // ---------------------- CORS ----------------------
 app.use(
   cors({
