@@ -1,4 +1,3 @@
-
 import User from "../models/User.js";
 import cloudinary from "../config/cloudinary.js";
 
@@ -9,7 +8,9 @@ export const uploadImage = async (req, res) => {
   try {
     if (!req.file) {
       console.error("No file uploaded. req.file:", req.file);
-      return res.status(400).json({ success: false, error: "No file uploaded" });
+      return res
+        .status(400)
+        .json({ success: false, error: "No file uploaded" });
     }
 
     let result;
@@ -20,12 +21,17 @@ export const uploadImage = async (req, res) => {
       });
     } catch (cloudErr) {
       console.error("Cloudinary upload error:", cloudErr);
-      return res.status(500).json({ success: false, error: `Cloudinary upload failed: ${cloudErr.message || cloudErr}` });
+      return res
+        .status(500)
+        .json({
+          success: false,
+          error: `Cloudinary upload failed: ${cloudErr.message || cloudErr}`,
+        });
     }
 
     // Optionally, delete the local file after upload
     try {
-      await import('fs').then(fs => fs.unlinkSync(req.file.path));
+      await import("fs").then((fs) => fs.unlinkSync(req.file.path));
     } catch (e) {
       console.warn("Failed to delete local file after Cloudinary upload", e);
     }
@@ -39,7 +45,12 @@ export const uploadImage = async (req, res) => {
     });
   } catch (error) {
     console.error("Image upload failed:", error);
-    res.status(500).json({ success: false, error: `Image upload failed: ${error.message || error}` });
+    res
+      .status(500)
+      .json({
+        success: false,
+        error: `Image upload failed: ${error.message || error}`,
+      });
   }
 };
 
