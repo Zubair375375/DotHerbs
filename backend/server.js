@@ -1,18 +1,21 @@
 // Force dotenv to load the correct file based on NODE_ENV
 import dotenv from "dotenv";
-if (process.env.NODE_ENV === "production") {
-  dotenv.config({ path: ".env.production" });
-} else {
-  dotenv.config({ path: ".env" });
-}
+import path from "path";
+import { fileURLToPath } from "url";
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+dotenv.config({
+  path: path.resolve(
+    __dirname,
+    process.env.NODE_ENV === "production" ? ".env.production" : ".env",
+  ),
+});
 
 import express from "express";
 import cors from "cors";
 import cookieParser from "cookie-parser";
 import helmet from "helmet";
 import rateLimit from "express-rate-limit";
-import path from "path";
-import { fileURLToPath } from "url";
 
 import connectDB from "./config/database.js";
 
@@ -29,8 +32,7 @@ import aboutContentRoutes from "./routes/aboutContent.js";
 import batchRoutes from "./routes/batches.js";
 import { errorHandler } from "./middleware/errorHandler.js";
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
+
 
 const app = express();
 app.set("trust proxy", 1);
