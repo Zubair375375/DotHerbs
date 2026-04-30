@@ -192,8 +192,6 @@ const startServer = async () => {
 };
 
 startServer();
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
 
 // ENV
 const envFile = process.env.NODE_ENV?.includes("production")
