@@ -1,3 +1,10 @@
+// Helper to resolve image/media URLs (handles absolute and relative paths)
+const resolveMediaUrl = (url) => {
+  if (!url) return "";
+  if (url.startsWith("http://") || url.startsWith("https://")) return url;
+  if (url.startsWith("/uploads/")) return `${API_ORIGIN}${url}`;
+  return url;
+};
 import { useState, useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
@@ -2350,7 +2357,7 @@ const AdminDashboard = () => {
                             <td className="px-4 py-4">
                               {category.image ? (
                                 <img
-                                  src={`${API_ORIGIN}${category.image}`}
+                                  src={resolveMediaUrl(category.image)}
                                   alt={category.name}
                                   className="w-10 h-10 object-cover rounded-full border border-gray-200"
                                 />
