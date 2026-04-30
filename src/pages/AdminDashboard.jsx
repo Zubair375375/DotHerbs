@@ -1497,7 +1497,9 @@ const AdminDashboard = () => {
     } catch (error) {
       setUploadingCategoryImage(false);
       toast.error(error || "Failed to create category");
-      toast.error(error?.message || String(error) || "Failed to create category");
+      toast.error(
+        error?.message || String(error) || "Failed to create category",
+      );
     }
   };
 
@@ -1511,7 +1513,9 @@ const AdminDashboard = () => {
       toast.success("Category deleted successfully");
     } catch (error) {
       toast.error(error || "Failed to delete category");
-      toast.error(error?.message || String(error) || "Failed to delete category");
+      toast.error(
+        error?.message || String(error) || "Failed to delete category",
+      );
     }
   };
 
@@ -1539,7 +1543,9 @@ const AdminDashboard = () => {
       toast.success("Hero slide created successfully");
     } catch (error) {
       toast.error(error || "Failed to create hero slide");
-      toast.error(error?.message || String(error) || "Failed to create hero slide");
+      toast.error(
+        error?.message || String(error) || "Failed to create hero slide",
+      );
     } finally {
       setUploadingHeroImage(false);
     }
@@ -2743,7 +2749,11 @@ const AdminDashboard = () => {
                         <img
                           src={(() => {
                             const url = resolveMediaUrl(slide.image);
-                            console.log('Hero slide image src:', url, slide.image);
+                            console.log(
+                              "Hero slide image src:",
+                              url,
+                              slide.image,
+                            );
                             return url;
                           })()}
                           alt="Hero slide"
@@ -4266,5 +4276,3 @@ const AdminDashboard = () => {
 };
 
 export default AdminDashboard;
-
-
