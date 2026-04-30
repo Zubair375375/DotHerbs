@@ -1,4 +1,4 @@
-console.log("CLOUDINARY KEY:", process.env.CLOUDINARY_API_KEY);
+// console.log("CLOUDINARY KEY:", process.env.CLOUDINARY_API_KEY); // Remove after debugging
 import dotenv from "dotenv";
 import express from "express";
 import cors from "cors";
@@ -62,19 +62,19 @@ app.use(
   }),
 );
 
-// ---------------------- CORS ----------------------
+
+// ---------------------- CORS (Recommended Static Config) ----------------------
 app.use(
   cors({
-    origin: function (origin, callback) {
-      if (!origin || allowedOrigins.includes(origin)) {
-        callback(null, true);
-      } else {
-        callback(new Error("CORS blocked"));
-      }
-    },
+    origin: "https://dotherbs.com",
+    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+    allowedHeaders: ["Content-Type", "Authorization"],
     credentials: true,
-  }),
+  })
 );
+
+// Handle preflight requests for all routes
+app.options("*", cors());
 
 // ---------------------- RATE LIMIT ----------------------
 app.use(
@@ -102,6 +102,7 @@ app.use(
 );
 
 // ---------------------- ROUTES ----------------------
+// (CORS must be above all routes)
 app.use("/api/auth", authRoutes);
 app.use("/api/users", userRoutes);
 app.use("/api/products", productRoutes);
