@@ -1,5 +1,10 @@
+// Force dotenv to load the correct file based on NODE_ENV
 import dotenv from "dotenv";
-dotenv.config({ path: ".env.production" });
+if (process.env.NODE_ENV === "production") {
+  dotenv.config({ path: ".env.production" });
+} else {
+  dotenv.config({ path: ".env" });
+}
 
 import express from "express";
 import cors from "cors";
@@ -53,7 +58,7 @@ app.use(
         styleSrc: ["'self'", "'unsafe-inline'"],
       },
     },
-  })
+  }),
 );
 
 // ---------------------- CORS ----------------------
@@ -69,7 +74,7 @@ app.use(
       callback(new Error("CORS blocked: " + origin));
     },
     credentials: true,
-  })
+  }),
 );
 
 app.options("*", cors());
@@ -79,7 +84,7 @@ app.use(
   rateLimit({
     windowMs: 15 * 60 * 1000,
     max: isProduction ? 300 : 5000,
-  })
+  }),
 );
 
 // ---------------------- BODY ----------------------
@@ -94,7 +99,7 @@ app.use(
     res.setHeader("Cross-Origin-Resource-Policy", "cross-origin");
     next();
   },
-  express.static(path.join(__dirname, "uploads"))
+  express.static(path.join(__dirname, "uploads")),
 );
 
 // ---------------------- ROUTES ----------------------
