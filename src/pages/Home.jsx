@@ -316,7 +316,7 @@ const Home = () => {
                   <div className="mx-auto mb-4 flex h-24 w-24 shrink-0 items-center justify-center overflow-hidden rounded-full bg-white transition-all">
                     {category.image ? (
                       <img
-                        src={`${API_ORIGIN}${category.image}`}
+                        src={resolveMediaUrl(category.image)}
                         alt={category.name}
                         className="h-full w-full rounded-full object-cover"
                       />
