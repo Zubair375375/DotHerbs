@@ -1,7 +1,5 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
-import axios from "axios";
-
-const API_URL = import.meta.env.VITE_API_URL || "/api";
+import api from "../../api/axios";
 
 // Initial state
 const initialState = {
@@ -43,7 +41,7 @@ export const fetchProducts = createAsyncThunk(
       };
 
       const queryString = new URLSearchParams(queryParams).toString();
-      const response = await axios.get(`${API_URL}/products?${queryString}`);
+      const response = await api.get(`/products?${queryString}`);
 
       return response.data;
     } catch (error) {
@@ -58,7 +56,7 @@ export const fetchProduct = createAsyncThunk(
   "products/fetchProduct",
   async (id, { rejectWithValue }) => {
     try {
-      const response = await axios.get(`${API_URL}/products/${id}`);
+      const response = await api.get(`/products/${id}`);
       return response.data.data;
     } catch (error) {
       return rejectWithValue(
@@ -72,7 +70,7 @@ export const fetchCategories = createAsyncThunk(
   "products/fetchCategories",
   async (_, { rejectWithValue }) => {
     try {
-      const response = await axios.get(`${API_URL}/categories`);
+      const response = await api.get(`/categories`);
       return response.data.data;
     } catch (error) {
       return rejectWithValue(
@@ -107,7 +105,7 @@ export const createCategory = createAsyncThunk(
   async (categoryData, { getState, rejectWithValue }) => {
     try {
       const { auth } = getState();
-      const response = await axios.post(`${API_URL}/categories`, categoryData, {
+      const response = await api.post(`/categories`, categoryData, {
         headers: {
           Authorization: `Bearer ${auth.accessToken}`,
         },
@@ -126,7 +124,7 @@ export const deleteCategory = createAsyncThunk(
   async (id, { getState, rejectWithValue }) => {
     try {
       const { auth } = getState();
-      await axios.delete(`${API_URL}/categories/${id}`, {
+      await api.delete(`/categories/${id}`, {
         headers: {
           Authorization: `Bearer ${auth.accessToken}`,
         },
@@ -145,7 +143,7 @@ export const createProduct = createAsyncThunk(
   async (productData, { getState, rejectWithValue }) => {
     try {
       const { auth } = getState();
-      const response = await axios.post(`${API_URL}/products`, productData, {
+      const response = await api.post(`/products`, productData, {
         headers: {
           Authorization: `Bearer ${auth.accessToken}`,
         },
@@ -164,15 +162,11 @@ export const updateProduct = createAsyncThunk(
   async ({ id, productData }, { getState, rejectWithValue }) => {
     try {
       const { auth } = getState();
-      const response = await axios.put(
-        `${API_URL}/products/${id}`,
-        productData,
-        {
-          headers: {
-            Authorization: `Bearer ${auth.accessToken}`,
-          },
+      const response = await api.put(`/products/${id}`, productData, {
+        headers: {
+          Authorization: `Bearer ${auth.accessToken}`,
         },
-      );
+      });
       return response.data.data;
     } catch (error) {
       return rejectWithValue(
@@ -187,7 +181,7 @@ export const deleteProduct = createAsyncThunk(
   async (id, { getState, rejectWithValue }) => {
     try {
       const { auth } = getState();
-      await axios.delete(`${API_URL}/products/${id}`, {
+      await api.delete(`/products/${id}`, {
         headers: {
           Authorization: `Bearer ${auth.accessToken}`,
         },
@@ -206,8 +200,8 @@ export const createReview = createAsyncThunk(
   async ({ productId, reviewData }, { getState, rejectWithValue }) => {
     try {
       const { auth } = getState();
-      const response = await axios.post(
-        `${API_URL}/products/${productId}/reviews`,
+      const response = await api.post(
+        `/products/${productId}/reviews`,
         reviewData,
         {
           headers: {
@@ -375,4 +369,3 @@ export const selectProductsError = (state) => state.products.error;
 export const selectProductsStatus = (state) => state.products.isLoading;
 export const selectProduct = (state) => state.products.product;
 export default productSlice.reducer;
-

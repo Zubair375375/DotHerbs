@@ -8,6 +8,7 @@ import cloudinary from "../config/cloudinary.js";
 export const uploadImage = async (req, res) => {
   try {
     if (!req.file) {
+      console.error("No file uploaded. req.file:", req.file);
       return res.status(400).json({ success: false, error: "No file uploaded" });
     }
 
@@ -19,7 +20,7 @@ export const uploadImage = async (req, res) => {
       });
     } catch (cloudErr) {
       console.error("Cloudinary upload error:", cloudErr);
-      return res.status(500).json({ success: false, error: "Cloudinary upload failed" });
+      return res.status(500).json({ success: false, error: `Cloudinary upload failed: ${cloudErr.message || cloudErr}` });
     }
 
     // Optionally, delete the local file after upload
@@ -37,8 +38,8 @@ export const uploadImage = async (req, res) => {
       },
     });
   } catch (error) {
-    console.error(error);
-    res.status(500).json({ success: false, error: "Image upload failed" });
+    console.error("Image upload failed:", error);
+    res.status(500).json({ success: false, error: `Image upload failed: ${error.message || error}` });
   }
 };
 

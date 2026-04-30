@@ -3,16 +3,14 @@ import {
   createAsyncThunk,
   createSelector,
 } from "@reduxjs/toolkit";
-import axios from "axios";
-
-const API_URL = import.meta.env.VITE_API_URL || "/api";
+import api from "../../api/axios";
 
 // Fetch active announcements (public)
 export const fetchAnnouncements = createAsyncThunk(
   "announcements/fetchActive",
   async (_, { rejectWithValue }) => {
     try {
-      const response = await axios.get(`${API_URL}/announcements`);
+      const response = await api.get("/announcements");
       return response.data.data;
     } catch (error) {
       return rejectWithValue(
@@ -28,7 +26,7 @@ export const fetchAllAnnouncements = createAsyncThunk(
   async (_, { getState, rejectWithValue }) => {
     try {
       const { auth } = getState();
-      const response = await axios.get(`${API_URL}/announcements/all`, {
+      const response = await api.get("/announcements/all", {
         headers: { Authorization: `Bearer ${auth.accessToken}` },
       });
       return response.data.data;
@@ -46,11 +44,9 @@ export const createAnnouncement = createAsyncThunk(
   async (announcementData, { getState, rejectWithValue }) => {
     try {
       const { auth } = getState();
-      const response = await axios.post(
-        `${API_URL}/announcements`,
-        announcementData,
-        { headers: { Authorization: `Bearer ${auth.accessToken}` } },
-      );
+      const response = await api.post("/announcements", announcementData, {
+        headers: { Authorization: `Bearer ${auth.accessToken}` },
+      });
       return response.data.data;
     } catch (error) {
       return rejectWithValue(
@@ -66,7 +62,7 @@ export const updateAnnouncement = createAsyncThunk(
   async ({ id, data }, { getState, rejectWithValue }) => {
     try {
       const { auth } = getState();
-      const response = await axios.put(`${API_URL}/announcements/${id}`, data, {
+      const response = await api.put(`/announcements/${id}`, data, {
         headers: { Authorization: `Bearer ${auth.accessToken}` },
       });
       return response.data.data;
@@ -84,7 +80,7 @@ export const deleteAnnouncement = createAsyncThunk(
   async (id, { getState, rejectWithValue }) => {
     try {
       const { auth } = getState();
-      await axios.delete(`${API_URL}/announcements/${id}`, {
+      await api.delete(`/announcements/${id}`, {
         headers: { Authorization: `Bearer ${auth.accessToken}` },
       });
       return id;
@@ -164,4 +160,3 @@ export const selectAnnouncementsLoading = (state) =>
   state.announcements.isLoading;
 
 export default announcementSlice.reducer;
-
