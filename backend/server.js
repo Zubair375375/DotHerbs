@@ -191,59 +191,11 @@ const startServer = async () => {
   }
 };
 
-startServer();
-
-// ENV
-const envFile = process.env.NODE_ENV?.includes("production")
-  ? ".env.production"
-  : ".env";
-
-const envPath = path.resolve(__dirname, envFile);
-
-if (!fs.existsSync(envPath)) {
-  console.error(`[FATAL] Missing env file: ${envPath}`);
-} else {
-  console.log(`[INFO] Loading env: ${envPath}`);
-}
-
-dotenv.config({
-  path:
-    process.env.NODE_ENV === "production"
-      ? path.resolve(__dirname, ".env.production")
-      : path.resolve(__dirname, ".env"),
-});
-
-const app = express();
-app.set("trust proxy", 1);
-
-const isProduction = process.env.NODE_ENV === "production";
-
-
-// Robust CORS: allow all localhost ports in dev, only prod domain in prod
-const allowedOrigins = isProduction
-  ? ["https://dotherbs.com"]
-  : [
-      "http://localhost:5173",
-      "http://localhost:5000",
-      "http://localhost:5174",
-      "http://localhost:5175",
-      "http://localhost:5176",
-      "http://localhost:5177",
-      "http://localhost:5178",
-      "http://localhost:5179",
-      "http://localhost:5180"
-    ];
-
-// ---------------------- SECURITY (Helmet) ----------------------
-
-// Only enable Helmet CSP in production
-if (isProduction) {
   app.use(
     helmet({
       contentSecurityPolicy: false, // Set to true if you want strict CSP in prod
     })
   );
-}
 
 // ---------------------- CORS (Recommended Static Config) ----------------------
 
