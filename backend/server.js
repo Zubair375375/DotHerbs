@@ -9,7 +9,6 @@ import rateLimit from "express-rate-limit";
 import path from "path";
 import { fileURLToPath } from "url";
 
-import "./config/loadEnv.js";
 import connectDB from "./config/database.js";
 
 import authRoutes from "./routes/auth.js";
