@@ -7,11 +7,9 @@ module.exports = {
       env: {
         NODE_ENV: "development",
         PORT: 5000,
-        CLIENT_URLS:
-          "http://localhost:5173,http://localhost:5000,http://localhost:5174,http://localhost:5175,http://localhost:5176,http://localhost:5177,http://localhost:5178,http://localhost:5179,http://localhost:5180",
+        CLIENT_URLS: "http://localhost:5173,http://localhost:5000,http://localhost:5174,http://localhost:5175,http://localhost:5176,http://localhost:5177,http://localhost:5178,http://localhost:5179,http://localhost:5180",
         CLIENT_URL: "http://localhost:5173",
-        MONGODB_URI:
-          "mongodb+srv://admin:11Dotherbs11@dotherbs.leexkrt.mongodb.net/dotherbs_dev?retryWrites=true&w=majority&appName=DotHerbs",
+        MONGODB_URI: "mongodb+srv://admin:11Dotherbs11@dotherbs.leexkrt.mongodb.net/dotherbs_dev?retryWrites=true&w=majority&appName=DotHerbs",
         JWT_SECRET: "replace_with_secure_secret",
         JWT_EXPIRE: "30d",
         JWT_REFRESH_SECRET: "replace_with_secure_refresh_secret",
@@ -32,13 +30,10 @@ module.exports = {
         NODE_ENV: "production",
         PORT: 5000,
         CLIENT_URLS: "https://dotherbs.com",
-        MONGODB_URI:
-          "mongodb+srv://admin:11Dotherbs11@dotherbs.leexkrt.mongodb.net/dotherbs?retryWrites=true&w=majority&appName=DotHerbs",
-        JWT_SECRET:
-          "48593b9fe7926f61747d5d6f9a8189266015de4019420228a49d90ffa5176016",
+        MONGODB_URI: "mongodb+srv://admin:11Dotherbs11@dotherbs.leexkrt.mongodb.net/dotherbs?retryWrites=true&w=majority&appName=DotHerbs",
+        JWT_SECRET: "48593b9fe7926f61747d5d6f9a8189266015de4019420228a49d90ffa5176016",
         JWT_EXPIRE: "30d",
-        JWT_REFRESH_SECRET:
-          "95c633395e6349383685566468be70f1f36eb44c8c932d36da76170492625a03",
+        JWT_REFRESH_SECRET: "95c633395e6349383685566468be70f1f36eb44c8c932d36da76170492625a03",
         JWT_REFRESH_EXPIRE: "7d",
         EMAIL_VERIFICATION_EXPIRE_MINUTES: 60,
         LOGIN_MAX_ATTEMPTS: 5,
