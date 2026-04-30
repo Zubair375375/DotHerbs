@@ -1,5 +1,12 @@
 // Helper to resolve image/media URLs (handles absolute and relative paths)
 const resolveMediaUrl = (url) => {
+  if (!url) return "/placeholder-product.jpg";
+  if (url.startsWith("http://") || url.startsWith("https://")) return url;
+  if (url.startsWith("/uploads/")) return `${API_ORIGIN}${url}`;
+  return url;
+};
+// Helper to resolve image/media URLs (handles absolute and relative paths)
+const resolveMediaUrl = (url) => {
   if (!url) return "";
   if (url.startsWith("http://") || url.startsWith("https://")) return url;
   if (url.startsWith("/uploads/")) return `${API_ORIGIN}${url}`;
@@ -1980,10 +1987,8 @@ const AdminDashboard = () => {
                             <img
                               src={
                                 product.image
-                                  ? `${API_ORIGIN}${product.image}`
-                                  : product.images?.[0]?.url ||
-                                    product.images?.[0] ||
-                                    "/placeholder-product.jpg"
+                                  ? resolveMediaUrl(product.image)
+                                  : resolveMediaUrl(product.images?.[0]?.url || product.images?.[0])
                               }
                               alt={product.name}
                               className="w-10 h-10 object-cover rounded"
@@ -2181,10 +2186,8 @@ const AdminDashboard = () => {
                             <img
                               src={
                                 product.image
-                                  ? `${API_ORIGIN}${product.image}`
-                                  : product.images?.[0]?.url ||
-                                    product.images?.[0] ||
-                                    "/placeholder-product.jpg"
+                                  ? resolveMediaUrl(product.image)
+                                  : resolveMediaUrl(product.images?.[0]?.url || product.images?.[0])
                               }
                               alt={product.name}
                               className="w-10 h-10 object-cover rounded"

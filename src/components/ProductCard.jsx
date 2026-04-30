@@ -1,3 +1,10 @@
+// Helper to resolve image/media URLs (handles absolute and relative paths)
+const resolveMediaUrl = (url) => {
+  if (!url) return "/placeholder-product.jpg";
+  if (url.startsWith("http://") || url.startsWith("https://")) return url;
+  if (url.startsWith("/uploads/")) return `${SERVER_URL}${url}`;
+  return url;
+};
 import { Link } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { addToCart } from "../store/slices/cartSlice";
@@ -14,10 +21,8 @@ const ProductCard = ({ product, viewMode = "grid" }) => {
   const API_URL = import.meta.env.VITE_API_URL || "/api";
   const SERVER_URL = API_URL.replace(/\/api\/?$/, "");
   const productImage = product.image
-    ? `${SERVER_URL}${product.image}`
-    : product.images?.[0]?.url ||
-      product.images?.[0] ||
-      "/placeholder-product.jpg";
+    ? resolveMediaUrl(product.image)
+    : resolveMediaUrl(product.images?.[0]?.url || product.images?.[0]);
 
   const handleAddToCart = (e) => {
     e.preventDefault();
