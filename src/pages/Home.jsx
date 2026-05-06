@@ -240,11 +240,13 @@ const Home = () => {
                     key={slide._id}
                     type="button"
                     onClick={() => setCurrentSlide(index)}
-                    className={`h-3 w-3 rounded-full border border-white/70 transition ${
-                      index === currentSlide % slides.length
-                        ? "bg-[#68a300]"
-                        : "bg-white/70"
-                    }`}
+                    className={`w-3 h-3 rounded-full border border-black/70 transition p-0 m-0
+                      ${
+                        index === currentSlide % slides.length
+                          ? "bg-[#232323]"
+                          : "bg-none"
+                      }
+                    `}
                     aria-label={`Go to hero slide ${index + 1}`}
                   />
                 ))}
