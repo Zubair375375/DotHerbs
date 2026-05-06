@@ -60,10 +60,6 @@ const userSchema = new mongoose.Schema(
       trim: true,
       maxlength: [30, "Last name cannot be more than 30 characters"],
     },
-    // Virtual for full name
-    userSchema.virtual('name').get(function() {
-      return `${this.firstName} ${this.lastName}`.trim();
-    });
     email: {
       type: String,
       required: [true, "Email is required"],

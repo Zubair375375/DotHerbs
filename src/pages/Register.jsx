@@ -139,7 +139,12 @@ const Register = () => {
           <div className="rounded-md shadow-sm space-y-4">
             <div className="flex gap-2">
               <div className="flex-1">
-                <label htmlFor="firstName" className="block text-sm font-medium text-gray-700">First Name</label>
+                <label
+                  htmlFor="firstName"
+                  className="block text-sm font-medium text-gray-700"
+                >
+                  First Name
+                </label>
                 <input
                   id="firstName"
                   name="firstName"
@@ -153,7 +158,12 @@ const Register = () => {
                 />
               </div>
               <div className="flex-1">
-                <label htmlFor="lastName" className="block text-sm font-medium text-gray-700">Last Name</label>
+                <label
+                  htmlFor="lastName"
+                  className="block text-sm font-medium text-gray-700"
+                >
+                  Last Name
+                </label>
                 <input
                   id="lastName"
                   name="lastName"
