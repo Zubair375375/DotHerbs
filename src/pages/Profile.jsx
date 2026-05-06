@@ -648,10 +648,12 @@ const Profile = () => {
                     disabled={isLoading}
                   />
                 </div>
-                <h2 className="text-xl font-semibold text-gray-800">
+                <h2 className="text-[18px] font-semibold text-gray-800">
                   {user.name}
                 </h2>
-                <p className="break-all text-gray-600">{user.email}</p>
+                <p className="break-all text-gray-600 text-[14px]">
+                  {user.email}
+                </p>
               </div>
 
               <nav className="space-y-2">
@@ -669,7 +671,7 @@ const Profile = () => {
 
                 <button
                   onClick={() => setActiveTab("orders")}
-                  className={`w-full flex items-center space-x-3 px-4 py-3 rounded-lg text-left ${
+                  className={`w-full flex items-center space-x-3 px-4 py-3 rounded-lg text-left text-[14px] ${
                     activeTab === "orders"
                       ? "bg-green-50 text-green-700 border border-green-200"
                       : "text-gray-700 hover:bg-gray-50"
@@ -681,7 +683,7 @@ const Profile = () => {
 
                 <button
                   onClick={() => setActiveTab("wishlist")}
-                  className={`w-full flex items-center space-x-3 px-4 py-3 rounded-lg text-left ${
+                  className={`w-full flex items-center space-x-3 px-4 py-3 rounded-lg text-left text-[14px] ${
                     activeTab === "wishlist"
                       ? "bg-green-50 text-green-700 border border-green-200"
                       : "text-gray-700 hover:bg-gray-50"
@@ -693,7 +695,7 @@ const Profile = () => {
 
                 <button
                   onClick={() => setActiveTab("addresses")}
-                  className={`w-full flex items-center space-x-3 px-4 py-3 rounded-lg text-left ${
+                  className={`w-full flex items-center space-x-3 px-4 py-3 rounded-lg text-left text-[14px] ${
                     activeTab === "addresses"
                       ? "bg-green-50 text-green-700 border border-green-200"
                       : "text-gray-700 hover:bg-gray-50"
@@ -705,7 +707,7 @@ const Profile = () => {
 
                 <button
                   onClick={() => setActiveTab("recently-viewed")}
-                  className={`w-full flex items-center space-x-3 px-4 py-3 rounded-lg text-left ${
+                  className={`w-full flex items-center space-x-3 px-4 py-3 rounded-lg text-left text-[14px] ${
                     activeTab === "recently-viewed"
                       ? "bg-green-50 text-green-700 border border-green-200"
                       : "text-gray-700 hover:bg-gray-50"
@@ -717,7 +719,7 @@ const Profile = () => {
 
                 <button
                   onClick={() => setActiveTab("settings")}
-                  className={`w-full flex items-center space-x-3 px-4 py-3 rounded-lg text-left ${
+                  className={`w-full flex items-center space-x-3 px-4 py-3 rounded-lg text-left text-[14px] ${
                     activeTab === "settings"
                       ? "bg-green-50 text-green-700 border border-green-200"
                       : "text-gray-700 hover:bg-gray-50"
@@ -729,7 +731,7 @@ const Profile = () => {
 
                 <button
                   onClick={handleLogout}
-                  className="w-full flex items-center space-x-3 px-4 py-3 rounded-lg text-left text-red-600 hover:bg-red-50"
+                  className="w-full flex items-center space-x-3 px-4 py-3 rounded-lg text-left text-[14px] text-red-600 hover:bg-red-50"
                 >
                   <FaSignOutAlt />
                   <span>Logout</span>
@@ -776,15 +778,16 @@ const Profile = () => {
             {activeTab === "profile" && (
               <div className="bg-white rounded-lg shadow-md p-6">
                 <div className="flex items-center justify-between mb-6">
-                  <h3 className="text-2xl font-semibold text-gray-800">
+                  <h3 className="text-[20px] font-semibold text-gray-800">
                     Profile Information
                   </h3>
                   {!isEditing ? (
                     <button
                       onClick={() => setIsEditing(true)}
-                      className="flex items-center space-x-2 bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700"
+                      className="text-[14px] flex items-center space-x-1 text-blue-600 px-4 py-2 hover:bg-white focus:outline-none border-0"
+                      style={{ boxShadow: "none" }}
                     >
-                      <FaEdit />
+                      {/* <FaEdit /> */}
                       <span>Edit</span>
                     </button>
                   ) : (
@@ -792,16 +795,16 @@ const Profile = () => {
                       <button
                         onClick={handleSaveProfile}
                         disabled={isLoading}
-                        className="flex items-center space-x-2 bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700 disabled:opacity-50"
+                        className="text-[14px] flex items-center space-x-2 text-blue-600 px-4 py-2 hover:bg-white focus:outline-none border-0 disabled:opacity-50"
                       >
-                        <FaSave />
+                        {/* <FaSave /> */}
                         <span>Save</span>
                       </button>
                       <button
                         onClick={handleCancelEdit}
-                        className="flex items-center space-x-2 bg-gray-600 text-white px-4 py-2 rounded hover:bg-gray-700"
+                        className="text-[14px] flex items-center space-x-1 text-red-600 px-4 py-2 hover:bg-white focus:outline-none border-0"
                       >
-                        <FaTimes />
+                        {/* <FaTimes /> */}
                         <span>Cancel</span>
                       </button>
                     </div>
@@ -854,7 +857,7 @@ const Profile = () => {
                       value={formData.name}
                       onChange={handleInputChange}
                       disabled={!isEditing}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500 disabled:bg-gray-100"
+                      className="w-full px-3 py-2 border border-black-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500 disabled:bg-white"
                     />
                   </div>
 
@@ -868,7 +871,7 @@ const Profile = () => {
                       value={formData.email}
                       onChange={handleInputChange}
                       disabled={!isEditing}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500 disabled:bg-gray-100"
+                      className="w-full px-3 py-2 border border-black-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500 disabled:bg-white"
                     />
                   </div>
 
@@ -882,7 +885,7 @@ const Profile = () => {
                       value={formData.phone}
                       onChange={handleInputChange}
                       disabled={!isEditing}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500 disabled:bg-gray-100"
+                      className="w-full px-3 py-2 border border-black-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500 disabled:bg-white"
                     />
                   </div>
 
@@ -901,7 +904,7 @@ const Profile = () => {
                           value={formData.address.street}
                           onChange={handleInputChange}
                           disabled={!isEditing}
-                          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500 disabled:bg-gray-100"
+                          className="w-full px-3 py-2 border border-black-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500 disabled:bg-white"
                         />
                       </div>
 
@@ -915,7 +918,7 @@ const Profile = () => {
                           value={formData.address.city}
                           onChange={handleInputChange}
                           disabled={!isEditing}
-                          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500 disabled:bg-gray-100"
+                          className="w-full px-3 py-2 border border-black-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500 disabled:bg-white"
                         />
                       </div>
 
@@ -929,7 +932,7 @@ const Profile = () => {
                           value={formData.address.state}
                           onChange={handleInputChange}
                           disabled={!isEditing}
-                          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500 disabled:bg-gray-100"
+                          className="w-full px-3 py-2 border border-black-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500 disabled:bg-white"
                         />
                       </div>
 
@@ -943,7 +946,7 @@ const Profile = () => {
                           value={formData.address.zipCode}
                           onChange={handleInputChange}
                           disabled={!isEditing}
-                          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500 disabled:bg-gray-100"
+                          className="w-full px-3 py-2 border border-black-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500 disabled:bg-white"
                         />
                       </div>
 
@@ -957,7 +960,7 @@ const Profile = () => {
                           value={formData.address.country}
                           onChange={handleInputChange}
                           disabled={!isEditing}
-                          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500 disabled:bg-gray-100"
+                          className="w-full px-3 py-2 border border-black-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500 disabled:bg-white"
                         />
                       </div>
                     </div>
@@ -969,22 +972,22 @@ const Profile = () => {
             {/* Orders Tab */}
             {activeTab === "orders" && (
               <div className="space-y-6">
-                <h3 className="text-2xl font-semibold text-gray-800">
+                <h3 className="text-[20px] font-semibold text-gray-800">
                   Order History
                 </h3>
 
                 {userOrders.length === 0 ? (
                   <div className="bg-white rounded-lg shadow-md p-8 text-center">
                     <FaShoppingBag className="mx-auto text-4xl text-gray-300 mb-4" />
-                    <h4 className="text-lg font-medium text-gray-600 mb-2">
+                    <h4 className="text-[18px] font-medium text-gray-600 mb-2">
                       No orders yet
                     </h4>
-                    <p className="text-gray-500 mb-4">
+                    <p className="text-[14px] text-gray-500 mb-4">
                       Start shopping to see your order history here.
                     </p>
                     <button
                       onClick={() => navigate("/products")}
-                      className="bg-green-600 text-white px-6 py-2 rounded hover:bg-green-700"
+                      className="text-[14px] bg-[#232323] text-white px-4 py-2 hover:bg-[#ffffff] hover:text-[#232323] border border-[#232323] hover:border-[#232323] transition-colors duration-300"
                     >
                       Browse Products
                     </button>
@@ -1074,8 +1077,8 @@ const Profile = () => {
               <div className="space-y-6">
                 <div className="bg-white rounded-lg shadow-md p-6">
                   <div className="mb-6 flex items-center gap-2">
-                    <FaMapMarkerAlt className="text-gray-500" />
-                    <h3 className="text-2xl font-semibold text-gray-800">
+                    {/* <FaMapMarkerAlt className="text-gray-500" /> */}
+                    <h3 className="text-[20px] font-semibold text-gray-800">
                       Address Book
                     </h3>
                   </div>
@@ -1083,7 +1086,7 @@ const Profile = () => {
                   <div className="grid gap-6 lg:grid-cols-[1.1fr_0.9fr]">
                     <div className="space-y-4">
                       {addressBook.length === 0 ? (
-                        <div className="rounded-lg border border-dashed border-gray-300 p-8 text-center text-gray-500">
+                        <div className="rounded-lg border border-dashed border-gray-300 p-8 text-center text-[14px] text-gray-500">
                           No saved addresses yet.
                         </div>
                       ) : (
@@ -1146,7 +1149,7 @@ const Profile = () => {
                     </div>
 
                     <div className="rounded-lg border border-gray-200 p-5">
-                      <h4 className="mb-4 text-lg font-medium text-gray-800">
+                      <h4 className="mb-4 text-[18px] font-medium text-gray-800">
                         {isEditingAddress ? "Edit Address" : "Add New Address"}
                       </h4>
                       <div className="space-y-4">
@@ -1156,7 +1159,7 @@ const Profile = () => {
                           value={addressForm.label}
                           onChange={handleAddressFieldChange}
                           placeholder="Label (e.g. Home, Office)"
-                          className="w-full rounded-md border border-gray-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-green-500"
+                          className="w-full rounded-md border border-gray-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-green-500 text-[14px]"
                         />
                         <input
                           type="text"
@@ -1164,7 +1167,7 @@ const Profile = () => {
                           value={addressForm.street}
                           onChange={handleAddressFieldChange}
                           placeholder="Street address"
-                          className="w-full rounded-md border border-gray-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-green-500"
+                          className="w-full rounded-md border border-gray-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-green-500 text-[14px]"
                         />
                         <div className="grid grid-cols-2 gap-4">
                           <input
@@ -1173,7 +1176,7 @@ const Profile = () => {
                             value={addressForm.city}
                             onChange={handleAddressFieldChange}
                             placeholder="City"
-                            className="w-full rounded-md border border-gray-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-green-500"
+                            className="w-full rounded-md border border-gray-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-green-500 text-[14px]"
                           />
                           <input
                             type="text"
@@ -1181,7 +1184,7 @@ const Profile = () => {
                             value={addressForm.state}
                             onChange={handleAddressFieldChange}
                             placeholder="State"
-                            className="w-full rounded-md border border-gray-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-green-500"
+                            className="w-full rounded-md border border-gray-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-green-500 text-[14px]"
                           />
                         </div>
                         <div className="grid grid-cols-2 gap-4">
@@ -1191,7 +1194,7 @@ const Profile = () => {
                             value={addressForm.zipCode}
                             onChange={handleAddressFieldChange}
                             placeholder="ZIP code"
-                            className="w-full rounded-md border border-gray-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-green-500"
+                            className="w-full rounded-md border border-gray-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-green-500 text-[14px]"
                           />
                           <input
                             type="text"
@@ -1199,10 +1202,10 @@ const Profile = () => {
                             value={addressForm.country}
                             onChange={handleAddressFieldChange}
                             placeholder="Country"
-                            className="w-full rounded-md border border-gray-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-green-500"
+                            className="w-full rounded-md border border-gray-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-green-500 text-[14px]"
                           />
                         </div>
-                        <label className="flex items-center gap-2 text-sm text-gray-700">
+                        <label className="flex items-center gap-2 text-[14px] text-gray-700">
                           <input
                             type="checkbox"
                             name="isDefault"
@@ -1216,7 +1219,7 @@ const Profile = () => {
                             type="button"
                             onClick={handleSaveAddress}
                             disabled={isLoading}
-                            className="rounded bg-green-600 px-4 py-2 text-white hover:bg-green-700 disabled:opacity-50"
+                            className="bg-[#232323] px-4 py-2 text-white hover:bg-[#ffffff] hover:border-[#232323] hover:text-[#232323] disabled:opacity-50 transition-colors duration-300"
                           >
                             {isEditingAddress
                               ? "Update Address"
@@ -1243,7 +1246,7 @@ const Profile = () => {
             {activeTab === "wishlist" && (
               <div className="bg-white rounded-lg shadow-md p-6">
                 <div className="mb-6 flex items-center justify-between gap-4">
-                  <h3 className="text-2xl font-semibold text-gray-800">
+                  <h3 className="text-[20px] font-semibold text-gray-800">
                     Wishlist
                   </h3>
                   {wishlistItems.length > 0 ? (
@@ -1259,15 +1262,15 @@ const Profile = () => {
                 {wishlistItems.length === 0 ? (
                   <div className="text-center py-12">
                     <FaHeart className="mx-auto text-4xl text-gray-300 mb-4" />
-                    <h4 className="text-lg font-medium text-gray-600 mb-2">
+                    <h4 className="text-[18px] font-medium text-gray-600 mb-2">
                       Your wishlist is empty
                     </h4>
-                    <p className="text-gray-500 mb-4">
+                    <p className="text-[14px] text-gray-500 mb-4">
                       Save items you love for later.
                     </p>
                     <button
                       onClick={() => navigate("/products")}
-                      className="bg-green-600 text-white px-6 py-2 rounded hover:bg-green-700"
+                      className="text-[14px] bg-[#232323] text-white px-4 py-2 hover:bg-[#ffffff] hover:text-[#232323] border border-[#232323] hover:border-[#232323] transition-colors duration-300"
                     >
                       Browse Products
                     </button>
@@ -1319,21 +1322,21 @@ const Profile = () => {
 
             {activeTab === "recently-viewed" && (
               <div className="bg-white rounded-lg shadow-md p-6">
-                <h3 className="mb-6 text-2xl font-semibold text-gray-800">
+                <h3 className="mb-6 text-[20px] font-semibold text-gray-800">
                   Recently Viewed
                 </h3>
                 {recentlyViewedItems.length === 0 ? (
                   <div className="text-center py-12">
                     <FaClock className="mx-auto mb-4 text-4xl text-gray-300" />
-                    <h4 className="mb-2 text-lg font-medium text-gray-600">
+                    <h4 className="mb-2 text-[18px] font-medium text-gray-600">
                       No recently viewed products
                     </h4>
-                    <p className="mb-4 text-gray-500">
+                    <p className="text-[14px] mb-4 text-gray-500">
                       Products you open will appear here for quick access.
                     </p>
                     <button
                       onClick={() => navigate("/products")}
-                      className="rounded bg-green-600 px-6 py-2 text-white hover:bg-green-700"
+                      className="text-[14px] bg-[#232323] text-white px-4 py-2 hover:bg-[#ffffff] hover:text-[#232323] border border-[#232323] hover:border-[#232323] transition-colors duration-300"
                     >
                       Browse Products
                     </button>
@@ -1383,7 +1386,7 @@ const Profile = () => {
             {/* Settings Tab */}
             {activeTab === "settings" && (
               <div className="bg-white rounded-lg shadow-md p-6">
-                <h3 className="text-2xl font-semibold text-gray-800 mb-6">
+                <h3 className="text-[20px] font-semibold text-gray-800 mb-6">
                   Account Settings
                 </h3>
 
@@ -1391,7 +1394,7 @@ const Profile = () => {
                   <div>
                     <div className="mb-4 flex items-center gap-2">
                       <FaBell className="text-gray-500" />
-                      <h4 className="text-lg font-medium">Notifications</h4>
+                      <h4 className="text-[18px] font-medium">Notifications</h4>
                     </div>
                     <div className="space-y-3 rounded-lg border border-gray-200 p-4">
                       {[
@@ -1403,11 +1406,13 @@ const Profile = () => {
                           key={key}
                           className="flex items-center justify-between gap-4"
                         >
-                          <span className="text-sm text-gray-700">{label}</span>
+                          <span className="text-[14px] text-gray-700">
+                            {label}
+                          </span>
                           <button
                             type="button"
                             onClick={() => handleTogglePreference(key)}
-                            className={`relative h-6 w-11 rounded-full transition-colors ${
+                            className={`relative h-6 w-10 rounded-full transition-colors ${
                               preferences[key] ? "bg-green-600" : "bg-gray-300"
                             }`}
                             aria-pressed={preferences[key]}
@@ -1426,14 +1431,14 @@ const Profile = () => {
                   </div>
 
                   <div>
-                    <h4 className="text-lg font-medium mb-4">Security</h4>
+                    <h4 className="text-[18px] font-medium mb-4">Security</h4>
                     <div className="rounded-lg border border-gray-200 p-4">
                       <div className="flex items-start justify-between gap-4">
                         <div className="flex-1">
-                          <p className="text-sm font-medium text-gray-800">
+                          <p className="text-[16px] font-medium text-gray-800">
                             Two-factor authentication (Email OTP)
                           </p>
-                          <p className="text-xs text-gray-500 mt-1">
+                          <p className="text-[14px] text-gray-500 mt-1">
                             When enabled, login requires a 6-digit code sent to
                             your email.
                           </p>
@@ -1445,7 +1450,7 @@ const Profile = () => {
                                 setTwoFactorPassword(e.target.value)
                               }
                               placeholder="Current password"
-                              className="w-full rounded-md border border-gray-300 px-3 py-2 pr-10 text-sm focus:outline-none focus:ring-2 focus:ring-green-500"
+                              className="w-full rounded-md border border-gray-300 px-3 py-2 pr-10 text-sm focus:outline-none focus:ring-2 focus:ring-green-500 text-[14px"
                             />
                             <button
                               type="button"
@@ -1459,7 +1464,11 @@ const Profile = () => {
                                   : "Show current password"
                               }
                             >
-                              {showTwoFactorPassword ? <FaEyeSlash /> : <FaEye />}
+                              {showTwoFactorPassword ? (
+                                <FaEyeSlash />
+                              ) : (
+                                <FaEye />
+                              )}
                             </button>
                           </div>
                         </div>
@@ -1485,7 +1494,7 @@ const Profile = () => {
                   </div>
 
                   <div>
-                    <h4 className="text-lg font-medium mb-4">
+                    <h4 className="text-[18px] font-medium mb-4">
                       Change Password
                     </h4>
                     <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
@@ -1498,7 +1507,7 @@ const Profile = () => {
                           name="currentPassword"
                           value={passwordForm.currentPassword}
                           onChange={handlePasswordFieldChange}
-                          className="w-full rounded-md border border-gray-300 px-3 py-2 pr-10 focus:outline-none focus:ring-2 focus:ring-green-500"
+                          className="w-full rounded-md border border-gray-300 px-3 py-2 pr-10 focus:outline-none focus:ring-2 focus:ring-green-500 text-[14px]"
                         />
                         <button
                           type="button"
@@ -1526,7 +1535,7 @@ const Profile = () => {
                           name="newPassword"
                           value={passwordForm.newPassword}
                           onChange={handlePasswordFieldChange}
-                          className="w-full rounded-md border border-gray-300 px-3 py-2 pr-10 focus:outline-none focus:ring-2 focus:ring-green-500"
+                          className="w-full rounded-md border border-gray-300 px-3 py-2 pr-10 focus:outline-none focus:ring-2 focus:ring-green-500 text-[14px]"
                         />
                         <button
                           type="button"
@@ -1556,7 +1565,7 @@ const Profile = () => {
                           name="confirmPassword"
                           value={passwordForm.confirmPassword}
                           onChange={handlePasswordFieldChange}
-                          className="w-full rounded-md border border-gray-300 px-3 py-2 pr-10 focus:outline-none focus:ring-2 focus:ring-green-500"
+                          className="w-full rounded-md border border-gray-300 px-3 py-2 pr-10 focus:outline-none focus:ring-2 focus:ring-green-500 text-[14px]"
                         />
                         <button
                           type="button"
@@ -1581,7 +1590,7 @@ const Profile = () => {
                         type="button"
                         onClick={handleChangePassword}
                         disabled={isLoading}
-                        className="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700 disabled:opacity-50"
+                        className="text-[14px] bg-[#232323] text-white px-4 py-2 hover:bg-[#ffffff] hover:text-[#232323] border border-[#232323] hover:border-[#232323] transition-colors duration-300 disabled:opacity-50"
                       >
                         {isLoading ? "Updating..." : "Update Password"}
                       </button>
@@ -1589,11 +1598,11 @@ const Profile = () => {
                   </div>
 
                   <div className="border-t pt-6">
-                    <h4 className="text-lg font-medium mb-4 text-red-600">
+                    <h4 className="text-[18px] font-medium mb-4 text-red-600">
                       Danger Zone
                     </h4>
                     <div className="space-y-4 rounded-lg border border-red-200 bg-red-50 p-4">
-                      <p className="text-sm text-red-700">
+                      <p className="text-[14px] text-red-700">
                         Deleting your account is permanent. Your profile and
                         saved account access will be removed.
                       </p>
@@ -1633,18 +1642,20 @@ const Profile = () => {
                           }))
                         }
                         placeholder='Type "DELETE" to confirm'
-                        className="max-w-md w-full rounded-md border border-red-200 bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-red-500"
+                        className="max-w-md w-full rounded-md border border-red-200 bg-white px-3 py-2 text-[14px] focus:outline-none focus:ring-2 focus:ring-red-500 mb-3"
                       />
-                      <button
-                        type="button"
-                        onClick={handleDeleteAccount}
-                        disabled={isLoading}
-                        className="bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700 disabled:opacity-50"
-                      >
-                        {isLoading ? "Deleting..." : "Delete Account"}
-                      </button>
+                      <div className="flex justify-end">
+                        <button
+                          type="button"
+                          onClick={handleDeleteAccount}
+                          disabled={isLoading}
+                          className="bg-red-800 text-white px-4 py-2 hover:bg-[#ffffff] hover:text-red-800 hover:border-red-800 disabled:opacity-50 transition-colors duration-300 text-[14px]"
+                        >
+                          {isLoading ? "Deleting..." : "Delete Account"}
+                        </button>
+                      </div>
                     </div>
-                    <p className="text-sm text-gray-500 mt-2">
+                    <p className="text-[14px] text-gray-500 mt-2">
                       This action cannot be undone. All your data will be
                       permanently deleted.
                     </p>
@@ -1660,4 +1671,3 @@ const Profile = () => {
 };
 
 export default Profile;
-

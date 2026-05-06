@@ -3,7 +3,8 @@
 @tailwind utilities;
 
 :root {
-  font-family: Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
+  font-family:
+    "Poppins", sans-serif, Inter, system-ui, Avenir, Helvetica, Arial;
   line-height: 1.5;
   font-weight: 400;
 
@@ -24,6 +25,8 @@ body {
   min-height: 100vh;
   background-color: #ffffff;
   color: #213547;
+  font-family:
+    "Poppins", sans-serif, Inter, system-ui, Avenir, Helvetica, Arial;
 }
 
 #root {

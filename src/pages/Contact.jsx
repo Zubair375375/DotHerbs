@@ -69,13 +69,13 @@ const Contact = () => {
         <div className="lg:col-span-2">
           <div className="bg-white shadow-lg rounded-3xl p-8 sm:p-10">
             <div className="mb-8">
-              <p className="text-sm uppercase tracking-[0.24em] text-herbs-600 font-semibold">
+              <p className="text-[14px] uppercase tracking-[0.24em] text-herbs-600 font-semibold">
                 Contact Us
               </p>
-              <h1 className="mt-3 text-3xl sm:text-4xl font-semibold text-secondary-900">
+              <h1 className="mt-3 font-semibold text-secondary-900 text-[24px]">
                 We’re here to help.
               </h1>
-              <p className="mt-4 text-secondary-600 leading-7">
+              <p className="text-[14px] mt-4 text-secondary-600 leading-7">
                 Send us a message and our customer support team will respond as
                 soon as possible. Need help with an order? Use the quick action
                 cards below.
@@ -121,7 +121,7 @@ const Contact = () => {
                   name="email"
                   value={formData.email}
                   onChange={handleChange}
-                //   placeholder="jane@example.com"
+                  //   placeholder="jane@example.com"
                   className="mt-2 block w-full rounded-2xl border border-gray-300 bg-white px-4 py-3 text-sm text-secondary-900 shadow-sm focus:border-herbs-500 focus:ring-herbs-500"
                 />
               </label>

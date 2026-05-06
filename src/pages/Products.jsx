@@ -289,7 +289,7 @@ const Products = () => {
           <aside className="space-y-6">
             <div className="bg-white lg:sticky lg:top-24">
               <div className="mb-5 flex items-center justify-between border-b border-gray-300 pb-4">
-                <h2 className="text-sm font-bold uppercase tracking-[0.12em] text-gray-900">
+                <h2 className="text-[14px] font-bold uppercase tracking-[0.12em] text-gray-900">
                   Categories
                 </h2>
                 <FaChevronUp className="text-xs text-gray-500" />
@@ -314,7 +314,7 @@ const Products = () => {
                     <FaChevronRight />
                   </span>
                   <span
-                    className={`relative inline-block after:absolute after:bottom-[-2px] after:left-0 after:h-px after:bg-current after:transition-all after:duration-300 ${
+                    className={`text-[12px] relative inline-block after:absolute after:bottom-[-2px] after:left-0 after:h-px after:bg-current after:transition-all after:duration-300 ${
                       !filters.category
                         ? "after:w-full"
                         : "after:w-0 group-hover:after:w-full"
@@ -365,7 +365,7 @@ const Products = () => {
             <div className="mb-6 rounded-lg bg-white p-6 shadow-md">
               <div className="flex flex-col gap-4 xl:flex-row xl:items-center xl:justify-between">
                 <div>
-                  <p className="text-gray-600">
+                  <p className="text-gray-600 text-[12px]">
                     {sortedProducts.length} products found
                   </p>
                 </div>
@@ -380,7 +380,7 @@ const Products = () => {
                       onChange={(e) =>
                         handleFilterChange("priceRange", e.target.value)
                       }
-                      className="w-full rounded-md border border-gray-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-green-500 sm:w-[180px]"
+                      className="text-[12px] w-full rounded-md border border-gray-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-green-500 sm:w-[180px]"
                     >
                       <option value="">All Prices</option>
                       <option value="0-25">$0 - $25</option>
@@ -399,7 +399,7 @@ const Products = () => {
                       onChange={(e) =>
                         handleFilterChange("sortBy", e.target.value)
                       }
-                      className="w-full rounded-md border border-gray-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-green-500 sm:w-[220px]"
+                      className="text-[12px] w-full rounded-md border border-gray-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-green-500 sm:w-[220px]"
                     >
                       <option value="name">Name</option>
                       <option value="price-low">Price: Low to High</option>
@@ -496,7 +496,7 @@ const Products = () => {
               </div>
             ) : (
               <div className="py-12 text-center">
-                <p className="text-lg text-gray-500">
+                <p className="text-[14px] text-gray-500">
                   No products found matching your criteria.
                 </p>
                 <button
@@ -508,7 +508,7 @@ const Products = () => {
                       sortBy: "name",
                     })
                   }
-                  className="mt-4 rounded bg-[#68a300] px-4 py-2 text-white hover:bg-[#5f9600]"
+                  className="text-[14px] mt-4 rounded bg-[#68a300] px-4 py-2 text-white hover:bg-[#5f9600]"
                 >
                   Clear Filters
                 </button>

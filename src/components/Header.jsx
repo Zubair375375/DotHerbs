@@ -120,12 +120,12 @@ const Header = () => {
           to={to}
           className={({ isActive }) =>
             compact
-              ? `text-sm font-medium transition-colors ${
+              ? `text-[14px] font-medium transition-colors ${
                   isActive
                     ? "text-[#68a300]"
                     : "text-gray-700 hover:text-[#68a300]"
                 }`
-              : `pb-0.5 transition-colors font-medium text-sm ${
+              : `pb-0.5 transition-colors font-medium text-[14px] ${
                   isActive
                     ? "text-[#68a300] border-b-2 border-[#68a300]"
                     : "text-gray-700 hover:text-[#68a300]"
@@ -148,12 +148,12 @@ const Header = () => {
           to={to}
           className={({ isActive }) =>
             compact
-              ? `inline-flex items-center text-sm font-medium transition-colors ${
+              ? `inline-flex items-center text-[14px] font-medium transition-colors ${
                   isActive || isProductsMenuOpen
                     ? "text-[#68a300]"
                     : "text-gray-700 hover:text-[#68a300]"
                 }`
-              : `inline-flex items-center pb-0.5 transition-colors font-medium text-sm ${
+              : `inline-flex items-center pb-0.5 transition-colors font-medium text-[14px] ${
                   isActive || isProductsMenuOpen
                     ? "text-[#68a300] border-b-2 border-[#68a300]"
                     : "text-gray-700 hover:text-[#68a300]"
@@ -246,7 +246,8 @@ const Header = () => {
                   handleLogout();
                   setIsProfileMenuOpen(false);
                 }}
-                className="w-full px-4 py-3 text-left text-sm text-gray-700 hover:bg-gray-50"
+                className="w-full px-4 py-3 text-left text-sm text-gray-700 hover:bg-gray-50 focus:outline-none border-0"
+                style={{ boxShadow: 'none' }}
               >
                 Logout
               </button>
@@ -398,4 +399,3 @@ const Header = () => {
 };
 
 export default Header;
-
