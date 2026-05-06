@@ -19,7 +19,8 @@ const Register = () => {
   const isAuthenticated = useSelector(selectIsAuthenticated);
 
   const [formData, setFormData] = useState({
-    name: "",
+    firstName: "",
+    lastName: "",
     email: "",
     password: "",
     confirmPassword: "",
@@ -65,7 +66,8 @@ const Register = () => {
 
     // Validation
     if (
-      !formData.name ||
+      !formData.firstName ||
+      !formData.lastName ||
       !formData.email ||
       !formData.password ||
       !formData.confirmPassword
@@ -95,7 +97,8 @@ const Register = () => {
     try {
       const result = await dispatch(
         register({
-          name: formData.name,
+          firstName: formData.firstName,
+          lastName: formData.lastName,
           email: formData.email,
           password: formData.password,
         }),
@@ -134,24 +137,35 @@ const Register = () => {
 
         <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
           <div className="rounded-md shadow-sm space-y-4">
-            <div>
-              <label
-                htmlFor="name"
-                className="block text-sm font-medium text-gray-700"
-              >
-                Full Name
-              </label>
-              <input
-                id="name"
-                name="name"
-                type="text"
-                autoComplete="name"
-                required
-                className="mt-1 appearance-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-green-500 focus:border-[#68a300] sm:text-sm"
-                placeholder="Enter your full name"
-                value={formData.name}
-                onChange={handleChange}
-              />
+            <div className="flex gap-2">
+              <div className="flex-1">
+                <label htmlFor="firstName" className="block text-sm font-medium text-gray-700">First Name</label>
+                <input
+                  id="firstName"
+                  name="firstName"
+                  type="text"
+                  autoComplete="given-name"
+                  required
+                  className="mt-1 appearance-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-green-500 focus:border-[#68a300] sm:text-sm"
+                  placeholder="First name"
+                  value={formData.firstName}
+                  onChange={handleChange}
+                />
+              </div>
+              <div className="flex-1">
+                <label htmlFor="lastName" className="block text-sm font-medium text-gray-700">Last Name</label>
+                <input
+                  id="lastName"
+                  name="lastName"
+                  type="text"
+                  autoComplete="family-name"
+                  required
+                  className="mt-1 appearance-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-green-500 focus:border-[#68a300] sm:text-sm"
+                  placeholder="Last name"
+                  value={formData.lastName}
+                  onChange={handleChange}
+                />
+              </div>
             </div>
 
             <div>

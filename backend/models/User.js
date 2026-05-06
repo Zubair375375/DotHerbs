@@ -48,12 +48,22 @@ const addressBookEntrySchema = new mongoose.Schema(
 
 const userSchema = new mongoose.Schema(
   {
-    name: {
+    firstName: {
       type: String,
-      required: [true, "Name is required"],
+      required: [true, "First name is required"],
       trim: true,
-      maxlength: [50, "Name cannot be more than 50 characters"],
+      maxlength: [30, "First name cannot be more than 30 characters"],
     },
+    lastName: {
+      type: String,
+      required: [true, "Last name is required"],
+      trim: true,
+      maxlength: [30, "Last name cannot be more than 30 characters"],
+    },
+    // Virtual for full name
+    userSchema.virtual('name').get(function() {
+      return `${this.firstName} ${this.lastName}`.trim();
+    });
     email: {
       type: String,
       required: [true, "Email is required"],

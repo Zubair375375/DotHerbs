@@ -142,7 +142,8 @@ export function formatOrdersForExport(orders) {
 export function formatUsersForExport(users) {
   return users.map((u) => ({
     ID: u._id,
-    Name: u.name,
+    "First Name": u.firstName || (u.name ? u.name.split(" ")[0] : ""),
+    "Last Name": u.lastName || (u.name ? u.name.split(" ").slice(1).join(" ") : ""),
     Email: u.email,
     Role: u.role,
     "Joined At": u.createdAt ? new Date(u.createdAt).toLocaleDateString() : "",
