@@ -69,12 +69,7 @@ const Products = () => {
       }));
     }
 
-    return [
-      {
-        _id: "fallback-products-banner",
-        image: "/images/banners/hero_banner1.jpg",
-      },
-    ];
+    return [];
   }, [API_ORIGIN, productBanners]);
 
   const loopedBannerSlides = useMemo(() => {
@@ -221,7 +216,7 @@ const Products = () => {
   return (
     <div>
       <section className="relative mb-8 overflow-hidden">
-        <div className="relative h-[220px] sm:h-[280px] lg:h-[340px]">
+        <div className="relative h-[320px] sm:h-[420px] lg:h-[720px]">
           <div
             className={`flex h-full ${
               isBannerTransition
@@ -299,10 +294,10 @@ const Products = () => {
                 <button
                   type="button"
                   onClick={() => handleFilterChange("category", "")}
-                  className={`group flex w-full items-center gap-3 border-0 py-2 text-left text-[15px] outline-none ring-0 transition hover:border-0 hover:outline-none hover:ring-0 focus:outline-none focus:ring-0 ${
+                  className={`group flex w-full items-center gap-3 border-0 py-2 text-left text-[12px] outline-none ring-0 transition hover:border-0 hover:outline-none hover:ring-0 focus:outline-none focus:ring-0 ${
                     !filters.category
-                      ? "font-medium text-[#c3832d]"
-                      : "text-gray-900 hover:text-[#c3832d]"
+                      ? "font-medium text-[#68a300]"
+                      : "text-gray-900 hover:text-[#68a300]"
                   }`}
                 >
                   <span
@@ -330,10 +325,10 @@ const Products = () => {
                     onClick={() =>
                       handleFilterChange("category", category.value)
                     }
-                    className={`group flex w-full items-center gap-3 border-0 py-2 text-left text-[15px] outline-none ring-0 transition hover:border-0 hover:outline-none hover:ring-0 focus:outline-none focus:ring-0 ${
+                    className={`group flex w-full items-center gap-3 border-0 py-2 text-left text-[12px] outline-none ring-0 transition hover:border-0 hover:outline-none hover:ring-0 focus:outline-none focus:ring-0 ${
                       filters.category === category.value
-                        ? "font-medium text-[#c3832d]"
-                        : "text-gray-900 hover:text-[#c3832d]"
+                        ? "font-medium text-[#68a300]"
+                        : "text-gray-900 hover:text-[#68a300]"
                     }`}
                   >
                     <span
@@ -508,7 +503,7 @@ const Products = () => {
                       sortBy: "name",
                     })
                   }
-                  className="text-[14px] mt-4 rounded bg-[#68a300] px-4 py-2 text-white hover:bg-[#5f9600]"
+                  className="mt-4 bg-[#ffffff] px-4 py-2 text-[14px] text-[#232323] border border-[#232323] hover:bg-[#232323] hover:text-[#ffffff] hover:border-[#232323] transition-colors duration-300"
                 >
                   Clear Filters
                 </button>
