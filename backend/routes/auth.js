@@ -80,9 +80,7 @@ const resendVerificationValidation = [
 ];
 
 const verifyTwoFactorValidation = [
-  body("challengeToken")
-    .notEmpty()
-    .withMessage("Challenge token is required"),
+  body("challengeToken").notEmpty().withMessage("Challenge token is required"),
   body("code")
     .isLength({ min: 6, max: 6 })
     .withMessage("Verification code must be 6 digits")
@@ -90,9 +88,7 @@ const verifyTwoFactorValidation = [
     .withMessage("Verification code must be numeric"),
 ];
 
-const resetPasswordValidation = [
-  passwordRules,
-];
+const resetPasswordValidation = [passwordRules];
 
 // Routes
 router.post("/register", authLimiter, registerValidation, register);
@@ -104,7 +100,12 @@ router.post(
   resendVerification,
 );
 router.post("/login", authLimiter, loginValidation, login);
-router.post("/verify-2fa", authLimiter, verifyTwoFactorValidation, verifyTwoFactor);
+router.post(
+  "/verify-2fa",
+  authLimiter,
+  verifyTwoFactorValidation,
+  verifyTwoFactor,
+);
 router.post("/refresh", refreshToken);
 router.post("/logout", protect, logout);
 router.post(

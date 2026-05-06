@@ -190,7 +190,6 @@ export const register = async (req, res) => {
     });
   }
 
-
   const firstName = req.body.firstName?.trim();
   const lastName = req.body.lastName?.trim();
   const email = normalizedEmail(req.body.email);

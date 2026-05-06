@@ -266,9 +266,11 @@ const Products = () => {
                     type="button"
                     onClick={() => setCurrentBanner(index)}
                     className={`w-3 h-3 rounded-full border border-black/70 transition p-0 m-0
-                      ${index === currentBanner % bannerSlides.length
-                        ? "bg-[#232323]"
-                        : "bg-none"}
+                      ${
+                        index === currentBanner % bannerSlides.length
+                          ? "bg-[#232323]"
+                          : "bg-none"
+                      }
                     `}
                     aria-label={`Go to products banner ${index + 1}`}
                   />
