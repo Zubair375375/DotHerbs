@@ -190,7 +190,9 @@ export const register = async (req, res) => {
     });
   }
 
-  const name = req.body.name?.trim();
+
+  const firstName = req.body.firstName?.trim();
+  const lastName = req.body.lastName?.trim();
   const email = normalizedEmail(req.body.email);
   const { password } = req.body;
 
@@ -204,7 +206,8 @@ export const register = async (req, res) => {
     }
 
     const user = await User.create({
-      name,
+      firstName,
+      lastName,
       email,
       password,
       isEmailVerified: process.env.NODE_ENV !== "production", // auto-verify in dev
