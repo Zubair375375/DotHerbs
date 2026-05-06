@@ -293,7 +293,7 @@ const About = () => {
       </section>
 
       {/* Stats */}
-      <section className="border-b border-gray-100">
+      {/* <section className="border-b border-gray-100">
         <div className="max-w-6xl mx-auto px-6 py-14 grid grid-cols-2 md:grid-cols-4 gap-8">
           {stats.map((stat) => (
             <div key={stat.label} className="text-center">
@@ -304,10 +304,10 @@ const About = () => {
             </div>
           ))}
         </div>
-      </section>
+      </section> */}
 
       {/* Manufacturing Showcase */}
-      <section className="bg-[#ffffff] py-14 lg:py-16">
+      {/* <section className="bg-[#ffffff] py-14 lg:py-16">
         <div className="mx-auto max-w-[1500px] px-4 sm:px-6">
           <div className="text-center">
             <h2 className="text-4xl font-extrabold tracking-wide text-[#68a300] sm:text-6xl">
@@ -376,7 +376,7 @@ const About = () => {
             </div>
           </div>
         </div>
-      </section>
+      </section> */}
 
       {/* Facility Detail */}
       <section className="bg-[#ffffff] py-14">
@@ -407,11 +407,11 @@ const About = () => {
             </div>
 
             <div className="lg:col-span-6">
-              <h3 className="text-3xl font-extrabold uppercase leading-tight tracking-wide text-[#152238] sm:text-4xl">
+              <h3 className="text-[24px] font-extrabold uppercase leading-tight tracking-wide text-[#152238] sm:text-[24px">
                 {facilitySection.heading}
               </h3>
               <div className="mt-5 h-1 w-36 rounded-full bg-[#5b3f95]" />
-              <p className="mt-6 text-lg leading-relaxed text-[#2d3648]">
+              <p className="mt-6 text-[14px] leading-relaxed text-[#2d3648]">
                 {facilitySection.description}
               </p>
             </div>
@@ -423,11 +423,11 @@ const About = () => {
       <section className="bg-[#ffffff] py-16">
         <div className="mx-auto grid max-w-7xl items-center gap-10 px-6 lg:grid-cols-2">
           <div>
-            <h3 className="text-3xl font-extrabold uppercase tracking-wide text-[#152238] sm:text-4xl">
+            <h3 className="font-extrabold uppercase tracking-wide text-[#152238] text-[24px]">
               {scienceSection.heading}
             </h3>
             <div className="mt-5 h-1 w-28 rounded-full bg-[#5b3f95]" />
-            <p className="mt-6 max-w-xl text-lg leading-relaxed text-[#2d3648]">
+            <p className="mt-6 max-w-xl text-[14px] leading-relaxed text-[#2d3648]">
               {scienceSection.description}
             </p>
 
@@ -474,11 +474,11 @@ const About = () => {
       <section className="bg-[#ffffff] py-16">
         <div className="mx-auto max-w-7xl px-6">
           <div className="mx-auto max-w-5xl text-center">
-            <h3 className="text-4xl font-extrabold uppercase tracking-[0.08em] text-[#152238]">
+            <h3 className="font-extrabold uppercase tracking-[0.08em] text-[#152238] text-[24px]">
               {whyNutrifactorSection.heading}
             </h3>
             <div className="mx-auto mt-5 h-1 w-44 rounded-full bg-[#5b3f95]" />
-            <p className="mt-6 text-xl leading-relaxed text-[#2d3648]">
+            <p className="mt-6 text-[14px] leading-relaxed text-[#2d3648]">
               {whyNutrifactorSection.description}
             </p>
           </div>
@@ -509,13 +509,13 @@ const About = () => {
       {/* Mission */}
       <section className="max-w-6xl mx-auto px-6 py-20 grid md:grid-cols-2 gap-16 items-center">
         <div>
-          <span className="inline-block bg-[#68a300]/10 text-[#4a7a00] text-sm font-semibold px-4 py-1.5 rounded-full mb-4">
+          <span className="inline-block bg-[#68a300]/10 text-[#4a7a00] text-[12px] font-semibold px-4 py-1.5 rounded-full mb-4">
             Our Mission
           </span>
-          <h2 className="text-4xl font-bold text-gray-900 mb-6 leading-snug">
+          <h2 className="font-bold text-gray-900 mb-6 leading-snug text-[24px]">
             {missionSection.heading}
           </h2>
-          <p className="text-gray-600 text-lg leading-relaxed">
+          <p className="text-gray-600 text-[14px] leading-relaxed">
             {missionSection.description}
           </p>
         </div>
@@ -549,7 +549,7 @@ const About = () => {
       <section className="bg-[#ffffff] py-16">
         <div className="mx-auto max-w-6xl px-6">
           <div className="text-center">
-            <h3 className="text-2xl font-extrabold uppercase tracking-[0.08em] text-[#152238] sm:text-3xl">
+            <h3 className="font-extrabold uppercase tracking-[0.08em] text-[#152238] text-[24px]">
               {healthPrioritySection.heading}
             </h3>
             <div className="mx-auto mt-5 h-1 w-44 rounded-full bg-[#5b3f95]" />
@@ -562,10 +562,10 @@ const About = () => {
                   key={`${item.title}-${index}`}
                   className="rounded-2xl bg-gray-50 p-5"
                 >
-                  <h4 className="text-base font-extrabold uppercase tracking-[0.04em] text-[#152238]">
+                  <h4 className="font-extrabold uppercase tracking-[0.04em] text-[#152238] text-[18px]">
                     {item.title || "No Content"}
                   </h4>
-                  <p className="mt-2.5 text-base leading-relaxed text-[#2d3648]">
+                  <p className="mt-2.5 text-[14px] leading-relaxed text-[#2d3648]">
                     {item.description ||
                       "Section description is not available right now."}
                   </p>
@@ -615,10 +615,10 @@ const About = () => {
       <section className="bg-gray-50 py-20">
         <div className="max-w-6xl mx-auto px-6">
           <div className="text-center mb-14">
-            <span className="inline-block bg-[#68a300]/10 text-[#4a7a00] text-sm font-semibold px-4 py-1.5 rounded-full mb-4">
+            <span className="inline-block bg-[#68a300]/10 text-[#4a7a00] text-[12px] font-semibold px-4 py-1.5 rounded-full mb-4">
               What We Stand For
             </span>
-            <h2 className="text-4xl font-bold text-gray-900">
+            <h2 className="font-bold text-gray-900 text-[24px]">
               Our Core Values
             </h2>
           </div>
@@ -649,7 +649,7 @@ const About = () => {
           <span className="inline-block bg-[#68a300]/10 text-[#4a7a00] text-sm font-semibold px-4 py-1.5 rounded-full mb-4">
             The People Behind the Plants
           </span>
-          <h2 className="text-4xl font-bold text-gray-900">Meet Our Team</h2>
+          <h2 className="font-bold text-gray-900 text-[24px]">Meet Our Team</h2>
         </div>
         {teamMembers.length > 0 ? (
           <div className="flex flex-wrap justify-center gap-10">
@@ -713,7 +713,7 @@ const About = () => {
       </section>
 
       {/* CTA */}
-      <section className="max-w-4xl mx-auto px-6 py-20 text-center">
+      {/* <section className="max-w-4xl mx-auto px-6 py-20 text-center">
         <FaUsers className="w-12 h-12 text-[#68a300] mx-auto mb-5 opacity-80" />
         <h2 className="text-4xl font-bold text-gray-900 mb-5">
           Join the Dot-Herbs Community
@@ -737,10 +737,9 @@ const About = () => {
             Contact Us
           </Link>
         </div>
-      </section>
+      </section> */}
     </div>
   );
 };
 
 export default About;
-

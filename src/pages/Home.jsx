@@ -195,7 +195,7 @@ const Home = () => {
     <div className="min-h-screen">
       {/* Hero */}
       <section className="relative overflow-hidden">
-        <div className="relative h-[320px] sm:h-[420px] lg:h-[560px]">
+        <div className="relative h-[320px] sm:h-[420px] lg:h-[720px]">
           <div
             className={`flex h-full ${isTransitionEnabled ? "transition-transform duration-700 ease-in-out" : ""}`}
             style={{ transform: `translateX(-${currentSlide * 100}%)` }}
@@ -299,7 +299,13 @@ const Home = () => {
         <div className="max-w-7xl mx-auto">
           <div className="mb-12 flex items-center justify-center gap-6">
             <span className="hidden h-px flex-1 bg-[#1f2937] md:block" />
-            <h2 className="text-center text-sm font-extrabold uppercase tracking-[0.06em] text-[#0f1f34] sm:text-base md:text-lg">
+            <h2
+              className="text-center font-extrabold uppercase tracking-[0.06em] text-[#232323] font-sans"
+              style={{
+                fontFamily: "Poppins, sans-serif, Inter, system-ui",
+                fontSize: "16px",
+              }}
+            >
               Herbal Choice For Your Health
             </h2>
             <span className="hidden h-px flex-1 bg-[#1f2937] md:block" />
@@ -335,7 +341,7 @@ const Home = () => {
           <div className="mt-10 text-center">
             <Link
               to="/products"
-              className="inline-flex items-center justify-center rounded-full bg-[#68a300] px-7 py-3 text-sm font-semibold text-white transition hover:bg-[#5f9600]"
+              className="inline-flex items-center justify-center bg-[#232323] border border-[#232323] text-white px-4 py-2 text-[14px] font-semibold text-black transition hover:bg-[#ffffff] hover:text-black hover:border hover:border-[#232323]"
             >
               View All Products
             </Link>
@@ -349,23 +355,51 @@ const Home = () => {
       {/* Features */}
       <section className="py-16 bg-white grid grid-cols-1 md:grid-cols-4 gap-8 text-center px-6">
         <div>
-          <MdEco className="text-3xl mx-auto text-[#68a300]" />
-          <h3>100% Organic</h3>
+          <MdEco className="text-5xl mx-auto text-[#68a300] my-3" />
+          <h3
+            style={{
+              fontFamily: "Poppins, sans-serif, Inter, system-ui",
+              fontSize: "16px",
+            }}
+          >
+            100% Organic
+          </h3>
         </div>
 
         <div>
-          <MdShield className="text-3xl mx-auto text-[#68a300]" />
-          <h3>Quality Assured</h3>
+          <MdShield className="text-5xl mx-auto text-[#68a300] my-3" />
+          <h3
+            style={{
+              fontFamily: "Poppins, sans-serif, Inter, system-ui",
+              fontSize: "16px",
+            }}
+          >
+            Quality Assured
+          </h3>
         </div>
 
         <div>
-          <MdLocalShipping className="text-3xl mx-auto text-[#68a300]" />
-          <h3>Fast Shipping</h3>
+          <MdLocalShipping className="text-5xl mx-auto text-[#68a300] my-3" />
+          <h3
+            style={{
+              fontFamily: "Poppins, sans-serif, Inter, system-ui",
+              fontSize: "16px",
+            }}
+          >
+            Fast Shipping
+          </h3>
         </div>
 
         <div>
-          <MdFavorite className="text-3xl mx-auto text-[#68a300]" />
-          <h3>Customer Care</h3>
+          <MdFavorite className="text-5xl mx-auto text-[#68a300] my-3" />
+          <h3
+            style={{
+              fontFamily: "Poppins, sans-serif, Inter, system-ui",
+              fontSize: "16px",
+            }}
+          >
+            Customer Care
+          </h3>
         </div>
       </section>
 

@@ -42,7 +42,7 @@ export default {
         },
       },
       fontFamily: {
-        sans: ["Inter", "system-ui", "sans-serif"],
+        sans: ["Poppins", "sans-serif", "Inter", "system-ui"],
         serif: ["Georgia", "serif"],
       },
       boxShadow: {

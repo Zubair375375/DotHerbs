@@ -107,7 +107,7 @@ const Cart = () => {
   return (
     <div className="container mx-auto px-4 py-8">
       <div className="flex items-center justify-between mb-8">
-        <h1 className="text-3xl font-bold text-gray-800">Shopping Cart</h1>
+        <h1 className="text-[24px] font-bold text-gray-800">Shopping Cart</h1>
         {cartItems.length > 0 && (
           <button
             onClick={handleClearCart}
@@ -122,15 +122,15 @@ const Cart = () => {
       {cartItems.length === 0 ? (
         <div className="text-center py-16">
           <FaShoppingBag className="mx-auto text-6xl text-gray-300 mb-4" />
-          <h2 className="text-2xl font-semibold text-gray-600 mb-4">
+          <h2 className="text-[18px] font-semibold text-gray-600 mb-4">
             Your cart is empty
           </h2>
-          <p className="text-gray-500 mb-8">
+          <p className="text-[14px] text-gray-500 mb-8">
             Add some products to get started!
           </p>
           <button
             onClick={() => navigate("/products")}
-            className="bg-[#68a300] text-white px-6 py-3 rounded-lg hover:bg-[#5f9600]"
+            className="bg-[#232323] text-white px-4 py-2 hover:bg-white hover:text-[#232323] border border-[#232323] hover:border-[#232323] transition-colors duration-300"
           >
             Continue Shopping
           </button>
