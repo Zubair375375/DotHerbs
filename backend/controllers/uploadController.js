@@ -92,14 +92,17 @@ export const uploadAvatar = async (req, res) => {
     }
 
     const imageUrl = `/uploads/${req.file.filename}`;
-    const user = await User.findById(req.user._id);
+    const user = await User.findByIdAndUpdate(
+      req.user._id,
+      { avatar: imageUrl },
+      {
+        new: true,
+      },
+    );
 
     if (!user) {
       return res.status(404).json({ success: false, error: "User not found" });
     }
-
-    user.avatar = imageUrl;
-    await user.save();
 
     res.json({
       success: true,
