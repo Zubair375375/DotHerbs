@@ -9,11 +9,14 @@ const Footer = () => {
           {/* Company Info */}
           <div className="col-span-1 md:col-span-2">
             <div className="flex items-center space-x-2 mb-4">
-              <Link to="/" className="flex items-center">
+              <Link
+                to="/"
+                className="flex items-center border-0 outline-none ring-0 focus:outline-none focus:ring-0 focus-visible:outline-none"
+              >
                 <img
                   src="/assets/logos/Logo_White.png"
                   alt="Dot-Herbs"
-                  className="h-6 w-auto"
+                  className="h-6 w-auto border-0 outline-none"
                 />
               </Link>
             </div>

@@ -24,8 +24,8 @@ import {
 
 const Header = () => {
   const [isProfileMenuOpen, setIsProfileMenuOpen] = useState(false);
-  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isProductsMenuOpen, setIsProductsMenuOpen] = useState(false);
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [scrolled, setScrolled] = useState(false);
   const [isDesktop, setIsDesktop] = useState(() =>
@@ -86,11 +86,7 @@ const Header = () => {
         typeof window !== "undefined"
           ? `${window.location.origin}${user.avatar}`
           : user.avatar;
-      return [
-        `${API_URL}${user.avatar}`,
-        sameOrigin,
-        user.avatar,
-      ];
+      return [`${API_URL}${user.avatar}`, sameOrigin, user.avatar];
     }
 
     return [user.avatar];
@@ -338,11 +334,14 @@ const Header = () => {
               : "h-16 opacity-100"
           }`}
         >
-          <Link to="/" className="flex items-center shrink-0">
+          <Link
+            to="/"
+            className="flex items-center shrink-0 border-0 outline-none ring-0 focus:outline-none focus:ring-0 focus-visible:outline-none"
+          >
             <img
               src="/assets/logos/Logo.png"
               alt="Dot-Herbs"
-              className="h-6 w-auto"
+              className="h-6 w-auto border-0 outline-none"
             />
           </Link>
 
@@ -394,11 +393,14 @@ const Header = () => {
           }`}
         >
           <div className="flex w-1/4 items-center justify-start">
-            <Link to="/" className="flex items-center shrink-0">
+            <Link
+              to="/"
+              className="flex items-center shrink-0 border-0 outline-none ring-0 focus:outline-none focus:ring-0 focus-visible:outline-none"
+            >
               <img
                 src="/assets/logos/Logo.png"
                 alt="Dot-Herbs"
-                className="h-5 w-auto"
+                className="h-5 w-auto border-0 outline-none"
               />
             </Link>
           </div>
