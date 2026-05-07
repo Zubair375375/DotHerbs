@@ -32,8 +32,6 @@ const initialState = {
   user: null,
   accessToken: getTokenFromStorage(),
   refreshToken: null,
-  twoFactorChallengeToken: null,
-  twoFactorEmail: "",
   hasCheckedAuth: false,
   isLoading: false,
   error: null,
@@ -59,42 +57,12 @@ export const login = createAsyncThunk(
   async (credentials, { rejectWithValue }) => {
     try {
       const response = await api.post("/auth/login", credentials);
-      const { user, accessToken, requiresTwoFactor, challengeToken } =
-        response.data.data;
-
-      if (requiresTwoFactor) {
-        return {
-          requiresTwoFactor: true,
-          challengeToken,
-          email: response.data.data?.email || credentials.email,
-        };
-      }
+      const { user, accessToken } = response.data.data;
 
       setTokenInStorage(accessToken);
       return { user, accessToken };
     } catch (error) {
       return rejectWithValue(getApiErrorMessage(error, "Login failed"));
-    }
-  },
-);
-
-export const verifyTwoFactorLogin = createAsyncThunk(
-  "auth/verifyTwoFactorLogin",
-  async ({ challengeToken, code }, { rejectWithValue }) => {
-    try {
-      const response = await api.post("/auth/verify-2fa", {
-        challengeToken,
-        code,
-      });
-
-      const { user, accessToken } = response.data.data;
-      setTokenInStorage(accessToken);
-
-      return { user, accessToken };
-    } catch (error) {
-      return rejectWithValue(
-        getApiErrorMessage(error, "2FA verification failed"),
-      );
     }
   },
 );
@@ -332,14 +300,8 @@ const authSlice = createSlice({
       state.user = null;
       state.accessToken = null;
       state.refreshToken = null;
-      state.twoFactorChallengeToken = null;
-      state.twoFactorEmail = "";
       state.hasCheckedAuth = true;
       removeTokensFromStorage();
-    },
-    clearTwoFactorChallenge: (state) => {
-      state.twoFactorChallengeToken = null;
-      state.twoFactorEmail = "";
     },
     setAuthChecked: (state, action) => {
       state.hasCheckedAuth = action.payload;
@@ -368,42 +330,12 @@ const authSlice = createSlice({
       })
       .addCase(login.fulfilled, (state, action) => {
         state.isLoading = false;
-
-        if (action.payload.requiresTwoFactor) {
-          state.twoFactorChallengeToken = action.payload.challengeToken;
-          state.twoFactorEmail = action.payload.email || "";
-          state.user = null;
-          state.accessToken = null;
-          state.refreshToken = null;
-          state.hasCheckedAuth = false;
-          return;
-        }
-
-        state.twoFactorChallengeToken = null;
-        state.twoFactorEmail = "";
         state.user = action.payload.user;
         state.accessToken = action.payload.accessToken;
         state.refreshToken = null;
         state.hasCheckedAuth = true;
       })
       .addCase(login.rejected, (state, action) => {
-        state.isLoading = false;
-        state.error = action.payload;
-      })
-      .addCase(verifyTwoFactorLogin.pending, (state) => {
-        state.isLoading = true;
-        state.error = null;
-      })
-      .addCase(verifyTwoFactorLogin.fulfilled, (state, action) => {
-        state.isLoading = false;
-        state.user = action.payload.user;
-        state.accessToken = action.payload.accessToken;
-        state.refreshToken = null;
-        state.twoFactorChallengeToken = null;
-        state.twoFactorEmail = "";
-        state.hasCheckedAuth = true;
-      })
-      .addCase(verifyTwoFactorLogin.rejected, (state, action) => {
         state.isLoading = false;
         state.error = action.payload;
       })
@@ -481,8 +413,6 @@ const authSlice = createSlice({
         state.user = null;
         state.accessToken = null;
         state.refreshToken = null;
-        state.twoFactorChallengeToken = null;
-        state.twoFactorEmail = "";
         state.hasCheckedAuth = true;
       })
       .addCase(deleteAccount.rejected, (state, action) => {
@@ -537,21 +467,13 @@ const authSlice = createSlice({
   },
 });
 
-export const {
-  clearError,
-  setCredentials,
-  logoutUser,
-  clearTwoFactorChallenge,
-  setAuthChecked,
-} = authSlice.actions;
+export const { clearError, setCredentials, logoutUser, setAuthChecked } =
+  authSlice.actions;
 
 export const selectAuthUser = (state) => state.auth.user;
 export const selectIsAuthenticated = (state) => !!state.auth.user;
 export const selectAuthIsLoading = (state) => state.auth.isLoading;
 export const selectAuthError = (state) => state.auth.error;
 export const selectAuthChecked = (state) => state.auth.hasCheckedAuth;
-export const selectTwoFactorChallengeToken = (state) =>
-  state.auth.twoFactorChallengeToken;
-export const selectTwoFactorEmail = (state) => state.auth.twoFactorEmail;
 
 export default authSlice.reducer;

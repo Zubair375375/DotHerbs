@@ -6,18 +6,9 @@ import { sendEmail } from "../utils/sendEmail.js";
 
 const LOGIN_MAX_ATTEMPTS = Number(process.env.LOGIN_MAX_ATTEMPTS || 5);
 const LOGIN_LOCK_MINUTES = Number(process.env.LOGIN_LOCK_MINUTES || 15);
-const TWO_FACTOR_CODE_EXPIRE_MINUTES = Number(
-  process.env.TWO_FACTOR_CODE_EXPIRE_MINUTES || 10,
-);
 
 const hashToken = (token) =>
   crypto.createHash("sha256").update(token).digest("hex");
-
-const generateNumericCode = (length = 6) => {
-  const min = 10 ** (length - 1);
-  const max = 10 ** length - 1;
-  return String(Math.floor(min + Math.random() * (max - min + 1)));
-};
 
 const normalizedEmail = (email) => email?.trim().toLowerCase();
 
@@ -50,12 +41,6 @@ const generateToken = (id) => {
 const generateRefreshToken = (id) => {
   return jwt.sign({ id }, process.env.JWT_REFRESH_SECRET, {
     expiresIn: process.env.JWT_REFRESH_EXPIRE || "7d",
-  });
-};
-
-const generateTwoFactorChallengeToken = (id) => {
-  return jwt.sign({ id, type: "2fa" }, process.env.JWT_SECRET, {
-    expiresIn: `${TWO_FACTOR_CODE_EXPIRE_MINUTES}m`,
   });
 };
 
@@ -138,31 +123,6 @@ const sendAccountCreatedEmail = async (user) => {
     message,
     html,
   });
-};
-
-const sendTwoFactorCode = async (user) => {
-  const code = generateNumericCode(6);
-
-  user.twoFactorCodeHash = hashToken(code);
-  user.twoFactorCodeExpire =
-    Date.now() + TWO_FACTOR_CODE_EXPIRE_MINUTES * 60 * 1000;
-
-  await user.save({ validateBeforeSave: false });
-
-  const message = `Your Dot-Herbs login verification code is: ${code}. It expires in ${TWO_FACTOR_CODE_EXPIRE_MINUTES} minutes.`;
-
-  try {
-    await sendEmail({
-      email: user.email,
-      subject: "Your Dot-Herbs login verification code",
-      message,
-    });
-  } catch (error) {
-    user.twoFactorCodeHash = undefined;
-    user.twoFactorCodeExpire = undefined;
-    await user.save({ validateBeforeSave: false });
-    throw error;
-  }
 };
 
 const getRemainingLockMinutes = (lockUntil) => {
@@ -294,20 +254,6 @@ export const login = async (req, res) => {
       });
     }
 
-    if (user.twoFactorEnabled) {
-      await sendTwoFactorCode(user);
-      const challengeToken = generateTwoFactorChallengeToken(user._id);
-
-      return res.json({
-        success: true,
-        data: {
-          requiresTwoFactor: true,
-          challengeToken,
-          email: user.email,
-        },
-      });
-    }
-
     const authPayload = await issueAuthTokens(user);
     setRefreshCookie(res, authPayload.refreshToken);
 
@@ -322,81 +268,6 @@ export const login = async (req, res) => {
     res.status(500).json({
       success: false,
       error: "Server error",
-    });
-  }
-};
-
-export const verifyTwoFactor = async (req, res) => {
-  const errors = validationResult(req);
-  if (!errors.isEmpty()) {
-    return res.status(400).json({
-      success: false,
-      error: "Validation error",
-      details: errors.array(),
-    });
-  }
-
-  const { challengeToken, code } = req.body;
-
-  try {
-    const decoded = jwt.verify(challengeToken, process.env.JWT_SECRET);
-    if (decoded.type !== "2fa") {
-      return res.status(401).json({
-        success: false,
-        error: "Invalid 2FA challenge",
-      });
-    }
-
-    const user = await User.findById(decoded.id);
-    if (!user || !user.twoFactorEnabled) {
-      return res.status(401).json({
-        success: false,
-        error: "Invalid 2FA challenge",
-      });
-    }
-
-    if (!user.twoFactorCodeHash || !user.twoFactorCodeExpire) {
-      return res.status(401).json({
-        success: false,
-        error: "2FA code expired. Please login again.",
-      });
-    }
-
-    if (user.twoFactorCodeExpire <= Date.now()) {
-      user.twoFactorCodeHash = undefined;
-      user.twoFactorCodeExpire = undefined;
-      await user.save({ validateBeforeSave: false });
-
-      return res.status(401).json({
-        success: false,
-        error: "2FA code expired. Please login again.",
-      });
-    }
-
-    const incomingCodeHash = hashToken(String(code).trim());
-    if (incomingCodeHash !== user.twoFactorCodeHash) {
-      return res.status(401).json({
-        success: false,
-        error: "Invalid verification code",
-      });
-    }
-
-    user.twoFactorCodeHash = undefined;
-    user.twoFactorCodeExpire = undefined;
-    const authPayload = await issueAuthTokens(user);
-    setRefreshCookie(res, authPayload.refreshToken);
-
-    res.json({
-      success: true,
-      data: {
-        user: authPayload.user,
-        accessToken: authPayload.accessToken,
-      },
-    });
-  } catch (error) {
-    res.status(401).json({
-      success: false,
-      error: "Invalid or expired 2FA challenge",
     });
   }
 };
