@@ -35,19 +35,20 @@ body {
 
 /* ✅ Fixed button base */
 button {
-  border: 1px solid transparent;
+  border: none;
   padding: 6px 12px;
   cursor: pointer;
-  transition: border-color 0.25s;
 }
 
 button:hover {
-  border-color: #646cff;
+  border-color: transparent;
 }
 
 button:focus,
-button:focus-visible {
-  outline: 4px auto -webkit-focus-ring-color;
+button:focus-visible,
+button:active {
+  outline: none;
+  border-color: transparent;
 }
 
 @media (prefers-color-scheme: light) {

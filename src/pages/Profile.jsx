@@ -685,10 +685,10 @@ const Profile = () => {
               <nav className="space-y-2">
                 <button
                   onClick={() => setActiveTab("profile")}
-                  className={`w-full flex items-center space-x-3 px-4 py-3 rounded-lg text-left ${
+                  className={`w-full flex items-center space-x-3 px-4 py-3 rounded-lg text-left outline-none ring-0 focus:outline-none focus:ring-0 transition-none ${
                     activeTab === "profile"
-                      ? "bg-green-50 text-green-700 border border-green-200"
-                      : "text-gray-700 hover:bg-gray-50"
+                      ? "bg-green-50 text-green-700 border border-green-200 hover:border-green-200 focus:border-green-200"
+                      : "border border-transparent text-gray-700 hover:bg-gray-50 hover:border-transparent hover:outline-none hover:ring-0"
                   }`}
                 >
                   <FaUser />
@@ -697,10 +697,10 @@ const Profile = () => {
 
                 <button
                   onClick={() => setActiveTab("orders")}
-                  className={`w-full flex items-center space-x-3 px-4 py-3 rounded-lg text-left text-[14px] ${
+                  className={`w-full flex items-center space-x-3 px-4 py-3 rounded-lg text-left text-[14px] outline-none ring-0 focus:outline-none focus:ring-0 transition-none ${
                     activeTab === "orders"
-                      ? "bg-green-50 text-green-700 border border-green-200"
-                      : "text-gray-700 hover:bg-gray-50"
+                      ? "bg-green-50 text-green-700 border border-green-200 hover:border-green-200 focus:border-green-200"
+                      : "border border-transparent text-gray-700 hover:bg-gray-50 hover:border-transparent hover:outline-none hover:ring-0"
                   }`}
                 >
                   <FaShoppingBag />
@@ -709,10 +709,10 @@ const Profile = () => {
 
                 <button
                   onClick={() => setActiveTab("wishlist")}
-                  className={`w-full flex items-center space-x-3 px-4 py-3 rounded-lg text-left text-[14px] ${
+                  className={`w-full flex items-center space-x-3 px-4 py-3 rounded-lg text-left text-[14px] outline-none ring-0 focus:outline-none focus:ring-0 transition-none ${
                     activeTab === "wishlist"
-                      ? "bg-green-50 text-green-700 border border-green-200"
-                      : "text-gray-700 hover:bg-gray-50"
+                      ? "bg-green-50 text-green-700 border border-green-200 hover:border-green-200 focus:border-green-200"
+                      : "border border-transparent text-gray-700 hover:bg-gray-50 hover:border-transparent hover:outline-none hover:ring-0"
                   }`}
                 >
                   <FaHeart />
@@ -721,10 +721,10 @@ const Profile = () => {
 
                 <button
                   onClick={() => setActiveTab("addresses")}
-                  className={`w-full flex items-center space-x-3 px-4 py-3 rounded-lg text-left text-[14px] ${
+                  className={`w-full flex items-center space-x-3 px-4 py-3 rounded-lg text-left text-[14px] outline-none ring-0 focus:outline-none focus:ring-0 transition-none ${
                     activeTab === "addresses"
-                      ? "bg-green-50 text-green-700 border border-green-200"
-                      : "text-gray-700 hover:bg-gray-50"
+                      ? "bg-green-50 text-green-700 border border-green-200 hover:border-green-200 focus:border-green-200"
+                      : "border border-transparent text-gray-700 hover:bg-gray-50 hover:border-transparent hover:outline-none hover:ring-0"
                   }`}
                 >
                   <FaMapMarkerAlt />
@@ -733,10 +733,10 @@ const Profile = () => {
 
                 <button
                   onClick={() => setActiveTab("recently-viewed")}
-                  className={`w-full flex items-center space-x-3 px-4 py-3 rounded-lg text-left text-[14px] ${
+                  className={`w-full flex items-center space-x-3 px-4 py-3 rounded-lg text-left text-[14px] outline-none ring-0 focus:outline-none focus:ring-0 transition-none ${
                     activeTab === "recently-viewed"
-                      ? "bg-green-50 text-green-700 border border-green-200"
-                      : "text-gray-700 hover:bg-gray-50"
+                      ? "bg-green-50 text-green-700 border border-green-200 hover:border-green-200 focus:border-green-200"
+                      : "border border-transparent text-gray-700 hover:bg-gray-50 hover:border-transparent hover:outline-none hover:ring-0"
                   }`}
                 >
                   <FaClock />
@@ -745,10 +745,10 @@ const Profile = () => {
 
                 <button
                   onClick={() => setActiveTab("settings")}
-                  className={`w-full flex items-center space-x-3 px-4 py-3 rounded-lg text-left text-[14px] ${
+                  className={`w-full flex items-center space-x-3 px-4 py-3 rounded-lg text-left text-[14px] outline-none ring-0 focus:outline-none focus:ring-0 transition-none ${
                     activeTab === "settings"
-                      ? "bg-green-50 text-green-700 border border-green-200"
-                      : "text-gray-700 hover:bg-gray-50"
+                      ? "bg-green-50 text-green-700 border border-green-200 hover:border-green-200 focus:border-green-200"
+                      : "border border-transparent text-gray-700 hover:bg-gray-50 hover:border-transparent hover:outline-none hover:ring-0"
                   }`}
                 >
                   <FaCog />
@@ -757,7 +757,7 @@ const Profile = () => {
 
                 <button
                   onClick={handleLogout}
-                  className="w-full flex items-center space-x-3 px-4 py-3 rounded-lg text-left text-[14px] text-red-600 hover:bg-red-50"
+                  className="w-full flex items-center space-x-3 px-4 py-3 rounded-lg text-left text-[14px] border-0 text-red-600 hover:bg-red-50 hover:border-0 hover:outline-none hover:ring-0 outline-none ring-0 focus:outline-none focus:ring-0"
                 >
                   <FaSignOutAlt />
                   <span>Logout</span>
@@ -879,11 +879,7 @@ const Profile = () => {
                     </label>
                     <input
                       type="text"
-                      name="firstName"
-                      value={formData.firstName}
-                      onChange={handleInputChange}
-                      disabled={!isEditing}
-                      className="w-full px-3 py-2 border border-black-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500 disabled:bg-white"
+                      className="w-full px-3 py-2 border border-black-300 rounded-md focus:outline-none focus:ring-0 disabled:bg-white"
                     />
                   </div>
 
@@ -893,11 +889,7 @@ const Profile = () => {
                     </label>
                     <input
                       type="text"
-                      name="lastName"
-                      value={formData.lastName}
-                      onChange={handleInputChange}
-                      disabled={!isEditing}
-                      className="w-full px-3 py-2 border border-black-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500 disabled:bg-white"
+                      className="w-full px-3 py-2 border border-black-300 rounded-md focus:outline-none focus:ring-0 disabled:bg-white"
                     />
                   </div>
 
@@ -907,11 +899,7 @@ const Profile = () => {
                     </label>
                     <input
                       type="email"
-                      name="email"
-                      value={formData.email}
-                      onChange={handleInputChange}
-                      disabled={!isEditing}
-                      className="w-full px-3 py-2 border border-black-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500 disabled:bg-white"
+                      className="w-full px-3 py-2 border border-black-300 rounded-md focus:outline-none focus:ring-0 disabled:bg-white"
                     />
                   </div>
 
@@ -921,11 +909,7 @@ const Profile = () => {
                     </label>
                     <input
                       type="tel"
-                      name="phone"
-                      value={formData.phone}
-                      onChange={handleInputChange}
-                      disabled={!isEditing}
-                      className="w-full px-3 py-2 border border-black-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500 disabled:bg-white"
+                      className="w-full px-3 py-2 border border-black-300 rounded-md focus:outline-none focus:ring-0 disabled:bg-white"
                     />
                   </div>
 
@@ -940,11 +924,7 @@ const Profile = () => {
                         </label>
                         <input
                           type="text"
-                          name="address.street"
-                          value={formData.address.street}
-                          onChange={handleInputChange}
-                          disabled={!isEditing}
-                          className="w-full px-3 py-2 border border-black-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500 disabled:bg-white"
+                          className="w-full px-3 py-2 border border-black-300 rounded-md focus:outline-none focus:ring-0 disabled:bg-white"
                         />
                       </div>
 
@@ -954,11 +934,7 @@ const Profile = () => {
                         </label>
                         <input
                           type="text"
-                          name="address.city"
-                          value={formData.address.city}
-                          onChange={handleInputChange}
-                          disabled={!isEditing}
-                          className="w-full px-3 py-2 border border-black-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500 disabled:bg-white"
+                          className="w-full px-3 py-2 border border-black-300 rounded-md focus:outline-none focus:ring-0 disabled:bg-white"
                         />
                       </div>
 
@@ -968,11 +944,7 @@ const Profile = () => {
                         </label>
                         <input
                           type="text"
-                          name="address.state"
-                          value={formData.address.state}
-                          onChange={handleInputChange}
-                          disabled={!isEditing}
-                          className="w-full px-3 py-2 border border-black-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500 disabled:bg-white"
+                          className="w-full px-3 py-2 border border-black-300 rounded-md focus:outline-none focus:ring-0 disabled:bg-white"
                         />
                       </div>
 
@@ -982,11 +954,7 @@ const Profile = () => {
                         </label>
                         <input
                           type="text"
-                          name="address.zipCode"
-                          value={formData.address.zipCode}
-                          onChange={handleInputChange}
-                          disabled={!isEditing}
-                          className="w-full px-3 py-2 border border-black-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500 disabled:bg-white"
+                          className="w-full px-3 py-2 border border-black-300 rounded-md focus:outline-none focus:ring-0 disabled:bg-white"
                         />
                       </div>
 
@@ -996,11 +964,7 @@ const Profile = () => {
                         </label>
                         <input
                           type="text"
-                          name="address.country"
-                          value={formData.address.country}
-                          onChange={handleInputChange}
-                          disabled={!isEditing}
-                          className="w-full px-3 py-2 border border-black-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500 disabled:bg-white"
+                          className="w-full px-3 py-2 border border-black-300 rounded-md focus:outline-none focus:ring-0 disabled:bg-white"
                         />
                       </div>
                     </div>
@@ -1199,7 +1163,7 @@ const Profile = () => {
                           value={addressForm.label}
                           onChange={handleAddressFieldChange}
                           placeholder="Label (e.g. Home, Office)"
-                          className="w-full rounded-md border border-gray-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-green-500 text-[14px]"
+                          className="w-full rounded-md border border-gray-300 px-3 py-2 focus:outline-none focus:ring-0 text-[14px]"
                         />
                         <input
                           type="text"
@@ -1207,7 +1171,7 @@ const Profile = () => {
                           value={addressForm.street}
                           onChange={handleAddressFieldChange}
                           placeholder="Street address"
-                          className="w-full rounded-md border border-gray-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-green-500 text-[14px]"
+                          className="w-full rounded-md border border-gray-300 px-3 py-2 focus:outline-none focus:ring-0 text-[14px]"
                         />
                         <div className="grid grid-cols-2 gap-4">
                           <input
@@ -1216,7 +1180,7 @@ const Profile = () => {
                             value={addressForm.city}
                             onChange={handleAddressFieldChange}
                             placeholder="City"
-                            className="w-full rounded-md border border-gray-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-green-500 text-[14px]"
+                            className="w-full rounded-md border border-gray-300 px-3 py-2 focus:outline-none focus:ring-0 text-[14px]"
                           />
                           <input
                             type="text"
@@ -1224,7 +1188,7 @@ const Profile = () => {
                             value={addressForm.state}
                             onChange={handleAddressFieldChange}
                             placeholder="State"
-                            className="w-full rounded-md border border-gray-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-green-500 text-[14px]"
+                            className="w-full rounded-md border border-gray-300 px-3 py-2 focus:outline-none focus:ring-0 text-[14px]"
                           />
                         </div>
                         <div className="grid grid-cols-2 gap-4">
@@ -1234,7 +1198,7 @@ const Profile = () => {
                             value={addressForm.zipCode}
                             onChange={handleAddressFieldChange}
                             placeholder="ZIP code"
-                            className="w-full rounded-md border border-gray-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-green-500 text-[14px]"
+                            className="w-full rounded-md border border-gray-300 px-3 py-2 focus:outline-none focus:ring-0 text-[14px]"
                           />
                           <input
                             type="text"
@@ -1242,7 +1206,7 @@ const Profile = () => {
                             value={addressForm.country}
                             onChange={handleAddressFieldChange}
                             placeholder="Country"
-                            className="w-full rounded-md border border-gray-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-green-500 text-[14px]"
+                            className="w-full rounded-md border border-gray-300 px-3 py-2 focus:outline-none focus:ring-0 text-[14px]"
                           />
                         </div>
                         <label className="flex items-center gap-2 text-[14px] text-gray-700">
@@ -1452,16 +1416,18 @@ const Profile = () => {
                           <button
                             type="button"
                             onClick={() => handleTogglePreference(key)}
-                            className={`relative h-6 w-10 rounded-full transition-colors ${
-                              preferences[key] ? "bg-green-600" : "bg-gray-300"
+                            className={`relative h-7 w-14 rounded-full border-0 transition-all duration-200 cursor-pointer focus:outline-none focus:ring-0 flex-shrink-0 ${
+                              preferences[key]
+                                ? "bg-green-600 shadow-sm"
+                                : "bg-gray-300"
                             }`}
                             aria-pressed={preferences[key]}
                           >
                             <span
-                              className={`absolute top-0.5 h-5 w-5 rounded-full bg-white transition-transform ${
+                              className={`absolute top-1/2 left-1 -translate-y-1/2 h-5 w-5 rounded-full bg-white transition-transform duration-200 shadow-md ${
                                 preferences[key]
-                                  ? "translate-x-5"
-                                  : "translate-x-0.5"
+                                  ? "translate-x-7"
+                                  : "translate-x-0"
                               }`}
                             />
                           </button>
@@ -1490,7 +1456,7 @@ const Profile = () => {
                                 setTwoFactorPassword(e.target.value)
                               }
                               placeholder="Current password"
-                              className="w-full rounded-md border border-gray-300 px-3 py-2 pr-10 text-sm focus:outline-none focus:ring-2 focus:ring-green-500 text-[14px"
+                              className="w-full rounded-md border border-gray-300 px-3 py-2 pr-10 text-sm focus:outline-none focus:ring-0 text-[14px"
                             />
                             <button
                               type="button"
@@ -1516,16 +1482,18 @@ const Profile = () => {
                           type="button"
                           onClick={handleToggleTwoFactor}
                           disabled={isLoading}
-                          className={`relative h-6 w-11 rounded-full transition-colors ${
-                            twoFactorEnabled ? "bg-green-600" : "bg-gray-300"
+                          className={`relative h-7 w-14 rounded-full border-0 transition-all duration-200 cursor-pointer focus:outline-none focus:border-0 focus:ring-0 flex-shrink-0 ${
+                            twoFactorEnabled
+                              ? "bg-green-600 shadow-sm"
+                              : "bg-gray-300"
                           } ${isLoading ? "opacity-50" : ""}`}
                           aria-pressed={twoFactorEnabled}
                         >
                           <span
-                            className={`absolute top-0.5 h-5 w-5 rounded-full bg-white transition-transform ${
+                            className={`absolute top-1/2 left-1 -translate-y-1/2 h-5 w-5 rounded-full bg-white transition-transform duration-200 shadow-md ${
                               twoFactorEnabled
-                                ? "translate-x-5"
-                                : "translate-x-0.5"
+                                ? "translate-x-7"
+                                : "translate-x-0"
                             }`}
                           />
                         </button>
@@ -1544,10 +1512,7 @@ const Profile = () => {
                             showPassword.currentPassword ? "text" : "password"
                           }
                           placeholder="Current password"
-                          name="currentPassword"
-                          value={passwordForm.currentPassword}
-                          onChange={handlePasswordFieldChange}
-                          className="w-full rounded-md border border-gray-300 px-3 py-2 pr-10 focus:outline-none focus:ring-2 focus:ring-green-500 text-[14px]"
+                          className="w-full rounded-md border border-gray-300 px-3 py-2 pr-10 focus:outline-none focus:ring-0 text-[14px]"
                         />
                         <button
                           type="button"
@@ -1572,10 +1537,7 @@ const Profile = () => {
                         <input
                           type={showPassword.newPassword ? "text" : "password"}
                           placeholder="New password"
-                          name="newPassword"
-                          value={passwordForm.newPassword}
-                          onChange={handlePasswordFieldChange}
-                          className="w-full rounded-md border border-gray-300 px-3 py-2 pr-10 focus:outline-none focus:ring-2 focus:ring-green-500 text-[14px]"
+                          className="w-full rounded-md border border-gray-300 px-3 py-2 pr-10 focus:outline-none focus:ring-0 text-[14px]"
                         />
                         <button
                           type="button"
@@ -1602,10 +1564,7 @@ const Profile = () => {
                             showPassword.confirmPassword ? "text" : "password"
                           }
                           placeholder="Confirm new password"
-                          name="confirmPassword"
-                          value={passwordForm.confirmPassword}
-                          onChange={handlePasswordFieldChange}
-                          className="w-full rounded-md border border-gray-300 px-3 py-2 pr-10 focus:outline-none focus:ring-2 focus:ring-green-500 text-[14px]"
+                          className="w-full rounded-md border border-gray-300 px-3 py-2 pr-10 focus:outline-none focus:ring-0 text-[14px]"
                         />
                         <button
                           type="button"
@@ -1657,7 +1616,7 @@ const Profile = () => {
                             }))
                           }
                           placeholder="Current password"
-                          className="w-full rounded-md border border-red-200 bg-white px-3 py-2 pr-10 text-sm focus:outline-none focus:ring-2 focus:ring-red-500"
+                          className="w-full rounded-md border border-red-200 bg-white px-3 py-2 pr-10 text-sm focus:outline-none focus:ring-0"
                         />
                         <button
                           type="button"
@@ -1682,7 +1641,7 @@ const Profile = () => {
                           }))
                         }
                         placeholder='Type "DELETE" to confirm'
-                        className="max-w-md w-full rounded-md border border-red-200 bg-white px-3 py-2 text-[14px] focus:outline-none focus:ring-2 focus:ring-red-500 mb-3"
+                        className="max-w-md w-full rounded-md border border-red-200 bg-white px-3 py-2 text-[14px] focus:outline-none focus:ring-0 mb-3"
                       />
                       <div className="flex justify-end">
                         <button
