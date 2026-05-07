@@ -226,7 +226,10 @@ export const register = async (req, res) => {
     try {
       await sendAccountCreatedEmail(user);
     } catch (error) {
-      console.error("Account creation email failed:", error?.message || error);
+      console.error(
+        "Account creation email failed:",
+        error?.stack || error?.message || error,
+      );
     }
 
     res.status(201).json({
