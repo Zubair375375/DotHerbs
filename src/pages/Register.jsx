@@ -106,7 +106,7 @@ const Register = () => {
 
       toast.success(
         result?.message ||
-          "Registration successful! Please verify your email before signing in.",
+          "Registration successful! You can now sign in.",
       );
       navigate("/login");
     } catch (error) {

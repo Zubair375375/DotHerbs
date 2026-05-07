@@ -3,8 +3,6 @@ import { body } from "express-validator";
 import rateLimit from "express-rate-limit";
 import {
   register,
-  verifyEmail,
-  resendVerification,
   login,
   verifyTwoFactor,
   refreshToken,
@@ -72,13 +70,6 @@ const forgotPasswordValidation = [
     .withMessage("Please provide a valid email"),
 ];
 
-const resendVerificationValidation = [
-  body("email")
-    .isEmail()
-    .normalizeEmail()
-    .withMessage("Please provide a valid email"),
-];
-
 const verifyTwoFactorValidation = [
   body("challengeToken").notEmpty().withMessage("Challenge token is required"),
   body("code")
@@ -92,13 +83,6 @@ const resetPasswordValidation = [passwordRules];
 
 // Routes
 router.post("/register", authLimiter, registerValidation, register);
-router.get("/verify-email/:token", verifyEmail);
-router.post(
-  "/resend-verification",
-  authLimiter,
-  resendVerificationValidation,
-  resendVerification,
-);
 router.post("/login", authLimiter, loginValidation, login);
 router.post(
   "/verify-2fa",

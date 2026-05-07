@@ -107,12 +107,6 @@ const userSchema = new mongoose.Schema(
     resetPasswordToken: String,
     resetPasswordExpire: Date,
     refreshToken: String,
-    isEmailVerified: {
-      type: Boolean,
-      default: false,
-    },
-    emailVerificationToken: String,
-    emailVerificationExpire: Date,
     loginAttempts: {
       type: Number,
       default: 0,
@@ -151,8 +145,6 @@ userSchema.methods.toJSON = function () {
   delete userObject.resetPasswordToken;
   delete userObject.resetPasswordExpire;
   delete userObject.refreshToken;
-  delete userObject.emailVerificationToken;
-  delete userObject.emailVerificationExpire;
   delete userObject.twoFactorCodeHash;
   delete userObject.twoFactorCodeExpire;
   return userObject;
