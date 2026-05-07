@@ -4,7 +4,6 @@ import rateLimit from "express-rate-limit";
 import {
   register,
   login,
-  verifyTwoFactor,
   refreshToken,
   logout,
   forgotPassword,
@@ -70,26 +69,12 @@ const forgotPasswordValidation = [
     .withMessage("Please provide a valid email"),
 ];
 
-const verifyTwoFactorValidation = [
-  body("challengeToken").notEmpty().withMessage("Challenge token is required"),
-  body("code")
-    .isLength({ min: 6, max: 6 })
-    .withMessage("Verification code must be 6 digits")
-    .isNumeric()
-    .withMessage("Verification code must be numeric"),
-];
-
 const resetPasswordValidation = [passwordRules];
 
 // Routes
 router.post("/register", authLimiter, registerValidation, register);
 router.post("/login", authLimiter, loginValidation, login);
-router.post(
-  "/verify-2fa",
-  authLimiter,
-  verifyTwoFactorValidation,
-  verifyTwoFactor,
-);
+
 router.post("/refresh", refreshToken);
 router.post("/logout", protect, logout);
 router.post(
