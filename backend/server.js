@@ -107,13 +107,17 @@ app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 
 // ---------------------- STATIC ----------------------
+const uploadsDir = path.join(__dirname, "uploads");
+const legacyUploadsDir = path.join(__dirname, "../uploads");
+
 app.use(
   "/uploads",
   (req, res, next) => {
     res.setHeader("Cross-Origin-Resource-Policy", "cross-origin");
     next();
   },
-  express.static(path.join(__dirname, "uploads")),
+  express.static(uploadsDir),
+  express.static(legacyUploadsDir),
 );
 
 app.use(
@@ -122,7 +126,8 @@ app.use(
     res.setHeader("Cross-Origin-Resource-Policy", "cross-origin");
     next();
   },
-  express.static(path.join(__dirname, "uploads")),
+  express.static(uploadsDir),
+  express.static(legacyUploadsDir),
 );
 
 // ---------------------- ROUTES ----------------------
