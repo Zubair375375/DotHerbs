@@ -88,7 +88,8 @@ const Profile = () => {
   });
   const [showDeletePassword, setShowDeletePassword] = useState(false);
   const [formData, setFormData] = useState({
-    name: "",
+    firstName: "",
+    lastName: "",
     email: "",
     phone: "",
     address: {
@@ -108,7 +109,8 @@ const Profile = () => {
 
     if (user) {
       setFormData({
-        name: [user.firstName, user.lastName].filter(Boolean).join(" "),
+        firstName: user.firstName || "",
+        lastName: user.lastName || "",
         email: user.email || "",
         phone: user.phone || "",
         address: {
@@ -209,7 +211,8 @@ const Profile = () => {
     try {
       await dispatch(
         updateProfile({
-          name: formData.name,
+          firstName: formData.firstName,
+          lastName: formData.lastName,
           email: formData.email,
           phone: formData.phone,
           shippingAddress: formData.address,
@@ -227,7 +230,8 @@ const Profile = () => {
     // Reset form data to original user data
     if (user) {
       setFormData({
-        name: [user.firstName, user.lastName].filter(Boolean).join(" "),
+        firstName: user.firstName || "",
+        lastName: user.lastName || "",
         email: user.email || "",
         phone: user.phone || "",
         address: {
@@ -871,12 +875,26 @@ const Profile = () => {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Full Name
+                      First Name
                     </label>
                     <input
                       type="text"
-                      name="name"
-                      value={formData.name}
+                      name="firstName"
+                      value={formData.firstName}
+                      onChange={handleInputChange}
+                      disabled={!isEditing}
+                      className="w-full px-3 py-2 border border-black-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500 disabled:bg-white"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Last Name
+                    </label>
+                    <input
+                      type="text"
+                      name="lastName"
+                      value={formData.lastName}
                       onChange={handleInputChange}
                       disabled={!isEditing}
                       className="w-full px-3 py-2 border border-black-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500 disabled:bg-white"
