@@ -108,7 +108,7 @@ const Profile = () => {
 
     if (user) {
       setFormData({
-        name: user.name || "",
+        name: [user.firstName, user.lastName].filter(Boolean).join(" "),
         email: user.email || "",
         phone: user.phone || "",
         address: {
@@ -227,7 +227,7 @@ const Profile = () => {
     // Reset form data to original user data
     if (user) {
       setFormData({
-        name: user.name || "",
+        name: [user.firstName, user.lastName].filter(Boolean).join(" "),
         email: user.email || "",
         phone: user.phone || "",
         address: {
@@ -309,11 +309,7 @@ const Profile = () => {
         typeof window !== "undefined"
           ? `${window.location.origin}${user.avatar}`
           : user.avatar;
-      return [
-        `${API_URL}${user.avatar}`,
-        sameOrigin,
-        user.avatar,
-      ];
+      return [`${API_URL}${user.avatar}`, sameOrigin, user.avatar];
     }
 
     return [user.avatar];
@@ -642,7 +638,9 @@ const Profile = () => {
                     {user.avatar ? (
                       <img
                         src={avatarCandidates[avatarSrcIndex] || ""}
-                        alt={user.name}
+                        alt={[user.firstName, user.lastName]
+                          .filter(Boolean)
+                          .join(" ")}
                         className="h-full w-full object-cover"
                         onError={() => {
                           if (avatarSrcIndex < avatarCandidates.length - 1) {
@@ -673,7 +671,7 @@ const Profile = () => {
                   />
                 </div>
                 <h2 className="text-[18px] font-semibold text-gray-800">
-                  {user.name}
+                  {[user.firstName, user.lastName].filter(Boolean).join(" ")}
                 </h2>
                 <p className="break-all text-gray-600 text-[14px]">
                   {user.email}
