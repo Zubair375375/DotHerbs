@@ -89,9 +89,7 @@ const changePasswordValidation = [
 ];
 
 const updateTwoFactorValidation = [
-  body("enabled")
-    .isBoolean()
-    .withMessage("enabled must be a boolean value"),
+  body("enabled").isBoolean().withMessage("enabled must be a boolean value"),
   body("currentPassword")
     .notEmpty()
     .withMessage("Current password is required to change two-factor settings"),
@@ -113,18 +111,8 @@ router.put(
   changePasswordValidation,
   changePassword,
 );
-router.put(
-  "/two-factor",
-  protect,
-  updateTwoFactorValidation,
-  updateTwoFactor,
-);
-router.delete(
-  "/me",
-  protect,
-  deleteOwnAccountValidation,
-  deleteOwnAccount,
-);
+router.put("/two-factor", protect, updateTwoFactorValidation, updateTwoFactor);
+router.delete("/me", protect, deleteOwnAccountValidation, deleteOwnAccount);
 router.get("/:id([0-9a-fA-F]{24})", protect, authorize("admin"), getUser);
 router.put(
   "/:id([0-9a-fA-F]{24})",
