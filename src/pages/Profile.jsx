@@ -43,8 +43,7 @@ const Profile = () => {
   const isLoading = useSelector(selectAuthIsLoading);
   const authError = useSelector(selectAuthError);
   const userOrders = useSelector(selectOrders);
-  const API_URL = import.meta.env.VITE_API_URL || "/api";
-  const SERVER_URL = API_URL.replace(/\/api\/?$/, "");
+  const API_URL = (import.meta.env.VITE_API_URL || "/api").replace(/\/$/, "");
 
   const [activeTab, setActiveTab] = useState("profile");
   const [showOrderThanks, setShowOrderThanks] = useState(false);
@@ -303,7 +302,10 @@ const Profile = () => {
     ) {
       return user.avatar;
     }
-    return `${SERVER_URL}${user.avatar}`;
+    if (user.avatar.startsWith("/uploads/")) {
+      return `${API_URL}${user.avatar}`;
+    }
+    return user.avatar;
   };
 
   const handleAvatarChange = async (e) => {
