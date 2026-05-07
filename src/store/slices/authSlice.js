@@ -99,20 +99,6 @@ export const verifyTwoFactorLogin = createAsyncThunk(
   },
 );
 
-export const resendVerification = createAsyncThunk(
-  "auth/resendVerification",
-  async ({ email }, { rejectWithValue }) => {
-    try {
-      const response = await api.post("/auth/resend-verification", { email });
-      return response.data.message;
-    } catch (error) {
-      return rejectWithValue(
-        getApiErrorMessage(error, "Could not resend verification email"),
-      );
-    }
-  },
-);
-
 export const forgotPassword = createAsyncThunk(
   "auth/forgotPassword",
   async ({ email }, { rejectWithValue }) => {

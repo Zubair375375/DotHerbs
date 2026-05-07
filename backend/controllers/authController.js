@@ -4,9 +4,6 @@ import crypto from "crypto";
 import User from "../models/User.js";
 import { sendEmail } from "../utils/sendEmail.js";
 
-const EMAIL_VERIFICATION_EXPIRE_MINUTES = Number(
-  process.env.EMAIL_VERIFICATION_EXPIRE_MINUTES || 60,
-);
 const LOGIN_MAX_ATTEMPTS = Number(process.env.LOGIN_MAX_ATTEMPTS || 5);
 const LOGIN_LOCK_MINUTES = Number(process.env.LOGIN_LOCK_MINUTES || 15);
 const TWO_FACTOR_CODE_EXPIRE_MINUTES = Number(
@@ -15,8 +12,6 @@ const TWO_FACTOR_CODE_EXPIRE_MINUTES = Number(
 
 const hashToken = (token) =>
   crypto.createHash("sha256").update(token).digest("hex");
-
-const generateRandomToken = () => crypto.randomBytes(32).toString("hex");
 
 const generateNumericCode = (length = 6) => {
   const min = 10 ** (length - 1);
@@ -97,32 +92,49 @@ const getClientBaseUrl = () => {
   );
 };
 
-const sendVerificationEmail = async (user) => {
-  const verificationToken = generateRandomToken();
+const sendAccountCreatedEmail = async (user) => {
+  const loginUrl = `${getClientBaseUrl()}/login`;
+  const message = `Welcome to Dot-Herbs, ${user.firstName}! Your account has been created successfully. You can sign in here: ${loginUrl}`;
+  const html = `
+    <div style="margin:0;padding:24px;background:#f6f8f2;font-family:Arial,sans-serif;color:#1f2937;">
+      <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="max-width:620px;margin:0 auto;background:#ffffff;border-radius:12px;overflow:hidden;border:1px solid #e5e7eb;">
+        <tr>
+          <td style="padding:20px 24px;background:#68a300;color:#ffffff;font-size:20px;font-weight:700;">
+            Dot-Herbs
+          </td>
+        </tr>
+        <tr>
+          <td style="padding:28px 24px 14px 24px;">
+            <h1 style="margin:0 0 10px 0;font-size:22px;line-height:1.3;color:#111827;">Welcome, ${user.firstName}!</h1>
+            <p style="margin:0 0 14px 0;font-size:15px;line-height:1.7;color:#374151;">
+              Your Dot-Herbs account has been created successfully.
+            </p>
+            <p style="margin:0 0 24px 0;font-size:15px;line-height:1.7;color:#374151;">
+              You can now sign in and start exploring our products.
+            </p>
+            <a href="${loginUrl}" style="display:inline-block;padding:12px 18px;background:#68a300;color:#ffffff;text-decoration:none;border-radius:8px;font-size:14px;font-weight:700;">
+              Sign In to Your Account
+            </a>
+          </td>
+        </tr>
+        <tr>
+          <td style="padding:16px 24px 24px 24px;">
+            <p style="margin:16px 0 0 0;font-size:12px;line-height:1.6;color:#6b7280;">
+              If the button does not work, copy and paste this link into your browser:<br />
+              <a href="${loginUrl}" style="color:#68a300;text-decoration:underline;word-break:break-all;">${loginUrl}</a>
+            </p>
+          </td>
+        </tr>
+      </table>
+    </div>
+  `;
 
-  user.emailVerificationToken = hashToken(verificationToken);
-  user.emailVerificationExpire =
-    Date.now() + EMAIL_VERIFICATION_EXPIRE_MINUTES * 60 * 1000;
-
-  await user.save({ validateBeforeSave: false });
-
-  const clientUrl = getClientBaseUrl();
-  const verifyUrl = `${clientUrl}/verify-email/${verificationToken}`;
-
-  const message = `Welcome to Dot-Herbs! Please verify your email by opening this link: ${verifyUrl}. This link expires in ${EMAIL_VERIFICATION_EXPIRE_MINUTES} minutes.`;
-
-  try {
-    await sendEmail({
-      email: user.email,
-      subject: "Verify your Dot-Herbs account",
-      message,
-    });
-  } catch (error) {
-    user.emailVerificationToken = undefined;
-    user.emailVerificationExpire = undefined;
-    await user.save({ validateBeforeSave: false });
-    throw error;
-  }
+  await sendEmail({
+    email: user.email,
+    subject: "Your Dot-Herbs account is ready",
+    message,
+    html,
+  });
 };
 
 const sendTwoFactorCode = async (user) => {
@@ -209,89 +221,23 @@ export const register = async (req, res) => {
       lastName,
       email,
       password,
-      isEmailVerified: process.env.NODE_ENV !== "production", // auto-verify in dev
     });
 
-    // Only send verification email in production
-    if (process.env.NODE_ENV === "production") {
-      await sendVerificationEmail(user);
+    try {
+      await sendAccountCreatedEmail(user);
+    } catch (error) {
+      console.error("Account creation email failed:", error?.message || error);
     }
 
     res.status(201).json({
       success: true,
-      message:
-        process.env.NODE_ENV === "production"
-          ? "Registration successful! You can now log in. Please verify your email to unlock all features."
-          : "Registration successful! You can now log in.",
+      message: "Registration successful! You can now log in.",
       data: { email: user.email },
     });
   } catch (error) {
     res.status(500).json({
       success: false,
       error: "Server error",
-    });
-  }
-};
-
-export const verifyEmail = async (req, res) => {
-  const tokenHash = hashToken(req.params.token);
-
-  try {
-    const user = await User.findOne({
-      emailVerificationToken: tokenHash,
-      emailVerificationExpire: { $gt: Date.now() },
-    });
-
-    if (!user) {
-      return res.status(400).json({
-        success: false,
-        error: "Invalid or expired verification token",
-      });
-    }
-
-    user.isEmailVerified = true;
-    user.emailVerificationToken = undefined;
-    user.emailVerificationExpire = undefined;
-    await user.save({ validateBeforeSave: false });
-
-    res.json({
-      success: true,
-      message: "Email verified successfully. You can now log in.",
-    });
-  } catch (error) {
-    res.status(500).json({
-      success: false,
-      error: "Server error",
-    });
-  }
-};
-
-export const resendVerification = async (req, res) => {
-  const errors = validationResult(req);
-  if (!errors.isEmpty()) {
-    return res.status(400).json({
-      success: false,
-      error: "Validation error",
-      details: errors.array(),
-    });
-  }
-
-  const email = normalizedEmail(req.body.email);
-
-  try {
-    const user = await User.findOne({ email });
-    if (user && !user.isEmailVerified) {
-      await sendVerificationEmail(user);
-    }
-
-    res.json({
-      success: true,
-      message: "If your account exists, a verification email has been sent.",
-    });
-  } catch (error) {
-    res.status(500).json({
-      success: false,
-      error: "Email could not be sent",
     });
   }
 };
@@ -339,14 +285,6 @@ export const login = async (req, res) => {
       return res.status(401).json({
         success: false,
         error: `Invalid credentials. ${lockState.attemptsLeft} attempt(s) remaining.`,
-      });
-    }
-
-    if (process.env.NODE_ENV === "production" && !user.isEmailVerified) {
-      return res.status(403).json({
-        success: false,
-        error: "Please verify your email before logging in.",
-        code: "EMAIL_NOT_VERIFIED",
       });
     }
 

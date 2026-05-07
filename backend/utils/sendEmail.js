@@ -1,6 +1,5 @@
 import nodemailer from "nodemailer";
 
-
 const sendEmail = async (options) => {
   try {
     // Create transporter
@@ -19,7 +18,8 @@ const sendEmail = async (options) => {
       from: `${process.env.FROM_NAME} <${process.env.FROM_EMAIL}>`,
       to: options.email,
       subject: options.subject,
-      text: options.message,
+      text: options.message || options.text || "",
+      ...(options.html ? { html: options.html } : {}),
     };
 
     // Send email

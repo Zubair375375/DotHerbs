@@ -16,11 +16,16 @@ const router = express.Router();
 
 // Validation rules
 const updateUserValidation = [
-  body("name")
+  body("firstName")
     .optional()
     .trim()
-    .isLength({ min: 2, max: 50 })
-    .withMessage("Name must be between 2 and 50 characters"),
+    .isLength({ min: 2, max: 30 })
+    .withMessage("First name must be between 2 and 30 characters"),
+  body("lastName")
+    .optional()
+    .trim()
+    .isLength({ min: 2, max: 30 })
+    .withMessage("Last name must be between 2 and 30 characters"),
   body("email")
     .optional()
     .isEmail()
@@ -45,11 +50,16 @@ const updateUserValidation = [
 ];
 
 const updateProfileValidation = [
-  body("name")
+  body("firstName")
     .optional()
     .trim()
-    .isLength({ min: 2, max: 50 })
-    .withMessage("Name must be between 2 and 50 characters"),
+    .isLength({ min: 2, max: 30 })
+    .withMessage("First name must be between 2 and 30 characters"),
+  body("lastName")
+    .optional()
+    .trim()
+    .isLength({ min: 2, max: 30 })
+    .withMessage("Last name must be between 2 and 30 characters"),
   body("email")
     .optional()
     .isEmail()

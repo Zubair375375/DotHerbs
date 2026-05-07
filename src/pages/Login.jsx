@@ -3,7 +3,6 @@ import { useDispatch, useSelector } from "react-redux";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import {
   login,
-  resendVerification,
   verifyTwoFactorLogin,
   selectAuthIsLoading,
   selectAuthError,
@@ -34,7 +33,6 @@ const Login = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [rememberMe, setRememberMe] = useState(false);
   const [twoFactorCode, setTwoFactorCode] = useState("");
-  const [emailForResend, setEmailForResend] = useState("");
 
   const from = location.state?.from?.pathname || "/";
 
@@ -105,22 +103,6 @@ const Login = () => {
       navigate(destination, { replace: true });
     } catch (error) {
       toast.error(error || "2FA verification failed");
-    }
-  };
-
-  const handleResendVerification = async () => {
-    if (!emailForResend) {
-      toast.error("Enter your email first");
-      return;
-    }
-
-    try {
-      const message = await dispatch(
-        resendVerification({ email: emailForResend }),
-      ).unwrap();
-      toast.success(message || "Verification email sent");
-    } catch (error) {
-      toast.error(error || "Could not resend verification email");
     }
   };
 
@@ -230,25 +212,6 @@ const Login = () => {
           {error && (
             <div className="text-red-600 text-sm text-center bg-red-50 p-3 rounded">
               {error}
-            </div>
-          )}
-
-          {error?.toLowerCase?.().includes("verify your email") && (
-            <div className="space-y-2">
-              <input
-                type="email"
-                value={emailForResend}
-                onChange={(e) => setEmailForResend(e.target.value)}
-                className="appearance-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-green-500 focus:border-[#68a300] sm:text-sm"
-                placeholder="Enter your email to resend verification"
-              />
-              <button
-                type="button"
-                onClick={handleResendVerification}
-                className="w-full py-2 px-4 border border-gray-300 rounded-md text-sm font-medium text-gray-700 bg-white hover:bg-gray-50"
-              >
-                Resend verification email
-              </button>
             </div>
           )}
 

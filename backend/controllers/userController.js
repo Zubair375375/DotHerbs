@@ -183,10 +183,29 @@ export const updateUser = async (req, res) => {
       });
     }
 
-    const { name, email, role, avatar, phone, shippingAddress, addressBook } =
-      req.body;
+    const {
+      firstName,
+      lastName,
+      name,
+      email,
+      role,
+      avatar,
+      phone,
+      shippingAddress,
+      addressBook,
+    } = req.body;
 
-    user.name = name || user.name;
+    if (typeof firstName === "string" && firstName.trim()) {
+      user.firstName = firstName.trim();
+    }
+    if (typeof lastName === "string" && lastName.trim()) {
+      user.lastName = lastName.trim();
+    }
+    if (typeof name === "string" && name.trim()) {
+      const parts = name.trim().split(/\s+/);
+      user.firstName = parts[0] || user.firstName;
+      user.lastName = parts.slice(1).join(" ") || user.lastName;
+    }
     user.email = email || user.email;
     user.role = role || user.role;
     user.phone = typeof phone === "string" ? phone.trim() : user.phone;
@@ -256,10 +275,28 @@ export const updateProfile = async (req, res) => {
   try {
     const user = await User.findById(req.user._id);
 
-    const { name, email, avatar, phone, shippingAddress, addressBook } =
-      req.body;
+    const {
+      firstName,
+      lastName,
+      name,
+      email,
+      avatar,
+      phone,
+      shippingAddress,
+      addressBook,
+    } = req.body;
 
-    user.name = name || user.name;
+    if (typeof firstName === "string" && firstName.trim()) {
+      user.firstName = firstName.trim();
+    }
+    if (typeof lastName === "string" && lastName.trim()) {
+      user.lastName = lastName.trim();
+    }
+    if (typeof name === "string" && name.trim()) {
+      const parts = name.trim().split(/\s+/);
+      user.firstName = parts[0] || user.firstName;
+      user.lastName = parts.slice(1).join(" ") || user.lastName;
+    }
     user.email = email || user.email;
     user.phone = typeof phone === "string" ? phone.trim() : user.phone;
     if (typeof avatar === "string") {
