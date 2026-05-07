@@ -108,9 +108,9 @@ const sendAccountCreatedEmail = async (user) => {
         </tr>
         <tr>
           <td style="padding:28px 24px 14px 24px;">
-            <h1 style="margin:0 0 10px 0;font-size:22px;line-height:1.3;color:#111827;">Welcome, ${huser.firstName}!</h1>
+            <h1 style="margin:0 0 10px 0;font-size:22px;line-height:1.3;color:#111827;">Welcome, ${user.firstName}!</h1>
             <p style="margin:0 0 14px 0;font-size:15px;line-height:1.7;color:#374151;">
-              Your Dotherbs account has been created successfully.
+              Your Dot-Herbs account has been created successfully.
             </p>
             <p style="margin:0 0 24px 0;font-size:15px;line-height:1.7;color:#374151;">
               You can now sign in and start exploring our products.
