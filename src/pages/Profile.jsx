@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useLocation, useNavigate } from "react-router-dom";
 import {
@@ -294,19 +294,36 @@ const Profile = () => {
     }
   };
 
-  const getAvatarUrl = () => {
-    if (!user?.avatar) return "";
+  const avatarCandidates = useMemo(() => {
+    if (!user?.avatar) return [];
+
     if (
       user.avatar.startsWith("http://") ||
       user.avatar.startsWith("https://")
     ) {
-      return user.avatar;
+      return [user.avatar];
     }
+
     if (user.avatar.startsWith("/uploads/")) {
-      return `${API_URL}${user.avatar}`;
+      const sameOrigin =
+        typeof window !== "undefined"
+          ? `${window.location.origin}${user.avatar}`
+          : user.avatar;
+      return [
+        `${API_URL}${user.avatar}`,
+        sameOrigin,
+        user.avatar,
+      ];
     }
-    return user.avatar;
-  };
+
+    return [user.avatar];
+  }, [API_URL, user?.avatar]);
+
+  const [avatarSrcIndex, setAvatarSrcIndex] = useState(0);
+
+  useEffect(() => {
+    setAvatarSrcIndex(0);
+  }, [avatarCandidates.length, user?.avatar]);
 
   const handleAvatarChange = async (e) => {
     const file = e.target.files?.[0];
@@ -624,9 +641,14 @@ const Profile = () => {
                   <div className="h-20 w-20 overflow-hidden rounded-full bg-green-100">
                     {user.avatar ? (
                       <img
-                        src={getAvatarUrl()}
+                        src={avatarCandidates[avatarSrcIndex] || ""}
                         alt={user.name}
                         className="h-full w-full object-cover"
+                        onError={() => {
+                          if (avatarSrcIndex < avatarCandidates.length - 1) {
+                            setAvatarSrcIndex((prev) => prev + 1);
+                          }
+                        }}
                       />
                     ) : (
                       <div className="flex h-full w-full items-center justify-center">

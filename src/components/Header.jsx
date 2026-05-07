@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { Link, NavLink, useLocation, useNavigate } from "react-router-dom";
 import { useSelector, useDispatch } from "react-redux";
 import {
@@ -71,19 +71,36 @@ const Header = () => {
   const showAuthPendingState =
     !!accessToken && (!authChecked || (authLoading && !user));
 
-  const getAvatarUrl = () => {
-    if (!user?.avatar) return "";
+  const avatarCandidates = useMemo(() => {
+    if (!user?.avatar) return [];
+
     if (
       user.avatar.startsWith("http://") ||
       user.avatar.startsWith("https://")
     ) {
-      return user.avatar;
+      return [user.avatar];
     }
+
     if (user.avatar.startsWith("/uploads/")) {
-      return `${API_URL}${user.avatar}`;
+      const sameOrigin =
+        typeof window !== "undefined"
+          ? `${window.location.origin}${user.avatar}`
+          : user.avatar;
+      return [
+        `${API_URL}${user.avatar}`,
+        sameOrigin,
+        user.avatar,
+      ];
     }
-    return user.avatar;
-  };
+
+    return [user.avatar];
+  }, [API_URL, user?.avatar]);
+
+  const [avatarSrcIndex, setAvatarSrcIndex] = useState(0);
+
+  useEffect(() => {
+    setAvatarSrcIndex(0);
+  }, [avatarCandidates.length, user?.avatar]);
 
   useEffect(() => {
     dispatch(fetchCategories());
@@ -247,9 +264,14 @@ const Header = () => {
           >
             {user?.avatar ? (
               <img
-                src={getAvatarUrl()}
+                src={avatarCandidates[avatarSrcIndex] || ""}
                 alt={user?.name || "Profile"}
                 className="h-7 w-7 rounded-full object-cover"
+                onError={() => {
+                  if (avatarSrcIndex < avatarCandidates.length - 1) {
+                    setAvatarSrcIndex((prev) => prev + 1);
+                  }
+                }}
               />
             ) : (
               <MdPerson className="text-xl" />
