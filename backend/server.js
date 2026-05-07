@@ -116,6 +116,15 @@ app.use(
   express.static(path.join(__dirname, "uploads")),
 );
 
+app.use(
+  "/api/uploads",
+  (req, res, next) => {
+    res.setHeader("Cross-Origin-Resource-Policy", "cross-origin");
+    next();
+  },
+  express.static(path.join(__dirname, "uploads")),
+);
+
 // ---------------------- ROUTES ----------------------
 app.use("/api/auth", authRoutes);
 app.use("/api/users", userRoutes);

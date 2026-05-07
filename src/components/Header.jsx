@@ -67,8 +67,7 @@ const Header = () => {
   const authChecked = useSelector(selectAuthChecked);
   const authLoading = useSelector(selectAuthIsLoading);
   const cartItemCount = useSelector(selectCartItemCount);
-  const API_URL = import.meta.env.VITE_API_URL || "/api";
-  const SERVER_URL = API_URL.replace(/\/api\/?$/, "");
+  const API_URL = (import.meta.env.VITE_API_URL || "/api").replace(/\/$/, "");
   const showAuthPendingState =
     !!accessToken && (!authChecked || (authLoading && !user));
 
@@ -80,7 +79,10 @@ const Header = () => {
     ) {
       return user.avatar;
     }
-    return `${SERVER_URL}${user.avatar}`;
+    if (user.avatar.startsWith("/uploads/")) {
+      return `${API_URL}${user.avatar}`;
+    }
+    return user.avatar;
   };
 
   useEffect(() => {
@@ -270,7 +272,7 @@ const Header = () => {
                   setIsProfileMenuOpen(false);
                 }}
                 className="w-full px-4 py-3 text-left text-sm text-gray-700 hover:bg-gray-50 focus:outline-none border-0"
-                style={{ boxShadow: 'none' }}
+                style={{ boxShadow: "none" }}
               >
                 Logout
               </button>

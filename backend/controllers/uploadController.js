@@ -21,12 +21,10 @@ export const uploadImage = async (req, res) => {
       });
     } catch (cloudErr) {
       console.error("Cloudinary upload error:", cloudErr);
-      return res
-        .status(500)
-        .json({
-          success: false,
-          error: `Cloudinary upload failed: ${cloudErr.message || cloudErr}`,
-        });
+      return res.status(500).json({
+        success: false,
+        error: `Cloudinary upload failed: ${cloudErr.message || cloudErr}`,
+      });
     }
 
     // Optionally, delete the local file after upload
@@ -45,12 +43,10 @@ export const uploadImage = async (req, res) => {
     });
   } catch (error) {
     console.error("Image upload failed:", error);
-    res
-      .status(500)
-      .json({
-        success: false,
-        error: `Image upload failed: ${error.message || error}`,
-      });
+    res.status(500).json({
+      success: false,
+      error: `Image upload failed: ${error.message || error}`,
+    });
   }
 };
 
