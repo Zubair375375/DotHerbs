@@ -93,21 +93,24 @@ const getClientBaseUrl = () => {
 };
 
 const sendAccountCreatedEmail = async (user) => {
-  const loginUrl = `${getClientBaseUrl()}/login`;
+  const clientBaseUrl = getClientBaseUrl().replace(/\/$/, "");
+  const loginUrl = `${clientBaseUrl}/login`;
+  const logoUrl = `${clientBaseUrl}/assets/logos/Logo.png`;
   const message = `Welcome to Dot-Herbs, ${user.firstName}! Your account has been created successfully. You can sign in here: ${loginUrl}`;
   const html = `
     <div style="margin:0;padding:24px;background:#f6f8f2;font-family:Arial,sans-serif;color:#1f2937;">
       <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="max-width:620px;margin:0 auto;background:#ffffff;border-radius:12px;overflow:hidden;border:1px solid #e5e7eb;">
         <tr>
-          <td style="padding:20px 24px;background:#68a300;color:#ffffff;font-size:20px;font-weight:700;">
-            Dot-Herbs
+          <td style="padding:18px 24px;background:#ffffff;border-bottom:1px solid #e5e7eb;text-align:center;">
+            <img src="${logoUrl}" alt="Dot-Herbs" width="170" style="display:inline-block;max-width:170px;height:auto;border:0;outline:none;text-decoration:none;" />
+            <div style="margin-top:8px;font-size:12px;color:#6b7280;letter-spacing:0.08em;text-transform:uppercase;">Dot-Herbs</div>
           </td>
         </tr>
         <tr>
           <td style="padding:28px 24px 14px 24px;">
-            <h1 style="margin:0 0 10px 0;font-size:22px;line-height:1.3;color:#111827;">Welcome, ${user.firstName}!</h1>
+            <h1 style="margin:0 0 10px 0;font-size:22px;line-height:1.3;color:#111827;">Welcome, ${huser.firstName}!</h1>
             <p style="margin:0 0 14px 0;font-size:15px;line-height:1.7;color:#374151;">
-              Your Dot-Herbs account has been created successfully.
+              Your Dotherbs account has been created successfully.
             </p>
             <p style="margin:0 0 24px 0;font-size:15px;line-height:1.7;color:#374151;">
               You can now sign in and start exploring our products.

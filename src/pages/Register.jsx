@@ -105,8 +105,7 @@ const Register = () => {
       ).unwrap();
 
       toast.success(
-        result?.message ||
-          "Registration successful! You can now sign in.",
+        result?.message || "Registration successful! You can now sign in.",
       );
       navigate("/login");
     } catch (error) {
