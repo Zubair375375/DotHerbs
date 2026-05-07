@@ -28,14 +28,37 @@ const Header = () => {
   const [isProductsMenuOpen, setIsProductsMenuOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [scrolled, setScrolled] = useState(false);
+  const [isDesktop, setIsDesktop] = useState(() =>
+    typeof window !== "undefined" ? window.innerWidth >= 768 : false,
+  );
   const location = useLocation();
   const navigate = useNavigate();
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 60);
+    const onResize = () => setIsDesktop(window.innerWidth >= 768);
+
+    onResize();
     window.addEventListener("scroll", onScroll, { passive: true });
-    return () => window.removeEventListener("scroll", onScroll);
+    window.addEventListener("resize", onResize);
+    return () => {
+      window.removeEventListener("scroll", onScroll);
+      window.removeEventListener("resize", onResize);
+    };
   }, []);
+
+  useEffect(() => {
+    if (!isMobileMenuOpen) return undefined;
+
+    const originalOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+
+    return () => {
+      document.body.style.overflow = originalOverflow;
+    };
+  }, [isMobileMenuOpen]);
+
+  const isScrolled = isDesktop && scrolled;
 
   const dispatch = useDispatch();
   const user = useSelector(selectAuthUser);
@@ -286,7 +309,9 @@ const Header = () => {
           className={`flex justify-between items-center transition-all duration-300 ease-in-out ${
             isProfileMenuOpen ? "overflow-visible" : "overflow-hidden"
           } ${
-            scrolled ? "h-0 opacity-0 pointer-events-none" : "h-16 opacity-100"
+            isScrolled
+              ? "h-0 opacity-0 pointer-events-none"
+              : "h-16 opacity-100"
           }`}
         >
           <Link to="/" className="flex items-center shrink-0">
@@ -339,7 +364,9 @@ const Header = () => {
               ? "overflow-visible"
               : "overflow-hidden"
           } ${
-            scrolled ? "h-12 opacity-100" : "h-0 opacity-0 pointer-events-none"
+            isScrolled
+              ? "h-12 opacity-100"
+              : "h-0 opacity-0 pointer-events-none"
           }`}
         >
           <div className="flex w-1/4 items-center justify-start">
@@ -365,7 +392,7 @@ const Header = () => {
         <div
           className={`hidden md:block border-t border-gray-100 transition-all duration-300 ease-in-out ${
             isProductsMenuOpen ? "overflow-visible" : "overflow-hidden"
-          } ${scrolled ? "h-0 opacity-0" : "h-11 opacity-100"}`}
+          } ${isScrolled ? "h-0 opacity-0" : "h-11 opacity-100"}`}
         >
           <nav className="flex justify-center items-center space-x-8 h-11">
             {navLinks.map((link) => renderNavItem(link))}
@@ -373,27 +400,58 @@ const Header = () => {
         </div>
       </div>
 
-      {/* Mobile Menu */}
-      {isMobileMenuOpen && (
-        <div className="md:hidden px-4 pb-4 space-y-2 border-t border-gray-100 bg-white">
-          {navLinks.map(({ to, label }) => (
-            <NavLink
-              key={to}
-              to={to}
+      {/* Mobile Menu Drawer */}
+      <div
+        className={`md:hidden fixed inset-0 z-[120] transition-opacity duration-300 ${
+          isMobileMenuOpen
+            ? "pointer-events-auto opacity-100"
+            : "pointer-events-none opacity-0"
+        }`}
+      >
+        <button
+          type="button"
+          aria-label="Close menu overlay"
+          className="absolute inset-0 bg-black/35"
+          onClick={() => setIsMobileMenuOpen(false)}
+        />
+
+        <aside
+          className={`absolute right-0 top-0 h-full w-[82%] max-w-[340px] bg-white shadow-2xl border-l border-gray-200 transition-transform duration-300 ${
+            isMobileMenuOpen ? "translate-x-0" : "translate-x-full"
+          }`}
+        >
+          <div className="flex items-center justify-between border-b border-gray-100 px-4 py-4">
+            <span className="text-base font-semibold text-gray-900">Menu</span>
+            <button
+              type="button"
+              className="rounded p-1 text-gray-700"
               onClick={() => setIsMobileMenuOpen(false)}
-              className={({ isActive }) =>
-                `block py-1 font-medium transition-colors ${
-                  isActive
-                    ? "text-[#68a300]"
-                    : "text-gray-700 hover:text-[#68a300]"
-                }`
-              }
+              aria-label="Close menu"
             >
-              {label}
-            </NavLink>
-          ))}
-        </div>
-      )}
+              <MdClose className="text-xl" />
+            </button>
+          </div>
+
+          <nav className="space-y-1 px-4 py-4">
+            {navLinks.map(({ to, label }) => (
+              <NavLink
+                key={to}
+                to={to}
+                onClick={() => setIsMobileMenuOpen(false)}
+                className={({ isActive }) =>
+                  `block rounded px-2 py-2.5 font-medium transition-colors ${
+                    isActive
+                      ? "bg-[#f3f9e8] text-[#68a300]"
+                      : "text-gray-700 hover:bg-gray-50 hover:text-[#68a300]"
+                  }`
+                }
+              >
+                {label}
+              </NavLink>
+            ))}
+          </nav>
+        </aside>
+      </div>
     </header>
   );
 };
