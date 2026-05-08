@@ -263,10 +263,14 @@ const Home = () => {
               <div className="pointer-events-none absolute right-0 top-0 z-10 h-full w-14 bg-gradient-to-l from-white via-white/90 to-transparent" />
               {(() => {
                 const MIN_PER_HALF = 10;
-                const repeatCount = Math.max(1, Math.ceil(MIN_PER_HALF / heroCertificateBadges.length));
+                const repeatCount = Math.max(
+                  1,
+                  Math.ceil(MIN_PER_HALF / heroCertificateBadges.length),
+                );
                 const half = Array.from(
                   { length: heroCertificateBadges.length * repeatCount },
-                  (_, i) => heroCertificateBadges[i % heroCertificateBadges.length],
+                  (_, i) =>
+                    heroCertificateBadges[i % heroCertificateBadges.length],
                 );
                 const marqueeItems = [...half, ...half];
                 return (
@@ -310,7 +314,7 @@ const Home = () => {
             <span className="hidden h-px flex-1 bg-[#1f2937] md:block" />
           </div>
 
-          <div className="grid grid-cols-[repeat(auto-fit,minmax(170px,170px))] justify-center gap-4">
+          <div className="grid grid-cols-3 gap-3 sm:gap-4 md:grid-cols-4 lg:grid-cols-5">
             {categories.map((category) => {
               return (
                 <Link
