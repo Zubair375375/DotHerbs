@@ -11,6 +11,10 @@ import {
   fetchHeroSlides,
   selectHeroSlides,
 } from "../store/slices/heroSlideSlice";
+import {
+  fetchHeroBadges,
+  selectHeroBadges,
+} from "../store/slices/heroBadgeSlice";
 import TrendingProducts from "../components/TrendingProducts";
 
 const BADGE_MARQUEE_STYLE = `
@@ -31,6 +35,7 @@ const Home = () => {
   const dispatch = useDispatch();
   const categories = useSelector(selectCategories);
   const heroSlides = useSelector(selectHeroSlides);
+  const heroCertificateBadges = useSelector(selectHeroBadges);
   const [currentSlide, setCurrentSlide] = useState(0);
   const [isTransitionEnabled, setIsTransitionEnabled] = useState(true);
   const API_URL = import.meta.env.VITE_API_URL || "/api";
@@ -58,6 +63,7 @@ const Home = () => {
   useEffect(() => {
     dispatch(fetchCategories({ force: true }));
     dispatch(fetchHeroSlides());
+    dispatch(fetchHeroBadges());
   }, [dispatch]);
 
   const slides = useMemo(() => {
@@ -82,24 +88,6 @@ const Home = () => {
 
     return [...slides, slides[0]];
   }, [slides]);
-
-  const heroCertificateBadges = useMemo(() => {
-    if (!heroSlides.length) {
-      return [];
-    }
-
-    const sortedSlides = [...heroSlides].sort(
-      (a, b) => Number(a.displayOrder || 0) - Number(b.displayOrder || 0),
-    );
-
-    const firstSlideWithBadges = sortedSlides.find(
-      (slide) =>
-        Array.isArray(slide.certificateBadgeImages) &&
-        slide.certificateBadgeImages.length > 0,
-    );
-
-    return firstSlideWithBadges?.certificateBadgeImages || [];
-  }, [heroSlides]);
 
   useEffect(() => {
     setCurrentSlide(0);
@@ -260,7 +248,7 @@ const Home = () => {
       {heroCertificateBadges.length > 0 && (
         <section className="bg-[#ffffff] py-8">
           <style>{BADGE_MARQUEE_STYLE}</style>
-          <div className="flex w-full flex-col items-center gap-6 px-4 lg:flex-row lg:items-center">
+          <div className="flex w-full flex-col-reverse items-center gap-6 px-4 lg:flex-row lg:items-center">
             <div className="w-full rounded-2xl bg-gradient-to-r from-[#2f80ed] to-[#1f63d8] px-6 py-5 text-white lg:max-w-[34rem]">
               <h3 className="text-center text-3xl font-extrabold leading-tight lg:text-left">
                 20+ Certificates
@@ -273,24 +261,33 @@ const Home = () => {
             <div className="relative w-full overflow-hidden pb-2 lg:pl-2">
               <div className="pointer-events-none absolute left-0 top-0 z-10 h-full w-14 bg-gradient-to-r from-white via-white/90 to-transparent" />
               <div className="pointer-events-none absolute right-0 top-0 z-10 h-full w-14 bg-gradient-to-l from-white via-white/90 to-transparent" />
-              <div className="hero-badge-marquee-track items-start gap-5 pr-2">
-                {[...heroCertificateBadges, ...heroCertificateBadges].map(
-                  (badgeImage, index) => (
-                    <div
-                      key={`${badgeImage}-${index}`}
-                      className="flex w-24 flex-col items-center"
-                    >
-                      <div className="flex h-20 w-20 items-center justify-center overflow-hidden rounded-full border-2 border-[#ccb8d9] bg-white shadow-sm">
-                        <img
-                          src={resolveMediaUrl(badgeImage)}
-                          alt={`Certificate badge ${(index % heroCertificateBadges.length) + 1}`}
-                          className="h-full w-full object-cover"
-                        />
+              {(() => {
+                const MIN_PER_HALF = 10;
+                const repeatCount = Math.max(1, Math.ceil(MIN_PER_HALF / heroCertificateBadges.length));
+                const half = Array.from(
+                  { length: heroCertificateBadges.length * repeatCount },
+                  (_, i) => heroCertificateBadges[i % heroCertificateBadges.length],
+                );
+                const marqueeItems = [...half, ...half];
+                return (
+                  <div className="hero-badge-marquee-track items-start gap-5 pr-2">
+                    {marqueeItems.map((badgeImage, index) => (
+                      <div
+                        key={`${badgeImage}-${index}`}
+                        className="flex w-24 flex-col items-center"
+                      >
+                        <div className="flex h-20 w-20 items-center justify-center overflow-hidden rounded-full border-2 border-[#ccb8d9] bg-white shadow-sm">
+                          <img
+                            src={resolveMediaUrl(badgeImage)}
+                            alt={`Certificate badge ${(index % heroCertificateBadges.length) + 1}`}
+                            className="h-full w-full object-cover"
+                          />
+                        </div>
                       </div>
-                    </div>
-                  ),
-                )}
-              </div>
+                    ))}
+                  </div>
+                );
+              })()}
             </div>
           </div>
         </section>

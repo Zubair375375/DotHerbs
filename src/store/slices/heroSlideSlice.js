@@ -49,27 +49,6 @@ export const createHeroSlide = createAsyncThunk(
   },
 );
 
-export const updateHeroSlideBadges = createAsyncThunk(
-  "heroSlides/updateBadges",
-  async ({ id, certificateBadgeImages }, { getState, rejectWithValue }) => {
-    try {
-      const { auth } = getState();
-      const response = await api.put(
-        `/hero-slides/${id}/badges`,
-        { certificateBadgeImages },
-        {
-          headers: { Authorization: `Bearer ${auth.accessToken}` },
-        },
-      );
-      return response.data.data;
-    } catch (error) {
-      return rejectWithValue(
-        error.response?.data?.error || "Failed to update hero badges",
-      );
-    }
-  },
-);
-
 export const deleteHeroSlide = createAsyncThunk(
   "heroSlides/delete",
   async (id, { getState, rejectWithValue }) => {
@@ -127,14 +106,6 @@ const heroSlideSlice = createSlice({
         if (action.payload.isActive) {
           state.items.push(action.payload);
         }
-      })
-      .addCase(updateHeroSlideBadges.fulfilled, (state, action) => {
-        state.adminItems = state.adminItems.map((slide) =>
-          slide._id === action.payload._id ? action.payload : slide,
-        );
-        state.items = state.items.map((slide) =>
-          slide._id === action.payload._id ? action.payload : slide,
-        );
       })
       .addCase(deleteHeroSlide.fulfilled, (state, action) => {
         state.adminItems = state.adminItems.filter(
