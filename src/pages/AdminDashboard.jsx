@@ -9,6 +9,7 @@ import { useState, useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import {
+  selectAuthChecked,
   selectAuthUser,
   selectIsAuthenticated,
 } from "../store/slices/authSlice";
@@ -84,6 +85,7 @@ import {
 const AdminDashboard = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
+  const authChecked = useSelector(selectAuthChecked);
   const user = useSelector(selectAuthUser);
   const isAuthenticated = useSelector(selectIsAuthenticated);
   const products = useSelector(selectProducts);
@@ -263,7 +265,6 @@ const AdminDashboard = () => {
     },
   ];
   const defaultHealthPriorityImages = ["", "", "", ""];
-
 
   const getAuthToken = () => {
     const rawToken = localStorage.getItem("accessToken");
@@ -506,17 +507,24 @@ const AdminDashboard = () => {
   };
 
   useEffect(() => {
+    if (!authChecked) {
+      return;
+    }
+
     if (!isAuthenticated) {
-      navigate("/login");
+      navigate("/login", {
+        replace: true,
+        state: { from: { pathname: "/admin" } },
+      });
       return;
     }
 
     if (user?.role !== "admin") {
-      navigate("/");
+      navigate("/", { replace: true });
       toast.error("Access denied. Admin privileges required.");
       return;
     }
-  }, [isAuthenticated, navigate, user]);
+  }, [authChecked, isAuthenticated, navigate, user]);
 
   useEffect(() => {
     if (isAuthenticated && user?.role === "admin") {
@@ -1656,7 +1664,11 @@ const AdminDashboard = () => {
       setHeroBadgeImagePreviews([]);
       toast.success("Hero certificate badges updated successfully");
     } catch (error) {
-      toast.error(typeof error === "string" ? error : error?.message || "Failed to update hero certificate badges");
+      toast.error(
+        typeof error === "string"
+          ? error
+          : error?.message || "Failed to update hero certificate badges",
+      );
     } finally {
       setUpdatingHeroBadges(false);
     }
@@ -1741,7 +1753,7 @@ const AdminDashboard = () => {
     (product) => product._id === selectedBatchProductId,
   );
 
-  if (!isAuthenticated || user?.role !== "admin") {
+  if (!authChecked || !isAuthenticated || user?.role !== "admin") {
     return <Loader />;
   }
 
@@ -1941,7 +1953,10 @@ const AdminDashboard = () => {
                               src={
                                 product.image
                                   ? resolveMediaUrl(product.image)
-                                  : resolveMediaUrl(product.images?.[0]?.url || product.images?.[0])
+                                  : resolveMediaUrl(
+                                      product.images?.[0]?.url ||
+                                        product.images?.[0],
+                                    )
                               }
                               alt={product.name}
                               className="w-10 h-10 object-cover rounded"
@@ -2140,7 +2155,10 @@ const AdminDashboard = () => {
                               src={
                                 product.image
                                   ? resolveMediaUrl(product.image)
-                                  : resolveMediaUrl(product.images?.[0]?.url || product.images?.[0])
+                                  : resolveMediaUrl(
+                                      product.images?.[0]?.url ||
+                                        product.images?.[0],
+                                    )
                               }
                               alt={product.name}
                               className="w-10 h-10 object-cover rounded"

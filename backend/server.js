@@ -95,12 +95,18 @@ app.use(
 app.options("*", cors());
 
 // ---------------------- RATE LIMIT ----------------------
-app.use(
-  rateLimit({
-    windowMs: 15 * 60 * 1000,
-    max: isProduction ? 300 : 5000,
-  }),
-);
+const apiLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: isProduction ? 300 : 5000,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: {
+    success: false,
+    error: "Too many requests, please try again later.",
+  },
+});
+
+app.use("/api", apiLimiter);
 
 // ---------------------- BODY ----------------------
 app.use(express.json({ limit: "10mb" }));
