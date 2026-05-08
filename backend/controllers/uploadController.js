@@ -1,5 +1,5 @@
 import User from "../models/User.js";
-import cloudinary from "../config/cloudinary.js";
+import getCloudinary from "../config/cloudinary.js";
 
 // @desc    Upload image to local /uploads folder
 // @route   POST /api/upload
@@ -15,7 +15,7 @@ export const uploadImage = async (req, res) => {
 
     let result;
     try {
-      result = await cloudinary.uploader.upload(req.file.path, {
+      result = await getCloudinary().uploader.upload(req.file.path, {
         folder: "dot-herbs",
         resource_type: "image",
       });

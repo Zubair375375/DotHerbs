@@ -6,6 +6,7 @@ import orderReducer from "./slices/orderSlice";
 import userReducer from "./slices/userSlice";
 import announcementReducer from "./slices/announcementSlice";
 import heroSlideReducer from "./slices/heroSlideSlice";
+import heroBadgeReducer from "./slices/heroBadgeSlice";
 import productBannerReducer from "./slices/productBannerSlice";
 import trendingReducer from "./slices/trendingSlice";
 
@@ -18,6 +19,7 @@ export const store = configureStore({
     users: userReducer,
     announcements: announcementReducer,
     heroSlides: heroSlideReducer,
+    heroBadges: heroBadgeReducer,
     productBanners: productBannerReducer,
     trending: trendingReducer,
   },
