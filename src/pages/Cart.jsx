@@ -105,8 +105,8 @@ const Cart = () => {
   }
 
   return (
-    <div className="container mx-auto px-4 py-8">
-      <div className="flex items-center justify-between mb-8">
+    <div className="container mx-auto px-4 py-8 overflow-x-hidden">
+      <div className="mb-8 flex flex-wrap items-center justify-between gap-3">
         <h1 className="text-[24px] font-bold text-gray-800">Shopping Cart</h1>
         {cartItems.length > 0 && (
           <button
@@ -142,30 +142,30 @@ const Cart = () => {
             {cartItems.map((item) => (
               <div
                 key={item.product._id}
-                className="bg-white rounded-lg shadow-md p-6"
+                className="overflow-hidden bg-white rounded-lg shadow-md p-4 md:p-6"
               >
-                <div className="flex space-x-4">
+                <div className="flex flex-col gap-4 md:flex-row">
                   <img
                     src={getProductImage(item.product)}
                     alt={item.product.name}
-                    className="w-24 h-24 object-cover rounded"
+                    className="h-24 w-24 rounded object-cover"
                   />
 
-                  <div className="flex-1">
-                    <h3 className="text-lg font-semibold text-gray-800 mb-2">
+                  <div className="min-w-0 flex-1">
+                    <h3 className="mb-2 break-words text-lg font-semibold text-gray-800">
                       {item.product.name}
                     </h3>
-                    <p className="text-gray-600 text-sm mb-4 line-clamp-2">
+                    <p className="mb-4 text-sm text-gray-600 line-clamp-2">
                       {item.product.description}
                     </p>
 
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center space-x-3">
+                    <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
+                      <div className="flex flex-wrap items-center gap-3">
                         <span className="font-semibold text-green-600">
                           ${item.product.price?.toFixed(2)}
                         </span>
 
-                        <div className="flex items-center border border-gray-300 rounded">
+                        <div className="flex shrink-0 items-center rounded border border-gray-300">
                           <button
                             onClick={() =>
                               handleQuantityChange(
@@ -195,8 +195,8 @@ const Cart = () => {
                         </div>
                       </div>
 
-                      <div className="flex items-center space-x-4">
-                        <span className="font-semibold">
+                      <div className="flex w-full items-center justify-between gap-4 md:w-auto md:justify-end">
+                        <span className="whitespace-nowrap font-semibold">
                           ${(item.product.price * item.quantity).toFixed(2)}
                         </span>
                         <button
@@ -218,7 +218,7 @@ const Cart = () => {
             {/* Promo Code */}
             <div className="bg-white rounded-lg shadow-md p-6">
               <h3 className="text-lg font-semibold mb-4">Promo Code</h3>
-              <div className="flex space-x-2">
+              <div className="flex flex-col gap-2 md:flex-row md:space-x-2">
                 <input
                   type="text"
                   placeholder="Enter promo code"

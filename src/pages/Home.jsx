@@ -374,7 +374,6 @@ const Home = () => {
           </h3>
         </div>
       </section>
-
     </div>
   );
 };
