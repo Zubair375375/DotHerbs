@@ -39,14 +39,33 @@ app.set("trust proxy", 1);
 const isProduction =
   (process.env.NODE_ENV || "").toLowerCase() === "production";
 
-const allowedOrigins = (process.env.CLIENT_URLS || "")
-  .split(",")
-  .map((o) => o.trim())
-  .filter(Boolean);
+const allowedOrigins = (() => {
+  const raw = (process.env.CLIENT_URLS || "")
+    .split(",")
+    .map((o) => o.trim())
+    .filter(Boolean);
 
-if (allowedOrigins.length === 0) {
-  allowedOrigins.push(process.env.CLIENT_URL || "http://localhost:5173");
-}
+  if (raw.length === 0) {
+    raw.push(process.env.CLIENT_URL || "http://localhost:5173");
+  }
+
+  // Automatically allow both www and non-www variants for every entry
+  const expanded = new Set(raw);
+  for (const origin of raw) {
+    try {
+      const url = new URL(origin);
+      if (url.hostname.startsWith("www.")) {
+        url.hostname = url.hostname.slice(4);
+      } else {
+        url.hostname = "www." + url.hostname;
+      }
+      expanded.add(url.origin);
+    } catch {
+      // ignore malformed entries
+    }
+  }
+  return [...expanded];
+})();
 
 // ---------------------- SECURITY ----------------------
 // app.use(
@@ -86,7 +105,7 @@ app.use(
       if (!isProduction && /^http:\/\/localhost:\d+$/.test(origin)) {
         return callback(null, true);
       }
-      callback(new Error("CORS blocked: " + origin));
+      return callback(new Error(`CORS blocked: ${origin}`), false);
     },
     credentials: true,
   }),
