@@ -148,37 +148,6 @@ const Home = () => {
     return () => window.cancelAnimationFrame(frameId);
   }, [isTransitionEnabled]);
 
-  const featuredProducts = [
-    {
-      _id: "1",
-      name: "Organic Turmeric Powder",
-      price: 12.99,
-      images: ["/placeholder-product.jpg"],
-      averageRating: 4.5,
-    },
-    {
-      _id: "2",
-      name: "Green Tea Leaves",
-      price: 8.99,
-      images: ["/placeholder-product.jpg"],
-      averageRating: 4.2,
-    },
-    {
-      _id: "3",
-      name: "Lavender Essential Oil",
-      price: 15.99,
-      images: ["/placeholder-product.jpg"],
-      averageRating: 4.8,
-    },
-    {
-      _id: "4",
-      name: "Ginger Root Powder",
-      price: 9.99,
-      images: ["/placeholder-product.jpg"],
-      averageRating: 4.3,
-    },
-  ];
-
   return (
     <div className="min-h-screen">
       {/* Hero */}
@@ -356,7 +325,7 @@ const Home = () => {
       <TrendingProducts />
 
       {/* Features */}
-      <section className="py-16 bg-white grid grid-cols-1 md:grid-cols-4 gap-8 text-center px-6">
+      <section className="py-16 bg-white grid grid-cols-2 md:grid-cols-4 gap-8 text-center px-6">
         <div>
           <MdEco className="text-5xl mx-auto text-[#68a300] my-3" />
           <h3
@@ -406,32 +375,6 @@ const Home = () => {
         </div>
       </section>
 
-      {/* Products */}
-      <section className="py-16 bg-gray-50 px-6">
-        <h2 className="text-center text-3xl mb-10">Featured Products</h2>
-
-        <div className="grid md:grid-cols-4 gap-6">
-          {featuredProducts.map((p) => (
-            <div key={p._id} className="bg-white p-4 rounded shadow">
-              <img
-                src={p.images[0]}
-                alt={p.name}
-                className="w-full h-40 object-cover"
-              />
-
-              <h3 className="mt-2 font-bold">{p.name}</h3>
-              <p>${p.price}</p>
-
-              <Link
-                to={`/products/${p._id}`}
-                className="text-[#68a300] mt-2 block"
-              >
-                View Details
-              </Link>
-            </div>
-          ))}
-        </div>
-      </section>
     </div>
   );
 };
