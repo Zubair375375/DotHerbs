@@ -35,20 +35,7 @@ body {
 
 /* ✅ Fixed button base */
 button {
-  border: none;
-  padding: 6px 12px;
   cursor: pointer;
-}
-
-button:hover {
-  border-color: transparent;
-}
-
-button:focus,
-button:focus-visible,
-button:active {
-  outline: none;
-  border-color: transparent;
 }
 
 @media (prefers-color-scheme: light) {
@@ -59,10 +46,6 @@ button:active {
 
   a:hover {
     color: #747bff;
-  }
-
-  button {
-    background-color: #f9f9f9;
   }
 }
 

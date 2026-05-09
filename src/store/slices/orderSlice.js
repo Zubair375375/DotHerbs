@@ -23,11 +23,14 @@ export const createOrder = createAsyncThunk(
   async (orderData, { getState, rejectWithValue }) => {
     try {
       const { auth } = getState();
-      const response = await axios.post(`${API_URL}/orders`, orderData, {
-        headers: {
-          Authorization: `Bearer ${auth.accessToken}`,
-        },
-      });
+      const config = auth.accessToken
+        ? {
+            headers: {
+              Authorization: `Bearer ${auth.accessToken}`,
+            },
+          }
+        : undefined;
+      const response = await axios.post(`${API_URL}/orders`, orderData, config);
       return response.data.data;
     } catch (error) {
       return rejectWithValue(
@@ -290,4 +293,3 @@ export const selectOrder = (state) => state.orders.order;
 export const selectOrdersLoading = (state) => state.orders.isLoading;
 export const selectOrdersError = (state) => state.orders.error;
 export default orderSlice.reducer;
-

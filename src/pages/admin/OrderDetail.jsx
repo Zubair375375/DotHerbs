@@ -22,7 +22,7 @@ import {
 } from "../../store/slices/orderSlice";
 import Loader from "../../components/Loader";
 
-const formatCurrency = (amount) => `$${Number(amount || 0).toFixed(2)}`;
+const formatCurrency = (amount) => `Rs. ${Number(amount || 0).toFixed(2)}`;
 const API_URL = import.meta.env.VITE_API_URL || "/api";
 const SERVER_URL = API_URL.replace(/\/api\/?$/, "");
 
@@ -166,7 +166,7 @@ const OrderDetail = () => {
         <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
           <div className="rounded-lg bg-white p-6 shadow lg:col-span-2">
             <div className="mb-4 flex items-center">
-              <FaBoxOpen className="mr-2 text-[#68a300]" />
+              {/* <FaBoxOpen className="mr-2 text-[#68a300]" /> */}
               <h2 className="text-xl font-semibold text-gray-900">Items</h2>
             </div>
             <div className="space-y-4">
@@ -233,7 +233,14 @@ const OrderDetail = () => {
                 </p>
                 <p>
                   <span className="font-medium">Email:</span>{" "}
-                  {order.user?.email || "N/A"}
+                  {order.shippingAddress?.email ||
+                    order.customerSnapshot?.email ||
+                    order.user?.email ||
+                    "N/A"}
+                </p>
+                <p>
+                  <span className="font-medium">Phone:</span>{" "}
+                  {order.shippingAddress?.phone || "N/A"}
                 </p>
               </div>
             </div>

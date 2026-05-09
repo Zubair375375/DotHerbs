@@ -29,6 +29,10 @@ const Checkout = () => {
   const SERVER_URL = API_URL.replace(/\/api\/?$/, "");
 
   const [shippingAddress, setShippingAddress] = useState({
+    firstName: "",
+    lastName: "",
+    email: "",
+    phone: "",
     street: "",
     city: "",
     state: "",
@@ -46,22 +50,16 @@ const Checkout = () => {
     if (!rawImage) return "/placeholder-product.jpg";
     if (/^https?:\/\//i.test(rawImage)) return rawImage;
     if (rawImage === "/placeholder-product.jpg") return rawImage;
-    if (rawImage.startsWith("/uploads/"))
-      return `${SERVER_URL}${rawImage}`;
+    if (rawImage.startsWith("/uploads/")) return `${SERVER_URL}${rawImage}`;
     return rawImage;
   };
 
   useEffect(() => {
-    if (!isAuthenticated) {
-      navigate("/login");
-      return;
-    }
-
     if (itemCount === 0) {
       navigate("/cart");
       return;
     }
-  }, [isAuthenticated, itemCount, navigate]);
+  }, [itemCount, navigate]);
 
   useEffect(() => {
     if (!user) return;
@@ -80,6 +78,10 @@ const Checkout = () => {
     const defaultAddress =
       savedAddresses.find((entry) => entry.isDefault) ||
       (user.shippingAddress?.street ||
+      user.shippingAddress?.firstName ||
+      user.shippingAddress?.lastName ||
+      user.shippingAddress?.email ||
+      user.shippingAddress?.phone ||
       user.shippingAddress?.city ||
       user.shippingAddress?.state ||
       user.shippingAddress?.zipCode ||
@@ -89,6 +91,10 @@ const Checkout = () => {
 
     if (defaultAddress) {
       setShippingAddress({
+        firstName: defaultAddress.firstName || "",
+        lastName: defaultAddress.lastName || "",
+        email: defaultAddress.email || "",
+        phone: defaultAddress.phone || "",
         street: defaultAddress.street || "",
         city: defaultAddress.city || "",
         state: defaultAddress.state || "",
@@ -110,6 +116,10 @@ const Checkout = () => {
 
   const handleSelectSavedAddress = (entry) => {
     setShippingAddress({
+      firstName: entry.firstName || "",
+      lastName: entry.lastName || "",
+      email: entry.email || "",
+      phone: entry.phone || "",
       street: entry.street || "",
       city: entry.city || "",
       state: entry.state || "",
@@ -123,6 +133,10 @@ const Checkout = () => {
     e.preventDefault();
 
     if (
+      !shippingAddress.firstName ||
+      !shippingAddress.lastName ||
+      !shippingAddress.email ||
+      !shippingAddress.phone ||
       !shippingAddress.street ||
       !shippingAddress.city ||
       !shippingAddress.state ||
@@ -158,12 +172,16 @@ const Checkout = () => {
       const createdOrder = await dispatch(createOrder(orderData)).unwrap();
       dispatch(clearCart());
       toast.success("Order placed successfully!");
-      navigate("/profile", {
-        state: {
-          orderPlaced: true,
-          orderId: createdOrder?._id,
-        },
-      });
+      if (isAuthenticated) {
+        navigate("/profile", {
+          state: {
+            orderPlaced: true,
+            orderId: createdOrder?._id,
+          },
+        });
+      } else {
+        navigate("/products");
+      }
     } catch (error) {
       toast.error(error || "Failed to place order");
     } finally {
@@ -171,7 +189,7 @@ const Checkout = () => {
     }
   };
 
-  if (!isAuthenticated || itemCount === 0) {
+  if (itemCount === 0) {
     return <Loader />;
   }
 
@@ -288,6 +306,64 @@ const Checkout = () => {
               ) : null}
 
               <form onSubmit={handleSubmit} className="space-y-4">
+                <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      First Name
+                    </label>
+                    <input
+                      type="text"
+                      name="firstName"
+                      value={shippingAddress.firstName}
+                      onChange={handleInputChange}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
+                      required
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Last Name
+                    </label>
+                    <input
+                      type="text"
+                      name="lastName"
+                      value={shippingAddress.lastName}
+                      onChange={handleInputChange}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
+                      required
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Email
+                  </label>
+                  <input
+                    type="email"
+                    name="email"
+                    value={shippingAddress.email}
+                    onChange={handleInputChange}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
+                    required
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Phone
+                  </label>
+                  <input
+                    type="tel"
+                    name="phone"
+                    value={shippingAddress.phone}
+                    onChange={handleInputChange}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
+                    required
+                  />
+                </div>
+
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
                     Street Address
@@ -383,7 +459,7 @@ const Checkout = () => {
                 <button
                   type="submit"
                   disabled={isProcessing}
-                  className="w-full bg-[#68a300] text-white py-3 px-4 rounded-md hover:bg-[#5f9600] disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center"
+                  className="w-full border border-transparent bg-[#232323] text-white py-3 px-4 hover:bg-black hover:border-[#232323] disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center duration-300 transition"
                 >
                   {isProcessing ? (
                     <>

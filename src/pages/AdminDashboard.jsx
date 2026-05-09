@@ -1743,7 +1743,7 @@ const AdminDashboard = () => {
 
   // Calculate dashboard stats
   const totalRevenue = orders.reduce(
-    (sum, order) => sum + (order.total || 0),
+    (sum, order) => sum + Number(order.totalPrice ?? order.total ?? 0),
     0,
   );
   const totalOrders = orderPagination?.total || orders?.length || 0;
@@ -1921,7 +1921,10 @@ const AdminDashboard = () => {
                             </button>
                           </div>
                           <p className="text-sm text-gray-600">
-                            {order.user?.name} - ${order.total?.toFixed(2)}
+                            {order.user?.name} - $
+                            {Number(
+                              order.totalPrice ?? order.total ?? 0,
+                            ).toFixed(2)}
                           </p>
                         </div>
                         <span
@@ -2400,6 +2403,9 @@ const AdminDashboard = () => {
                         Customer
                       </th>
                       <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+                        Customer Type
+                      </th>
+                      <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">
                         Total
                       </th>
                       <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">
@@ -2434,8 +2440,14 @@ const AdminDashboard = () => {
                         <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-500">
                           {order.user?.name}
                         </td>
+                        <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-500">
+                          {order.user?._id ? "User" : "Guest Customer"}
+                        </td>
                         <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-900">
-                          ${order.total?.toFixed(2)}
+                          Rs.{" "}
+                          {Number(order.totalPrice ?? order.total ?? 0).toFixed(
+                            2,
+                          )}
                         </td>
                         <td className="px-4 py-4 whitespace-nowrap">
                           <select
