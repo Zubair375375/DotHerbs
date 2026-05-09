@@ -100,10 +100,10 @@ const ProductCard = ({ product, viewMode = "grid" }) => {
             <button
               onClick={handleAddToCart}
               disabled={product.stock === 0 || isAdmin}
-              className="rounded-sm border border-[#68a300] bg-white p-2 text-[#68a300] transition-colors hover:border-[#68a300] hover:bg-[#68a300] hover:text-white disabled:cursor-not-allowed disabled:opacity-50"
+              className="bg-transparent border-0 p-0 text-[#68a300] disabled:cursor-not-allowed disabled:opacity-50"
               aria-label="Add to cart"
             >
-              <MdShoppingCart className="h-5 w-5" />
+              <MdShoppingCart className="h-5 w-5 transition-transform duration-150 hover:scale-125" />
             </button>
           </div>
 
@@ -156,10 +156,10 @@ const ProductCard = ({ product, viewMode = "grid" }) => {
             <button
               onClick={handleAddToCart}
               disabled={product.stock === 0 || isAdmin}
-              className="rounded-sm border border-[#68a300] bg-white p-1.5 text-[#68a300] transition-colors hover:bg-[#68a300] hover:text-white disabled:cursor-not-allowed disabled:opacity-50"
+              className="bg-transparent border-0 p-0 text-[#68a300] disabled:cursor-not-allowed disabled:opacity-50"
               aria-label="Add to cart"
             >
-              <MdShoppingCart className="h-5 w-5" />
+              <MdShoppingCart className="h-5 w-5 transition-transform duration-150 hover:scale-125" />
             </button>
           </div>
 
@@ -205,10 +205,10 @@ const ProductCard = ({ product, viewMode = "grid" }) => {
             <button
               onClick={handleAddToCart}
               disabled={product.stock === 0 || isAdmin}
-              className="rounded-sm border border-[#68a300] px-1.5 py-0.5 text-[11px] text-[#68a300] transition-colors hover:bg-[#68a300] hover:text-white disabled:cursor-not-allowed disabled:opacity-50"
+              className="bg-transparent border-0 p-0 text-[#68a300] disabled:cursor-not-allowed disabled:opacity-50"
               aria-label="Add to cart"
             >
-              <MdShoppingCart className="h-4 w-4" />
+              <MdShoppingCart className="h-4 w-4 transition-transform duration-150 hover:scale-125" />
             </button>
           </div>
         </div>
@@ -254,10 +254,10 @@ const ProductCard = ({ product, viewMode = "grid" }) => {
           <button
             onClick={handleAddToCart}
             disabled={product.stock === 0 || isAdmin}
-            className="rounded-sm border border-[#68a300] bg-white p-2 text-[#68a300] transition-colors hover:border-[#68a300] hover:bg-[#68a300] hover:text-white disabled:cursor-not-allowed disabled:opacity-50"
+            className="bg-transparent border-0 p-0 text-[#68a300] disabled:cursor-not-allowed disabled:opacity-50"
             aria-label="Add to cart"
           >
-            <MdShoppingCart className="h-5 w-5" />
+            <MdShoppingCart className="h-5 w-5 transition-transform duration-150 hover:scale-125" />
           </button>
         </div>
 
