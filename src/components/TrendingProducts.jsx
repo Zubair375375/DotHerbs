@@ -59,7 +59,7 @@ const TrendingProducts = () => {
         <div className="trending-products-grid">
           {trendingProducts.map((product) => (
             <div key={product._id} className="trending-product-wrapper">
-              <ProductCard product={product} />
+              <ProductCard product={product} viewMode="tiny" />
               {product.trendingScore && (
                 <div className="trending-badge">
                   <span className="trending-score">
