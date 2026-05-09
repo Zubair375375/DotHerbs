@@ -10,7 +10,7 @@ import {
   createPaymentIntent,
   confirmPayment,
 } from "../controllers/orderController.js";
-import { protect, authorize } from "../middleware/auth.js";
+import { protect, authorize, optionalProtect } from "../middleware/auth.js";
 
 const router = express.Router();
 
@@ -38,6 +38,22 @@ const createOrderValidation = [
     .trim()
     .notEmpty()
     .withMessage("Street address is required"),
+  body("shippingAddress.firstName")
+    .trim()
+    .notEmpty()
+    .withMessage("First name is required"),
+  body("shippingAddress.lastName")
+    .trim()
+    .notEmpty()
+    .withMessage("Last name is required"),
+  body("shippingAddress.email")
+    .trim()
+    .isEmail()
+    .withMessage("Valid email is required"),
+  body("shippingAddress.phone")
+    .trim()
+    .notEmpty()
+    .withMessage("Phone is required"),
   body("shippingAddress.city")
     .trim()
     .notEmpty()
@@ -75,7 +91,7 @@ const updateStatusValidation = [
 ];
 
 // Routes
-router.post("/", protect, createOrderValidation, createOrder);
+router.post("/", optionalProtect, createOrderValidation, createOrder);
 router.get("/myorders", protect, getMyOrders);
 router.get("/:id", protect, getOrderById);
 router.get("/", protect, authorize("admin"), getOrders);

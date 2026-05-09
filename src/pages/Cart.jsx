@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import {
@@ -9,7 +9,6 @@ import {
   removeFromCart,
   clearCart,
 } from "../store/slices/cartSlice";
-import { selectIsAuthenticated } from "../store/slices/authSlice";
 import Loader from "../components/Loader";
 import toast from "react-hot-toast";
 import { FaTrash, FaPlus, FaMinus, FaShoppingBag } from "react-icons/fa";
@@ -20,7 +19,6 @@ const Cart = () => {
   const cartItems = useSelector(selectCartItems);
   const cartTotal = useSelector(selectCartTotal);
   const isLoading = useSelector(selectCartIsLoading);
-  const isAuthenticated = useSelector(selectIsAuthenticated);
   const API_URL = import.meta.env.VITE_API_URL || "/api";
   const SERVER_URL = API_URL.replace(/\/api\/?$/, "");
 
@@ -36,13 +34,6 @@ const Cart = () => {
     if (rawImage.startsWith("/uploads/")) return `${SERVER_URL}${rawImage}`;
     return rawImage;
   };
-
-  useEffect(() => {
-    if (!isAuthenticated) {
-      navigate("/login");
-      return;
-    }
-  }, [isAuthenticated, navigate]);
 
   const handleQuantityChange = (productId, newQuantity) => {
     if (newQuantity < 1) return;
@@ -97,10 +88,6 @@ const Cart = () => {
 
   if (isLoading) {
     return <Loader />;
-  }
-
-  if (!isAuthenticated) {
-    return null; // Will redirect in useEffect
   }
 
   return (
@@ -295,8 +282,8 @@ const Cart = () => {
                 Free Shipping
               </h4>
               <p className="text-blue-700 text-sm">
-                Orders over Rs. 500 qualify for free shipping. Standard shipping is
-                just Rs. 9.99.
+                Orders over Rs. 500 qualify for free shipping. Standard shipping
+                is just Rs. 9.99.
               </p>
             </div>
           </div>

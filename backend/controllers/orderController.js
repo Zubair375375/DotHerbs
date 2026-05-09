@@ -9,13 +9,34 @@ import {
 } from "../services/inventoryService.js";
 import { recordProductSale } from "../services/trendingProductService.js";
 
+const getGuestNameFromShipping = (shippingAddress = {}) => {
+  const firstName = (shippingAddress.firstName || "").trim();
+  const lastName = (shippingAddress.lastName || "").trim();
+  const fullName = [firstName, lastName].filter(Boolean).join(" ");
+  return fullName || "Guest Customer";
+};
+
+const getGuestEmailFromShipping = (shippingAddress = {}) => {
+  return (shippingAddress.email || "").trim();
+};
+
 const withCustomerFallback = (order) => {
-  const orderObject = typeof order.toObject === "function" ? order.toObject() : order;
+  const orderObject =
+    typeof order.toObject === "function" ? order.toObject() : order;
+
+  const snapshotName = (orderObject.customerSnapshot?.name || "").trim();
+  const snapshotEmail = (orderObject.customerSnapshot?.email || "").trim();
+  const resolvedGuestName =
+    snapshotName && snapshotName !== "Guest Customer"
+      ? snapshotName
+      : getGuestNameFromShipping(orderObject.shippingAddress);
+  const resolvedEmail =
+    snapshotEmail || (orderObject.shippingAddress?.email || "").trim();
 
   if (!orderObject.user && orderObject.customerSnapshot) {
     orderObject.user = {
-      name: orderObject.customerSnapshot.name || "Deleted user",
-      email: orderObject.customerSnapshot.email || "",
+      name: resolvedGuestName,
+      email: resolvedEmail,
     };
   }
 
@@ -24,7 +45,7 @@ const withCustomerFallback = (order) => {
 
 // @desc    Create new order
 // @route   POST /api/orders
-// @access  Private
+// @access  Public
 export const createOrder = async (req, res) => {
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
@@ -100,10 +121,10 @@ export const createOrder = async (req, res) => {
       });
 
       const order = new Order({
-        user: req.user._id,
+        user: req.user?._id || null,
         customerSnapshot: {
-          name: req.user.name || "",
-          email: req.user.email || "",
+          name: req.user?.name || getGuestNameFromShipping(shippingAddress),
+          email: req.user?.email || getGuestEmailFromShipping(shippingAddress),
         },
         orderItems: orderItemsWithBatches,
         shippingAddress,
@@ -125,7 +146,10 @@ export const createOrder = async (req, res) => {
       }
     } catch (trendingError) {
       // Fire-and-forget: don't fail order if trending tracking fails
-      console.warn("[Trending] Failed to record product sales:", trendingError.message);
+      console.warn(
+        "[Trending] Failed to record product sales:",
+        trendingError.message,
+      );
     }
 
     res.status(201).json({
@@ -179,7 +203,10 @@ export const getOrderById = async (req, res) => {
 
     // Check if user owns the order or is admin
     if (req.user.role !== "admin") {
-      if (!order.user || order.user._id.toString() !== req.user._id.toString()) {
+      if (
+        !order.user ||
+        order.user._id.toString() !== req.user._id.toString()
+      ) {
         return res.status(401).json({
           success: false,
           error: "Not authorized to view this order",
