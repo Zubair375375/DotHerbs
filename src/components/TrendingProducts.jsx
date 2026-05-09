@@ -73,7 +73,10 @@ const TrendingProducts = () => {
 
         {/* View All Link */}
         <div className="trending-footer">
-          <Link to="/products" className="trending-view-all">
+          <Link
+            to="/products"
+            className="inline-flex items-center justify-center bg-[#232323] border border-[#232323] text-white px-4 py-2 text-[14px] font-semibold text-black transition hover:bg-[#ffffff] hover:text-black hover:border hover:border-[#232323]"
+          >
             View All Products
             <MdChevronRight className="trending-chevron" />
           </Link>
