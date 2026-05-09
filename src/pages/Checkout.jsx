@@ -213,7 +213,7 @@ const Checkout = () => {
           {/* Order Summary */}
           <div className="bg-white rounded-lg shadow-md p-6">
             <h2 className="text-xl font-semibold mb-4 flex items-center">
-              <FaTruck className="mr-2" />
+              {/* <FaTruck className="mr-2" /> */}
               Order Summary
             </h2>
 
