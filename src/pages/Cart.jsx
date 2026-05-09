@@ -33,8 +33,7 @@ const Cart = () => {
     if (!rawImage) return "/placeholder-product.jpg";
     if (/^https?:\/\//i.test(rawImage)) return rawImage;
     if (rawImage === "/placeholder-product.jpg") return rawImage;
-    if (rawImage.startsWith("/uploads/"))
-      return `${SERVER_URL}${rawImage}`;
+    if (rawImage.startsWith("/uploads/")) return `${SERVER_URL}${rawImage}`;
     return rawImage;
   };
 
@@ -162,7 +161,7 @@ const Cart = () => {
                     <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
                       <div className="flex flex-wrap items-center gap-3">
                         <span className="font-semibold text-green-600">
-                          ${item.product.price?.toFixed(2)}
+                          Rs. {item.product.price?.toFixed(2)}
                         </span>
 
                         <div className="flex shrink-0 items-center rounded border border-gray-300">
@@ -197,7 +196,7 @@ const Cart = () => {
 
                       <div className="flex w-full items-center justify-between gap-4 md:w-auto md:justify-end">
                         <span className="whitespace-nowrap font-semibold">
-                          ${(item.product.price * item.quantity).toFixed(2)}
+                          Rs. {(item.product.price * item.quantity).toFixed(2)}
                         </span>
                         <button
                           onClick={() => handleRemoveItem(item.product._id)}
@@ -245,25 +244,25 @@ const Cart = () => {
               <div className="space-y-2 mb-4">
                 <div className="flex justify-between">
                   <span>Subtotal ({cartItems.length} items)</span>
-                  <span>${subtotal.toFixed(2)}</span>
+                  <span>Rs. {subtotal.toFixed(2)}</span>
                 </div>
 
                 <div className="flex justify-between">
                   <span>Shipping</span>
                   <span>
-                    {shipping === 0 ? "Free" : `$${shipping.toFixed(2)}`}
+                    {shipping === 0 ? "Free" : `Rs. ${shipping.toFixed(2)}`}
                   </span>
                 </div>
 
                 <div className="flex justify-between">
                   <span>Tax</span>
-                  <span>${tax.toFixed(2)}</span>
+                  <span>Rs. {tax.toFixed(2)}</span>
                 </div>
 
                 {discount > 0 && (
                   <div className="flex justify-between text-green-600">
                     <span>Discount</span>
-                    <span>-${discount.toFixed(2)}</span>
+                    <span>-Rs. {discount.toFixed(2)}</span>
                   </div>
                 )}
               </div>
@@ -271,7 +270,7 @@ const Cart = () => {
               <div className="border-t pt-4">
                 <div className="flex justify-between text-xl font-bold">
                   <span>Total</span>
-                  <span>${total.toFixed(2)}</span>
+                  <span>Rs. {total.toFixed(2)}</span>
                 </div>
               </div>
 
@@ -296,8 +295,8 @@ const Cart = () => {
                 Free Shipping
               </h4>
               <p className="text-blue-700 text-sm">
-                Orders over $50 qualify for free shipping. Standard shipping is
-                just $9.99.
+                Orders over Rs. 500 qualify for free shipping. Standard shipping is
+                just Rs. 9.99.
               </p>
             </div>
           </div>
