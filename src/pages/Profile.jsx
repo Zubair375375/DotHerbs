@@ -1,6 +1,6 @@
 import { useState, useEffect, useMemo } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { useLocation, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import {
   selectAuthUser,
   selectIsAuthenticated,
@@ -25,7 +25,6 @@ import {
   FaSignOutAlt,
   FaEdit,
   FaSave,
-  FaTimes,
   FaCamera,
   FaEye,
   FaEyeSlash,
@@ -37,7 +36,6 @@ import {
 const Profile = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
-  const location = useLocation();
   const user = useSelector(selectAuthUser);
   const isAuthenticated = useSelector(selectIsAuthenticated);
   const isLoading = useSelector(selectAuthIsLoading);
@@ -46,7 +44,6 @@ const Profile = () => {
   const API_URL = (import.meta.env.VITE_API_URL || "/api").replace(/\/$/, "");
 
   const [activeTab, setActiveTab] = useState("profile");
-  const [showOrderThanks, setShowOrderThanks] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
   const [passwordForm, setPasswordForm] = useState({
     currentPassword: "",
@@ -101,6 +98,17 @@ const Profile = () => {
     },
   });
 
+  const getResolvedNameParts = (currentUser) => {
+    const fullName = String(currentUser?.name || "").trim();
+    const [derivedFirstName = "", ...restNameParts] = fullName.split(" ");
+    const derivedLastName = restNameParts.join(" ");
+
+    return {
+      firstName: currentUser?.firstName || derivedFirstName || "",
+      lastName: currentUser?.lastName || derivedLastName || "",
+    };
+  };
+
   useEffect(() => {
     if (!isAuthenticated) {
       navigate("/login");
@@ -108,9 +116,11 @@ const Profile = () => {
     }
 
     if (user) {
+      const resolvedNames = getResolvedNameParts(user);
+
       setFormData({
-        firstName: user.firstName || "",
-        lastName: user.lastName || "",
+        firstName: resolvedNames.firstName,
+        lastName: resolvedNames.lastName,
         email: user.email || "",
         phone: user.phone || "",
         address: {
@@ -146,13 +156,6 @@ const Profile = () => {
       dispatch(getMyOrders());
     }
   }, [isAuthenticated, navigate, user, activeTab, dispatch]);
-
-  useEffect(() => {
-    if (location.state?.orderPlaced) {
-      setShowOrderThanks(true);
-      setActiveTab("orders");
-    }
-  }, [location.state]);
 
   useEffect(() => {
     try {
@@ -229,9 +232,11 @@ const Profile = () => {
     setIsEditing(false);
     // Reset form data to original user data
     if (user) {
+      const resolvedNames = getResolvedNameParts(user);
+
       setFormData({
-        firstName: user.firstName || "",
-        lastName: user.lastName || "",
+        firstName: resolvedNames.firstName,
+        lastName: resolvedNames.lastName,
         email: user.email || "",
         phone: user.phone || "",
         address: {
@@ -768,38 +773,6 @@ const Profile = () => {
 
           {/* Main Content */}
           <div className="lg:col-span-3">
-            {showOrderThanks && (
-              <div className="mb-6 rounded-lg border border-green-200 bg-green-50 p-5 shadow-sm">
-                <div className="flex items-start justify-between gap-4">
-                  <div>
-                    <h3 className="text-lg font-semibold text-green-800">
-                      Thank you for placing your order!
-                    </h3>
-                    <p className="mt-1 text-sm text-green-700">
-                      Your order has been received successfully and is now
-                      visible in your order history.
-                    </p>
-                    {location.state?.orderId && (
-                      <p className="mt-2 text-sm font-medium text-green-800">
-                        Order reference: #{location.state.orderId.slice(-8)}
-                      </p>
-                    )}
-                  </div>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setShowOrderThanks(false);
-                      navigate("/profile", { replace: true });
-                    }}
-                    className="text-green-700 hover:text-green-900"
-                    aria-label="Dismiss order success message"
-                  >
-                    <FaTimes />
-                  </button>
-                </div>
-              </div>
-            )}
-
             {/* Profile Tab */}
             {activeTab === "profile" && (
               <div className="bg-white rounded-lg shadow-md p-6">
@@ -879,7 +852,11 @@ const Profile = () => {
                     </label>
                     <input
                       type="text"
-                      className="w-full px-3 py-2 border border-black-300 rounded-md focus:outline-none focus:ring-0 disabled:bg-white"
+                      name="firstName"
+                      value={formData.firstName}
+                      onChange={handleInputChange}
+                      disabled={!isEditing}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-0 disabled:bg-white"
                     />
                   </div>
 
@@ -889,7 +866,11 @@ const Profile = () => {
                     </label>
                     <input
                       type="text"
-                      className="w-full px-3 py-2 border border-black-300 rounded-md focus:outline-none focus:ring-0 disabled:bg-white"
+                      name="lastName"
+                      value={formData.lastName}
+                      onChange={handleInputChange}
+                      disabled={!isEditing}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-0 disabled:bg-white"
                     />
                   </div>
 
@@ -899,7 +880,11 @@ const Profile = () => {
                     </label>
                     <input
                       type="email"
-                      className="w-full px-3 py-2 border border-black-300 rounded-md focus:outline-none focus:ring-0 disabled:bg-white"
+                      name="email"
+                      value={formData.email}
+                      onChange={handleInputChange}
+                      disabled={!isEditing}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-0 disabled:bg-white"
                     />
                   </div>
 
@@ -909,7 +894,11 @@ const Profile = () => {
                     </label>
                     <input
                       type="tel"
-                      className="w-full px-3 py-2 border border-black-300 rounded-md focus:outline-none focus:ring-0 disabled:bg-white"
+                      name="phone"
+                      value={formData.phone}
+                      onChange={handleInputChange}
+                      disabled={!isEditing}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-0 disabled:bg-white"
                     />
                   </div>
 
@@ -924,7 +913,11 @@ const Profile = () => {
                         </label>
                         <input
                           type="text"
-                          className="w-full px-3 py-2 border border-black-300 rounded-md focus:outline-none focus:ring-0 disabled:bg-white"
+                          name="address.street"
+                          value={formData.address.street}
+                          onChange={handleInputChange}
+                          disabled={!isEditing}
+                          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-0 disabled:bg-white"
                         />
                       </div>
 
@@ -934,7 +927,11 @@ const Profile = () => {
                         </label>
                         <input
                           type="text"
-                          className="w-full px-3 py-2 border border-black-300 rounded-md focus:outline-none focus:ring-0 disabled:bg-white"
+                          name="address.city"
+                          value={formData.address.city}
+                          onChange={handleInputChange}
+                          disabled={!isEditing}
+                          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-0 disabled:bg-white"
                         />
                       </div>
 
@@ -944,7 +941,11 @@ const Profile = () => {
                         </label>
                         <input
                           type="text"
-                          className="w-full px-3 py-2 border border-black-300 rounded-md focus:outline-none focus:ring-0 disabled:bg-white"
+                          name="address.state"
+                          value={formData.address.state}
+                          onChange={handleInputChange}
+                          disabled={!isEditing}
+                          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-0 disabled:bg-white"
                         />
                       </div>
 
@@ -954,7 +955,11 @@ const Profile = () => {
                         </label>
                         <input
                           type="text"
-                          className="w-full px-3 py-2 border border-black-300 rounded-md focus:outline-none focus:ring-0 disabled:bg-white"
+                          name="address.zipCode"
+                          value={formData.address.zipCode}
+                          onChange={handleInputChange}
+                          disabled={!isEditing}
+                          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-0 disabled:bg-white"
                         />
                       </div>
 
@@ -964,7 +969,11 @@ const Profile = () => {
                         </label>
                         <input
                           type="text"
-                          className="w-full px-3 py-2 border border-black-300 rounded-md focus:outline-none focus:ring-0 disabled:bg-white"
+                          name="address.country"
+                          value={formData.address.country}
+                          onChange={handleInputChange}
+                          disabled={!isEditing}
+                          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-0 disabled:bg-white"
                         />
                       </div>
                     </div>

@@ -53,12 +53,18 @@ const buildOrderConfirmationEmail = (customerName, order) => {
           <td style="padding:8px 12px;border-bottom:1px solid #eee;">${item.name}</td>
           <td style="padding:8px 12px;border-bottom:1px solid #eee;text-align:center;">${item.quantity}</td>
           <td style="padding:8px 12px;border-bottom:1px solid #eee;text-align:right;">₱${Number(item.price).toFixed(2)}</td>
-        </tr>`
+        </tr>`,
     )
     .join("");
 
   const addr = order.shippingAddress || {};
-  const addressLine = [addr.street, addr.city, addr.state, addr.zipCode, addr.country]
+  const addressLine = [
+    addr.street,
+    addr.city,
+    addr.state,
+    addr.zipCode,
+    addr.country,
+  ]
     .filter(Boolean)
     .join(", ");
 
@@ -257,16 +263,16 @@ export const createOrder = async (req, res) => {
     }
 
     // Send order confirmation email (fire-and-forget)
-    const customerEmail =
-      shippingAddress.email || req.user?.email;
-    const customerName = getGuestNameFromShipping(shippingAddress) || req.user?.name || "Customer";
+    const customerEmail = shippingAddress.email || req.user?.email;
+    const customerName =
+      getGuestNameFromShipping(shippingAddress) || req.user?.name || "Customer";
     if (customerEmail) {
       sendEmail({
         email: customerEmail,
         subject: `Order Confirmed - #${createdOrder._id.toString().slice(-8).toUpperCase()}`,
         html: buildOrderConfirmationEmail(customerName, createdOrder),
       }).catch((err) =>
-        console.warn("[Order Email] Failed to send confirmation:", err.message)
+        console.warn("[Order Email] Failed to send confirmation:", err.message),
       );
     }
 

@@ -5,12 +5,8 @@ import {
   selectCartItems,
   selectCartTotal,
   selectCartItemCount,
-  clearCart,
 } from "../store/slices/cartSlice";
-import {
-  selectAuthUser,
-  selectIsAuthenticated,
-} from "../store/slices/authSlice";
+import { selectAuthUser } from "../store/slices/authSlice";
 import { createOrder } from "../store/slices/orderSlice";
 import Loader from "../components/Loader";
 import toast from "react-hot-toast";
@@ -23,7 +19,6 @@ const Checkout = () => {
   const cartItems = useSelector(selectCartItems);
   const cartTotal = useSelector(selectCartTotal);
   const itemCount = useSelector(selectCartItemCount);
-  const isAuthenticated = useSelector(selectIsAuthenticated);
   const user = useSelector(selectAuthUser);
   const API_URL = import.meta.env.VITE_API_URL || "/api";
   const SERVER_URL = API_URL.replace(/\/api\/?$/, "");
@@ -43,6 +38,7 @@ const Checkout = () => {
 
   const [paymentMethod] = useState("demo");
   const [isProcessing, setIsProcessing] = useState(false);
+  const [hasPlacedOrder, setHasPlacedOrder] = useState(false);
 
   const getProductImage = (product) => {
     const rawImage =
@@ -55,14 +51,23 @@ const Checkout = () => {
   };
 
   useEffect(() => {
-    if (itemCount === 0) {
+    if (itemCount === 0 && !isProcessing && !hasPlacedOrder) {
       navigate("/cart");
       return;
     }
-  }, [itemCount, navigate]);
+  }, [itemCount, isProcessing, hasPlacedOrder, navigate]);
 
   useEffect(() => {
     if (!user) return;
+
+    const fullName = String(user.name || "").trim();
+    const [derivedFirstName = "", ...restNameParts] = fullName.split(" ");
+    const derivedLastName = restNameParts.join(" ");
+
+    const accountFirstName = user.firstName || derivedFirstName || "";
+    const accountLastName = user.lastName || derivedLastName || "";
+    const accountEmail = user.email || "";
+    const accountPhone = user.phone || "";
 
     const savedAddresses = Array.isArray(user.addressBook)
       ? user.addressBook.filter(
@@ -89,20 +94,18 @@ const Checkout = () => {
         ? user.shippingAddress
         : null);
 
-    if (defaultAddress) {
-      setShippingAddress({
-        firstName: defaultAddress.firstName || "",
-        lastName: defaultAddress.lastName || "",
-        email: defaultAddress.email || "",
-        phone: defaultAddress.phone || "",
-        street: defaultAddress.street || "",
-        city: defaultAddress.city || "",
-        state: defaultAddress.state || "",
-        zipCode: defaultAddress.zipCode || "",
-        country: defaultAddress.country || "",
-      });
-      setSelectedAddressId(defaultAddress._id || "manual");
-    }
+    setShippingAddress({
+      firstName: defaultAddress?.firstName || accountFirstName,
+      lastName: defaultAddress?.lastName || accountLastName,
+      email: defaultAddress?.email || accountEmail,
+      phone: defaultAddress?.phone || accountPhone,
+      street: defaultAddress?.street || "",
+      city: defaultAddress?.city || "",
+      state: defaultAddress?.state || "",
+      zipCode: defaultAddress?.zipCode || "",
+      country: defaultAddress?.country || "",
+    });
+    setSelectedAddressId(defaultAddress?._id || "manual");
   }, [user]);
 
   const handleInputChange = (e) => {
@@ -115,11 +118,20 @@ const Checkout = () => {
   };
 
   const handleSelectSavedAddress = (entry) => {
+    const fullName = String(user?.name || "").trim();
+    const [derivedFirstName = "", ...restNameParts] = fullName.split(" ");
+    const derivedLastName = restNameParts.join(" ");
+
+    const accountFirstName = user?.firstName || derivedFirstName || "";
+    const accountLastName = user?.lastName || derivedLastName || "";
+    const accountEmail = user?.email || "";
+    const accountPhone = user?.phone || "";
+
     setShippingAddress({
-      firstName: entry.firstName || "",
-      lastName: entry.lastName || "",
-      email: entry.email || "",
-      phone: entry.phone || "",
+      firstName: entry.firstName || accountFirstName,
+      lastName: entry.lastName || accountLastName,
+      email: entry.email || accountEmail,
+      phone: entry.phone || accountPhone,
       street: entry.street || "",
       city: entry.city || "",
       state: entry.state || "",
@@ -170,18 +182,34 @@ const Checkout = () => {
       };
 
       const createdOrder = await dispatch(createOrder(orderData)).unwrap();
-      dispatch(clearCart());
-      toast.success("Order placed successfully!");
-      if (isAuthenticated) {
-        navigate("/profile", {
-          state: {
-            orderPlaced: true,
-            orderId: createdOrder?._id,
+      setHasPlacedOrder(true);
+      const customerName =
+        [shippingAddress.firstName, shippingAddress.lastName]
+          .filter(Boolean)
+          .join(" ") || "N/A";
+      const estimatedDelivery = new Date(
+        Date.now() + 3 * 24 * 60 * 60 * 1000,
+      ).toLocaleDateString("en-US", {
+        month: "short",
+        day: "numeric",
+        year: "numeric",
+      });
+
+      navigate("/cart", {
+        state: {
+          orderSuccess: true,
+          orderSummary: {
+            orderId: createdOrder?._id || "",
+            customerName,
+            totalAmount: Number(cartTotal || 0),
+            paymentMethod,
+            deliveryCity: shippingAddress.city || "N/A",
+            estimatedDelivery,
+            email: shippingAddress.email || "N/A",
+            phone: shippingAddress.phone || "N/A",
           },
-        });
-      } else {
-        navigate("/products");
-      }
+        },
+      });
     } catch (error) {
       toast.error(error || "Failed to place order");
     } finally {
@@ -189,7 +217,7 @@ const Checkout = () => {
     }
   };
 
-  if (itemCount === 0) {
+  if (itemCount === 0 && !hasPlacedOrder) {
     return <Loader />;
   }
 
@@ -316,7 +344,7 @@ const Checkout = () => {
                       name="firstName"
                       value={shippingAddress.firstName}
                       onChange={handleInputChange}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
+                      className="w-full px-3 py-2 border border-gray-300 focus:outline-none focus:ring-0 focus:ring-0"
                       required
                     />
                   </div>
@@ -330,7 +358,7 @@ const Checkout = () => {
                       name="lastName"
                       value={shippingAddress.lastName}
                       onChange={handleInputChange}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
+                      className="w-full px-3 py-2 border border-gray-300 focus:outline-none focus:ring-0 focus:ring-0"
                       required
                     />
                   </div>
@@ -345,7 +373,7 @@ const Checkout = () => {
                     name="email"
                     value={shippingAddress.email}
                     onChange={handleInputChange}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
+                    className="w-full px-3 py-2 border border-gray-300 focus:outline-none focus:ring-0 focus:ring-0"
                     required
                   />
                 </div>
@@ -359,7 +387,7 @@ const Checkout = () => {
                     name="phone"
                     value={shippingAddress.phone}
                     onChange={handleInputChange}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
+                    className="w-full px-3 py-2 border border-gray-300 focus:outline-none focus:ring-0 focus:ring-0"
                     required
                   />
                 </div>
@@ -373,7 +401,7 @@ const Checkout = () => {
                     name="street"
                     value={shippingAddress.street}
                     onChange={handleInputChange}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
+                    className="w-full px-3 py-2 border border-gray-300 focus:outline-none focus:ring-0 focus:ring-0"
                     required
                   />
                 </div>
@@ -388,7 +416,7 @@ const Checkout = () => {
                       name="city"
                       value={shippingAddress.city}
                       onChange={handleInputChange}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
+                      className="w-full px-3 py-2 border border-gray-300 focus:outline-none focus:ring-0 focus:ring-0"
                       required
                     />
                   </div>
@@ -402,7 +430,7 @@ const Checkout = () => {
                       name="state"
                       value={shippingAddress.state}
                       onChange={handleInputChange}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
+                      className="w-full px-3 py-2 border border-gray-300 focus:outline-none focus:ring-0 focus:ring-0"
                       required
                     />
                   </div>
@@ -418,7 +446,7 @@ const Checkout = () => {
                       name="zipCode"
                       value={shippingAddress.zipCode}
                       onChange={handleInputChange}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
+                      className="w-full px-3 py-2 border border-gray-300 focus:outline-none focus:ring-0 focus:ring-0"
                       required
                     />
                   </div>
@@ -432,7 +460,7 @@ const Checkout = () => {
                       name="country"
                       value={shippingAddress.country}
                       onChange={handleInputChange}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
+                      className="w-full px-3 py-2 border border-gray-300 focus:outline-none focus:ring-0 focus:ring-0"
                       required
                     />
                   </div>
