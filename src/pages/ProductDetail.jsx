@@ -16,7 +16,10 @@ import {
   fetchProduct,
 } from "../store/slices/productSlice";
 import { addToCart } from "../store/slices/cartSlice";
-import { trackProductView, trackAddToCart } from "../utils/trendingMetricsTracker";
+import {
+  trackProductView,
+  trackAddToCart,
+} from "../utils/trendingMetricsTracker";
 import {
   selectAuthUser,
   selectIsAuthenticated,
@@ -670,12 +673,6 @@ const ProductDetail = () => {
   const handleAddToCart = () => {
     if (isAdmin) {
       toast.error("Admin accounts cannot add products to cart");
-      return;
-    }
-
-    if (!isAuthenticated) {
-      toast.error("Please login to add items to cart");
-      navigate("/login");
       return;
     }
 
@@ -1740,5 +1737,3 @@ const ProductDetail = () => {
 };
 
 export default ProductDetail;
-
-

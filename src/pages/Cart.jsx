@@ -1,6 +1,6 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import {
   selectCartItems,
   selectCartTotal,
@@ -11,11 +11,18 @@ import {
 } from "../store/slices/cartSlice";
 import Loader from "../components/Loader";
 import toast from "react-hot-toast";
-import { FaTrash, FaPlus, FaMinus, FaShoppingBag } from "react-icons/fa";
+import {
+  FaTrash,
+  FaPlus,
+  FaMinus,
+  FaShoppingBag,
+  FaCheckCircle,
+} from "react-icons/fa";
 
 const Cart = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
+  const location = useLocation();
   const cartItems = useSelector(selectCartItems);
   const cartTotal = useSelector(selectCartTotal);
   const isLoading = useSelector(selectCartIsLoading);
@@ -24,6 +31,16 @@ const Cart = () => {
 
   const [promoCode, setPromoCode] = useState("");
   const [discount, setDiscount] = useState(0);
+  const [showOrderSuccessPopup, setShowOrderSuccessPopup] = useState(false);
+  const [orderSummary, setOrderSummary] = useState(null);
+
+  useEffect(() => {
+    if (location.state?.orderSuccess && location.state?.orderSummary) {
+      setOrderSummary(location.state.orderSummary);
+      setShowOrderSuccessPopup(true);
+      navigate(location.pathname, { replace: true, state: {} });
+    }
+  }, [location.pathname, location.state, navigate]);
 
   const getProductImage = (product) => {
     const rawImage =
@@ -81,6 +98,11 @@ const Cart = () => {
     navigate("/checkout");
   };
 
+  const handleCloseOrderSuccessPopup = () => {
+    setShowOrderSuccessPopup(false);
+    dispatch(clearCart());
+  };
+
   const subtotal = cartTotal;
   const shipping = subtotal > 50 ? 0 : 9.99;
   const tax = (subtotal + shipping - discount) * 0.08;
@@ -92,6 +114,67 @@ const Cart = () => {
 
   return (
     <div className="container mx-auto px-4 py-8 overflow-x-hidden">
+      {showOrderSuccessPopup && orderSummary ? (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 px-4"
+          onClick={handleCloseOrderSuccessPopup}
+        >
+          <div
+            className="relative w-full max-w-md rounded-lg bg-white p-6 text-center shadow-xl"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <FaCheckCircle className="mx-auto mb-3 text-4xl text-green-600" />
+            <h2 className="text-2xl font-bold text-gray-800">
+              Thank you for your order!
+            </h2>
+            <p className="mt-2 text-sm text-gray-600">
+              Your order has been received and is now being processed.
+            </p>
+            <div className="mt-4 rounded-md p-4 text-left text-sm text-gray-700">
+              <p>
+                <span className="font-semibold">Order ID:</span>{" "}
+                {orderSummary.orderId || "N/A"}
+              </p>
+              <p className="mt-1">
+                <span className="font-semibold">Customer name:</span>{" "}
+                {orderSummary.customerName || "N/A"}
+              </p>
+              <p className="mt-1">
+                <span className="font-semibold">Total amount:</span> $
+                {Number(orderSummary.totalAmount || 0).toFixed(2)}
+              </p>
+              <p className="mt-1">
+                <span className="font-semibold">Payment method:</span>{" "}
+                {orderSummary.paymentMethod || "N/A"}
+              </p>
+              <p className="mt-1">
+                <span className="font-semibold">Delivery city:</span>{" "}
+                {orderSummary.deliveryCity || "N/A"}
+              </p>
+              <p className="mt-1">
+                <span className="font-semibold">Estimated delivery:</span>{" "}
+                {orderSummary.estimatedDelivery || "N/A"}
+              </p>
+              <p className="mt-1">
+                <span className="font-semibold">Email:</span>{" "}
+                {orderSummary.email || "N/A"}
+              </p>
+              <p className="mt-1">
+                <span className="font-semibold">Phone:</span>{" "}
+                {orderSummary.phone || "N/A"}
+              </p>
+            </div>
+            <button
+              type="button"
+              onClick={handleCloseOrderSuccessPopup}
+              className="mt-5 bg-[#232323] px-5 py-2 text-sm font-semibold text-white transition hover:bg-black"
+            >
+              Close
+            </button>
+          </div>
+        </div>
+      ) : null}
+
       <div className="mb-8 flex flex-wrap items-center justify-between gap-3">
         <h1 className="text-[24px] font-bold text-gray-800">Shopping Cart</h1>
         {cartItems.length > 0 && (
@@ -210,7 +293,7 @@ const Cart = () => {
                   placeholder="Enter promo code"
                   value={promoCode}
                   onChange={(e) => setPromoCode(e.target.value)}
-                  className="flex-1 px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-green-500"
+                  className="flex-1 px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-0 focus:ring-0"
                 />
                 <button
                   onClick={handleApplyPromoCode}
@@ -219,9 +302,9 @@ const Cart = () => {
                   Apply
                 </button>
               </div>
-              <p className="text-sm text-gray-500 mt-2">
+              {/* <p className="text-sm text-gray-500 mt-2">
                 Try: WELCOME10 or HERBS20
-              </p>
+              </p> */}
             </div>
 
             {/* Order Summary */}
@@ -263,14 +346,14 @@ const Cart = () => {
 
               <button
                 onClick={handleCheckout}
-                className="w-full bg-[#ffce12] text-black py-3 rounded-lg hover:bg-[##f8bd19] mt-6 font-semibold"
+                className="w-full bg-[#ffce12] text-gray-700 py-3 hover:bg-[#e3b80f] mt-6 font-semibold"
               >
                 Proceed to Checkout
               </button>
 
               <button
                 onClick={() => navigate("/products")}
-                className="w-full border border-gray-300 text-gray-700 py-2 rounded-lg hover:bg-gray-50 mt-3"
+                className="w-full border border-gray-300 text-gray-700 py-2 hover:bg-gray-50 mt-3"
               >
                 Continue Shopping
               </button>
