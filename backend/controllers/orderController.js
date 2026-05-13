@@ -52,7 +52,7 @@ const buildOrderConfirmationEmail = (customerName, order) => {
         `<tr>
           <td style="padding:16px 20px;border-bottom:1px solid #eee;font-size:14px;color:#333;"><strong>${item.name}</strong></td>
           <td style="padding:16px 20px;border-bottom:1px solid #eee;text-align:center;font-size:14px;color:#666;">× ${item.quantity}</td>
-          <td style="padding:16px 20px;border-bottom:1px solid #eee;text-align:right;font-size:14px;color:#333;font-weight:600;">₱${Number(item.price).toFixed(2)}</td>
+          <td style="padding:16px 20px;border-bottom:1px solid #eee;text-align:right;font-size:14px;color:#333;font-weight:600;">Rs. ${Number(item.price).toFixed(2)}</td>
         </tr>`,
     )
     .join("");
@@ -110,19 +110,19 @@ const buildOrderConfirmationEmail = (customerName, order) => {
             <table width="100%" cellpadding="0" cellspacing="0" style="margin-bottom:32px;">
               <tr>
                 <td style="padding:10px 20px;font-size:14px;color:#666;">Subtotal</td>
-                <td style="padding:10px 20px;text-align:right;font-size:14px;color:#666;">₱${subtotal.toFixed(2)}</td>
+                <td style="padding:10px 20px;text-align:right;font-size:14px;color:#666;">Rs. ${subtotal.toFixed(2)}</td>
               </tr>
               <tr>
                 <td style="padding:10px 20px;font-size:14px;color:#666;">Shipping</td>
-                <td style="padding:10px 20px;text-align:right;font-size:14px;color:#666;">₱${Number(order.shippingPrice || 0).toFixed(2)}</td>
+                <td style="padding:10px 20px;text-align:right;font-size:14px;color:#666;">Rs. ${Number(order.shippingPrice || 0).toFixed(2)}</td>
               </tr>
               <tr>
-                <td style="padding:10px 20px;font-size:14px;color:#666;">Tax</td>
-                <td style="padding:10px 20px;text-align:right;font-size:14px;color:#666;">₱${Number(order.taxPrice || 0).toFixed(2)}</td>
+                <td style="padding:10px 20px;font-size:14px;color:#666;font-weight:600;">Tax amount</td>
+                <td style="padding:10px 20px;text-align:right;font-size:14px;color:#666;font-weight:600;">Rs. ${Number(order.taxPrice || 0).toFixed(2)}</td>
               </tr>
               <tr style="border-top:2px solid #e0e0e0;">
                 <td style="padding:16px 20px;font-size:18px;font-weight:700;color:#2d5a27;">Total</td>
-                <td style="padding:16px 20px;text-align:right;font-size:18px;font-weight:700;color:#2d5a27;">₱${Number(order.totalPrice || 0).toFixed(2)}</td>
+                <td style="padding:16px 20px;text-align:right;font-size:18px;font-weight:700;color:#2d5a27;">Rs. ${Number(order.totalPrice || 0).toFixed(2)}</td>
               </tr>
             </table>
 
@@ -150,7 +150,7 @@ const buildOrderConfirmationEmail = (customerName, order) => {
                 <td colspan="2" style="padding-bottom:16px;font-size:15px;font-weight:600;color:#2d5a27;text-transform:uppercase;letter-spacing:0.5px;">Customer information</td>
               </tr>
               <tr>
-                <td style="width:50%;padding-right:20px;vertical-align:top;">
+                <td colspan="2" style="padding:0 0 20px;vertical-align:top;">
                   <p style="margin:0 0 12px;font-size:13px;color:#999;text-transform:uppercase;letter-spacing:0.5px;font-weight:600;">Shipping address</p>
                   <p style="margin:0;font-size:14px;color:#333;line-height:1.6;">
                     ${fullName}<br>
@@ -159,9 +159,15 @@ const buildOrderConfirmationEmail = (customerName, order) => {
                     ${addr.country || ""}
                   </p>
                 </td>
-                <td style="width:50%;padding-left:20px;vertical-align:top;border-left:1px solid #eee;">
+              </tr>
+              <tr>
+                <td colspan="2" style="padding:20px 0 0;vertical-align:top;border-top:1px solid #eee;">
                   <p style="margin:0 0 12px;font-size:13px;color:#999;text-transform:uppercase;letter-spacing:0.5px;font-weight:600;">Shipping method</p>
-                  <p style="margin:0 0 20px;font-size:14px;color:#333;">${order.shippingPrice === 0 ? "Free Shipping" : "Standard Shipping"}</p>
+                  <p style="margin:0;font-size:14px;color:#333;">${order.shippingPrice === 0 ? "Free Shipping" : "Standard Shipping"}</p>
+                </td>
+              </tr>
+              <tr>
+                <td colspan="2" style="padding:20px 0 0;vertical-align:top;border-top:1px solid #eee;">
                   <p style="margin:0 0 12px;font-size:13px;color:#999;text-transform:uppercase;letter-spacing:0.5px;font-weight:600;">Payment method</p>
                   <p style="margin:0;font-size:14px;color:#333;">${order.paymentMethod || "N/A"}</p>
                 </td>
