@@ -70,7 +70,17 @@ const buildOrderConfirmationEmail = (customerName, order) => {
   return `
 <!DOCTYPE html>
 <html>
-<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"></head>
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    @media only screen and (max-width: 600px) {
+      .dtherbs-btn-row { display: block !important; }
+      .dtherbs-btn-cell { display: block !important; width: 100% !important; padding: 0 0 12px 0 !important; text-align: center !important; }
+      .dtherbs-btn-cell:last-child { padding-bottom: 0 !important; }
+    }
+  </style>
+</head>
 <body style="margin:0;padding:0;background:#f8f9fa;font-family:'Segoe UI',Arial,sans-serif;color:#333;">
   <table width="100%" cellpadding="0" cellspacing="0" style="background:#f8f9fa;padding:40px 0;">
     <tr><td align="center">
@@ -130,13 +140,15 @@ const buildOrderConfirmationEmail = (customerName, order) => {
             <table width="100%" cellpadding="0" cellspacing="0" style="margin-bottom:40px;">
               <tr>
                 <td align="center">
-                  <table cellpadding="0" cellspacing="0">
-                    <tr>
-                      <td style="padding:0 8px;">
-                        <a href="${process.env.FRONTEND_URL || "https://www.dotherbs.com"}/profile" style="display:inline-block;padding:12px 32px;background:#2d5a27;color:#fff;text-decoration:none;border-radius:4px;font-size:14px;font-weight:600;border:2px solid #2d5a27;">View your order</a>
+                  <table cellpadding="0" cellspacing="0" class="dtherbs-btn-row" style="margin:0 auto;">
+                    <tr class="dtherbs-btn-row">
+                      <td class="dtherbs-btn-cell" style="padding:0 8px;">
+                        <a href="${process.env.FRONTEND_URL || "https://www.dotherbs.com"}/profile" style="display:inline-block;padding:12px 32px;background:#2d5a27;color:#fff;text-decoration:none;border-radius:4px;font-size:14px;font-weight:600;border:2px solid #2d5a27;width:100%;box-sizing:border-box;">View your order</a>
                       </td>
-                      <td style="padding:0 8px;">
-                        <a href="${process.env.FRONTEND_URL || "https://www.dotherbs.com"}/products" style="display:inline-block;padding:12px 32px;background:#fff;color:#2d5a27;text-decoration:none;border-radius:4px;font-size:14px;font-weight:600;border:2px solid #2d5a27;">Continue shopping</a>
+                    </tr>
+                    <tr class="dtherbs-btn-row">
+                      <td class="dtherbs-btn-cell" style="padding:0 8px;">
+                        <a href="${process.env.FRONTEND_URL || "https://www.dotherbs.com"}/products" style="display:inline-block;padding:12px 32px;background:#fff;color:#2d5a27;text-decoration:none;border-radius:4px;font-size:14px;font-weight:600;border:2px solid #2d5a27;width:100%;box-sizing:border-box;">Continue shopping</a>
                       </td>
                     </tr>
                   </table>
@@ -167,7 +179,7 @@ const buildOrderConfirmationEmail = (customerName, order) => {
                 </td>
               </tr>
               <tr>
-                <td colspan="2" style="padding:20px 0 0;vertical-align:top;border-top:1px solid #eee;">
+                <td colspan="2" style="padding:32px 0 0;vertical-align:top;border-top:1px solid #eee;">
                   <p style="margin:0 0 12px;font-size:13px;color:#999;text-transform:uppercase;letter-spacing:0.5px;font-weight:600;">Payment method</p>
                   <p style="margin:0;font-size:14px;color:#333;">${order.paymentMethod || "N/A"}</p>
                 </td>
