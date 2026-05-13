@@ -147,7 +147,7 @@ const buildOrderConfirmationEmail = (customerName, order) => {
                   <table cellpadding="0" cellspacing="0" style="margin:0 auto;">
                     <tr class="dtherbs-btn-row">
                       <td class="dtherbs-btn-cell" style="padding:0 8px; text-align:center;">
-                        <a href="${process.env.FRONTEND_URL || "https://www.dotherbs.com"}/profile" style="display:inline-block;padding:12px 32px;background:#2d5a27;color:#fff;text-decoration:none;border-radius:4px;font-size:14px;font-weight:600;border:2px solid #2d5a27;min-width:160px;">View your order</a>
+                        <a href="${process.env.FRONTEND_URL || "https://www.dotherbs.com"}/profile?tab=orders" style="display:inline-block;padding:12px 32px;background:#2d5a27;color:#fff;text-decoration:none;border-radius:4px;font-size:14px;font-weight:600;border:2px solid #2d5a27;min-width:160px;">View your order</a>
                       </td>
                       <td class="dtherbs-btn-cell" style="padding:0 8px; text-align:center;">
                         <a href="${process.env.FRONTEND_URL || "https://www.dotherbs.com"}/products" style="display:inline-block;padding:12px 32px;background:#fff;color:#2d5a27;text-decoration:none;border-radius:4px;font-size:14px;font-weight:600;border:2px solid #2d5a27;min-width:160px;">Continue shopping</a>
