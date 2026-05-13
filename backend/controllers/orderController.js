@@ -186,6 +186,18 @@ const buildOrderConfirmationEmail = (customerName, order) => {
                   <p style="margin:0;font-size:14px;color:#333;">${order.paymentMethod || "N/A"}</p>
                 </td>
               </tr>
+            </table>
+
+            <!-- Footer -->
+            <table width="100%" cellpadding="0" cellspacing="0" style="margin-bottom:0;">
+              <tr>
+                <td style="background:#f8f9fa;padding:48px 40px 32px;text-align:center;border-top:1px solid #eee;">
+                  <p style="margin:0 0 4px;font-size:11px;color:#aaa;text-transform:uppercase;letter-spacing:0.5px;">Dot Herbs</p>
+                  <p style="margin:0;font-size:11px;color:#bbb;">© ${new Date().getFullYear()} Dot Herbs. All rights reserved.</p>
+                </td>
+              </tr>
+            </table>
+
             <style>
               @media only screen and (max-width: 600px) {
                 .dtherbs-btn-row { display: block !important; }
@@ -193,8 +205,6 @@ const buildOrderConfirmationEmail = (customerName, order) => {
                 .dtherbs-btn-cell:last-child { padding-bottom: 0 !important; }
               }
             </style>
-            <p style="margin:0 0 12px;font-size:11px;color:#aaa;text-transform:uppercase;letter-spacing:0.5px;">Dot Herbs</p>
-            <p style="margin:0;font-size:11px;color:#bbb;">© ${new Date().getFullYear()} Dot Herbs. All rights reserved.</p>
           </td>
         </tr>
 
