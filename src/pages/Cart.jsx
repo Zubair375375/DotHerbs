@@ -140,7 +140,7 @@ const Cart = () => {
                 {orderSummary.customerName || "N/A"}
               </p>
               <p className="mt-1">
-                <span className="font-semibold">Total amount:</span> $
+                <span className="font-semibold">Total amount:</span> Rs. 
                 {Number(orderSummary.totalAmount || 0).toFixed(2)}
               </p>
               <p className="mt-1">

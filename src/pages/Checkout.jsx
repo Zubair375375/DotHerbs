@@ -39,6 +39,10 @@ const Checkout = () => {
   const [paymentMethod] = useState("demo");
   const [isProcessing, setIsProcessing] = useState(false);
   const [hasPlacedOrder, setHasPlacedOrder] = useState(false);
+  const TAX_RATE = 0.08;
+  const subtotal = Number(cartTotal || 0);
+  const taxAmount = Number((subtotal * TAX_RATE).toFixed(2));
+  const grandTotal = Number((subtotal + taxAmount).toFixed(2));
 
   const getProductImage = (product) => {
     const rawImage =
@@ -176,9 +180,9 @@ const Checkout = () => {
         })),
         shippingAddress,
         paymentMethod,
-        taxPrice: 0,
+        taxPrice: taxAmount,
         shippingPrice: 0,
-        totalPrice: cartTotal,
+        totalPrice: grandTotal,
       };
 
       const createdOrder = await dispatch(createOrder(orderData)).unwrap();
@@ -201,7 +205,7 @@ const Checkout = () => {
           orderSummary: {
             orderId: createdOrder?._id || "",
             customerName,
-            totalAmount: Number(cartTotal || 0),
+            totalAmount: grandTotal,
             paymentMethod,
             deliveryCity: shippingAddress.city || "N/A",
             estimatedDelivery,
@@ -258,21 +262,29 @@ const Checkout = () => {
                   />
                   <div className="flex-1">
                     <h3 className="font-medium">{item.product.name}</h3>
-                    <p className="text-sm text-gray-600">
-                      Quantity: {item.quantity} × ${item.price.toFixed(2)}
+                    <p className="text-[14px] text-gray-600">
+                      Quantity: {item.quantity} × {item.price.toFixed(2)}
                     </p>
                   </div>
-                  <p className="font-semibold">
-                    ${(item.quantity * item.price).toFixed(2)}
+                  <p className="font-semibold text-[16px]">
+                    Rs. {(item.quantity * item.price).toFixed(2)}
                   </p>
                 </div>
               ))}
             </div>
 
             <div className="border-t mt-4 pt-4">
-              <div className="flex justify-between text-lg font-semibold">
+              <div className="flex justify-between text-[16px] text-gray-700 mb-2">
+                <span>Subtotal:</span>
+                <span>Rs. {subtotal.toFixed(2)}</span>
+              </div>
+              <div className="flex justify-between text-[16px] text-gray-700 mb-2">
+                <span>Tax (8%):</span>
+                <span>Rs. {taxAmount.toFixed(2)}</span>
+              </div>
+              <div className="flex justify-between text-[16px] font-semibold">
                 <span>Total:</span>
-                <span>${cartTotal.toFixed(2)}</span>
+                <span>Rs. {grandTotal.toFixed(2)}</span>
               </div>
             </div>
           </div>
