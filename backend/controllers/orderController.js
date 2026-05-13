@@ -57,11 +57,15 @@ const buildOrderConfirmationEmail = (customerName, order) => {
     )
     .join("");
 
-  const subtotal = Number(order.totalPrice) - Number(order.taxPrice || 0) - Number(order.shippingPrice || 0);
+  const subtotal =
+    Number(order.totalPrice) -
+    Number(order.taxPrice || 0) -
+    Number(order.shippingPrice || 0);
   const addr = order.shippingAddress || {};
   const firstName = addr.firstName || "";
   const lastName = addr.lastName || "";
-  const fullName = [firstName, lastName].filter(Boolean).join(" ") || customerName;
+  const fullName =
+    [firstName, lastName].filter(Boolean).join(" ") || customerName;
 
   return `
 <!DOCTYPE html>
@@ -129,7 +133,7 @@ const buildOrderConfirmationEmail = (customerName, order) => {
                   <table cellpadding="0" cellspacing="0">
                     <tr>
                       <td style="padding:0 8px;">
-                        <a href="${process.env.FRONTEND_URL || "https://www.dotherbs.com"}/orders" style="display:inline-block;padding:12px 32px;background:#2d5a27;color:#fff;text-decoration:none;border-radius:4px;font-size:14px;font-weight:600;border:2px solid #2d5a27;">View your order</a>
+                        <a href="${process.env.FRONTEND_URL || "https://www.dotherbs.com"}/profile" style="display:inline-block;padding:12px 32px;background:#2d5a27;color:#fff;text-decoration:none;border-radius:4px;font-size:14px;font-weight:600;border:2px solid #2d5a27;">View your order</a>
                       </td>
                       <td style="padding:0 8px;">
                         <a href="${process.env.FRONTEND_URL || "https://www.dotherbs.com"}/products" style="display:inline-block;padding:12px 32px;background:#fff;color:#2d5a27;text-decoration:none;border-radius:4px;font-size:14px;font-weight:600;border:2px solid #2d5a27;">Continue shopping</a>

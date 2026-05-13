@@ -1,7 +1,6 @@
 import { useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate, useParams } from "react-router-dom";
-import toast from "react-hot-toast";
 import {
   FaArrowLeft,
   FaBoxOpen,
@@ -80,12 +79,6 @@ const OrderDetail = () => {
       return;
     }
 
-    if (user?.role !== "admin") {
-      navigate("/");
-      toast.error("Access denied. Admin privileges required.");
-      return;
-    }
-
     if (id) {
       dispatch(getOrderById(id));
     }
@@ -95,7 +88,7 @@ const OrderDetail = () => {
     };
   }, [dispatch, id, isAuthenticated, navigate, user]);
 
-  if (!isAuthenticated || user?.role !== "admin") {
+  if (!isAuthenticated) {
     return <Loader />;
   }
 
@@ -113,10 +106,12 @@ const OrderDetail = () => {
             </div>
             <p className="mb-6 text-gray-600">{error}</p>
             <button
-              onClick={() => navigate("/admin")}
+              onClick={() => navigate(user?.role === "admin" ? "/admin" : "/profile")}
               className="rounded bg-blue-600 px-4 py-2 text-white hover:bg-blue-700"
             >
-              Back to Admin Dashboard
+              {user?.role === "admin"
+                ? "Back to Admin Dashboard"
+                : "Back to Profile"}
             </button>
           </div>
         </div>
@@ -131,10 +126,12 @@ const OrderDetail = () => {
           <div className="text-center">
             <div className="mb-4 text-lg text-gray-600">Order not found</div>
             <button
-              onClick={() => navigate("/admin")}
+              onClick={() => navigate(user?.role === "admin" ? "/admin" : "/profile")}
               className="rounded bg-blue-600 px-4 py-2 text-white hover:bg-blue-700"
             >
-              Back to Admin Dashboard
+              {user?.role === "admin"
+                ? "Back to Admin Dashboard"
+                : "Back to Profile"}
             </button>
           </div>
         </div>
@@ -148,11 +145,13 @@ const OrderDetail = () => {
         <div className="rounded-lg bg-white p-6 shadow">
           <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
             <button
-              onClick={() => navigate("/admin")}
+              onClick={() => navigate(user?.role === "admin" ? "/admin" : "/profile")}
               className="inline-flex items-center text-gray-600 hover:text-gray-900"
             >
               <FaArrowLeft className="mr-2" />
-              Back to Admin Dashboard
+              {user?.role === "admin"
+                ? "Back to Admin Dashboard"
+                : "Back to Profile"}
             </button>
             <div className="text-right">
               <h1 className="text-2xl font-bold text-gray-900">
