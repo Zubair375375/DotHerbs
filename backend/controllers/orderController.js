@@ -50,102 +50,134 @@ const buildOrderConfirmationEmail = (customerName, order) => {
     .map(
       (item) =>
         `<tr>
-          <td style="padding:8px 12px;border-bottom:1px solid #eee;">${item.name}</td>
-          <td style="padding:8px 12px;border-bottom:1px solid #eee;text-align:center;">${item.quantity}</td>
-          <td style="padding:8px 12px;border-bottom:1px solid #eee;text-align:right;">₱${Number(item.price).toFixed(2)}</td>
+          <td style="padding:16px 20px;border-bottom:1px solid #eee;font-size:14px;color:#333;"><strong>${item.name}</strong></td>
+          <td style="padding:16px 20px;border-bottom:1px solid #eee;text-align:center;font-size:14px;color:#666;">× ${item.quantity}</td>
+          <td style="padding:16px 20px;border-bottom:1px solid #eee;text-align:right;font-size:14px;color:#333;font-weight:600;">₱${Number(item.price).toFixed(2)}</td>
         </tr>`,
     )
     .join("");
 
+  const subtotal = Number(order.totalPrice) - Number(order.taxPrice || 0) - Number(order.shippingPrice || 0);
   const addr = order.shippingAddress || {};
-  const addressLine = [
-    addr.street,
-    addr.city,
-    addr.state,
-    addr.zipCode,
-    addr.country,
-  ]
-    .filter(Boolean)
-    .join(", ");
+  const firstName = addr.firstName || "";
+  const lastName = addr.lastName || "";
+  const fullName = [firstName, lastName].filter(Boolean).join(" ") || customerName;
 
   return `
 <!DOCTYPE html>
 <html>
-<head><meta charset="UTF-8"></head>
-<body style="margin:0;padding:0;background:#f5f5f5;font-family:Arial,sans-serif;">
-  <table width="100%" cellpadding="0" cellspacing="0" style="background:#f5f5f5;padding:32px 0;">
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"></head>
+<body style="margin:0;padding:0;background:#f8f9fa;font-family:'Segoe UI',Arial,sans-serif;color:#333;">
+  <table width="100%" cellpadding="0" cellspacing="0" style="background:#f8f9fa;padding:40px 0;">
     <tr><td align="center">
-      <table width="600" cellpadding="0" cellspacing="0" style="background:#fff;border-radius:8px;overflow:hidden;box-shadow:0 2px 8px rgba(0,0,0,0.08);">
-        <!-- Header -->
+      <table width="100%" max-width="600" cellpadding="0" cellspacing="0" style="max-width:600px;background:#fff;box-shadow:0 2px 12px rgba(0,0,0,0.08);">
+        
+        <!-- Hero Header -->
         <tr>
-          <td style="background:#2d5a27;padding:32px 40px;text-align:center;">
-            <h1 style="margin:0;color:#fff;font-size:24px;letter-spacing:1px;">Dot Herbs</h1>
-            <p style="margin:8px 0 0;color:#b7e1b0;font-size:14px;">Order Confirmation</p>
+          <td style="background:linear-gradient(135deg, #2d5a27 0%, #3a6f2f 100%);padding:60px 40px;text-align:center;">
+            <h1 style="margin:0;color:#fff;font-size:42px;font-weight:300;letter-spacing:2px;">We're on it.</h1>
+            <p style="margin:16px 0 0;color:#d4e8d0;font-size:16px;font-weight:300;">Hey ${firstName || "there"},</p>
           </td>
         </tr>
-        <!-- Body -->
-        <tr>
-          <td style="padding:36px 40px;">
-            <p style="margin:0 0 16px;font-size:16px;color:#333;">Hi <strong>${customerName}</strong>,</p>
-            <p style="margin:0 0 24px;font-size:15px;color:#555;">Thank you for your order! We've received it and will process it shortly.</p>
 
-            <table width="100%" cellpadding="0" cellspacing="0" style="background:#f9f9f9;border-radius:6px;padding:16px 20px;margin-bottom:28px;">
+        <!-- Main Content -->
+        <tr>
+          <td style="padding:48px 40px;">
+            
+            <!-- Message -->
+            <p style="margin:0 0 8px;font-size:16px;color:#555;line-height:1.6;">This is just a quick email to say we've received your order.</p>
+            <p style="margin:0 0 32px;font-size:14px;color:#888;line-height:1.6;">Once everything is confirmed and ready to ship, you'll get another email with tracking details and any other information about your package.</p>
+
+            <!-- Order Summary Box -->
+            <table width="100%" cellpadding="0" cellspacing="0" style="background:#f8f9fa;border-radius:8px;padding:20px;margin-bottom:32px;border-left:4px solid #2d5a27;">
               <tr>
-                <td style="font-size:13px;color:#777;">Order ID</td>
-                <td style="font-size:13px;color:#333;text-align:right;font-weight:bold;">#${orderId}</td>
-              </tr>
-              <tr>
-                <td style="font-size:13px;color:#777;padding-top:8px;">Payment Method</td>
-                <td style="font-size:13px;color:#333;text-align:right;padding-top:8px;">${order.paymentMethod || "N/A"}</td>
-              </tr>
-              <tr>
-                <td style="font-size:13px;color:#777;padding-top:8px;">Shipping To</td>
-                <td style="font-size:13px;color:#333;text-align:right;padding-top:8px;">${addressLine || "N/A"}</td>
+                <td>
+                  <p style="margin:0 0 12px;font-size:13px;color:#999;text-transform:uppercase;letter-spacing:0.5px;">Order #${orderId} summary</p>
+                </td>
               </tr>
             </table>
 
-            <!-- Order Items -->
-            <h3 style="margin:0 0 12px;font-size:15px;color:#2d5a27;">Order Items</h3>
-            <table width="100%" cellpadding="0" cellspacing="0" style="border-collapse:collapse;">
-              <thead>
-                <tr style="background:#f1f1f1;">
-                  <th style="padding:8px 12px;text-align:left;font-size:13px;color:#555;">Product</th>
-                  <th style="padding:8px 12px;text-align:center;font-size:13px;color:#555;">Qty</th>
-                  <th style="padding:8px 12px;text-align:right;font-size:13px;color:#555;">Price</th>
-                </tr>
-              </thead>
+            <!-- Order Items Table -->
+            <table width="100%" cellpadding="0" cellspacing="0" style="border-collapse:collapse;margin-bottom:24px;">
               <tbody>${itemRows}</tbody>
             </table>
 
-            <!-- Totals -->
-            <table width="100%" cellpadding="0" cellspacing="0" style="margin-top:16px;">
+            <!-- Pricing Section -->
+            <table width="100%" cellpadding="0" cellspacing="0" style="margin-bottom:32px;">
               <tr>
-                <td style="padding:6px 12px;color:#777;font-size:13px;">Subtotal</td>
-                <td style="padding:6px 12px;text-align:right;font-size:13px;color:#333;">₱${(Number(order.totalPrice) - Number(order.taxPrice || 0) - Number(order.shippingPrice || 0)).toFixed(2)}</td>
+                <td style="padding:10px 20px;font-size:14px;color:#666;">Subtotal</td>
+                <td style="padding:10px 20px;text-align:right;font-size:14px;color:#666;">₱${subtotal.toFixed(2)}</td>
               </tr>
               <tr>
-                <td style="padding:6px 12px;color:#777;font-size:13px;">Shipping</td>
-                <td style="padding:6px 12px;text-align:right;font-size:13px;color:#333;">₱${Number(order.shippingPrice || 0).toFixed(2)}</td>
+                <td style="padding:10px 20px;font-size:14px;color:#666;">Shipping</td>
+                <td style="padding:10px 20px;text-align:right;font-size:14px;color:#666;">₱${Number(order.shippingPrice || 0).toFixed(2)}</td>
               </tr>
               <tr>
-                <td style="padding:6px 12px;color:#777;font-size:13px;">Tax</td>
-                <td style="padding:6px 12px;text-align:right;font-size:13px;color:#333;">₱${Number(order.taxPrice || 0).toFixed(2)}</td>
+                <td style="padding:10px 20px;font-size:14px;color:#666;">Tax</td>
+                <td style="padding:10px 20px;text-align:right;font-size:14px;color:#666;">₱${Number(order.taxPrice || 0).toFixed(2)}</td>
               </tr>
-              <tr style="border-top:2px solid #eee;">
-                <td style="padding:10px 12px;font-weight:bold;font-size:15px;color:#2d5a27;">Total</td>
-                <td style="padding:10px 12px;text-align:right;font-weight:bold;font-size:15px;color:#2d5a27;">₱${Number(order.totalPrice || 0).toFixed(2)}</td>
+              <tr style="border-top:2px solid #e0e0e0;">
+                <td style="padding:16px 20px;font-size:18px;font-weight:700;color:#2d5a27;">Total</td>
+                <td style="padding:16px 20px;text-align:right;font-size:18px;font-weight:700;color:#2d5a27;">₱${Number(order.totalPrice || 0).toFixed(2)}</td>
               </tr>
             </table>
 
-            <p style="margin:32px 0 0;font-size:14px;color:#888;">If you have any questions, reply to this email or contact us at <a href="mailto:${process.env.FROM_EMAIL}" style="color:#2d5a27;">${process.env.FROM_EMAIL}</a>.</p>
+            <!-- CTA Buttons -->
+            <table width="100%" cellpadding="0" cellspacing="0" style="margin-bottom:40px;">
+              <tr>
+                <td align="center">
+                  <table cellpadding="0" cellspacing="0">
+                    <tr>
+                      <td style="padding:0 8px;">
+                        <a href="${process.env.FRONTEND_URL || "https://www.dotherbs.com"}/orders" style="display:inline-block;padding:12px 32px;background:#2d5a27;color:#fff;text-decoration:none;border-radius:4px;font-size:14px;font-weight:600;border:2px solid #2d5a27;">View your order</a>
+                      </td>
+                      <td style="padding:0 8px;">
+                        <a href="${process.env.FRONTEND_URL || "https://www.dotherbs.com"}/products" style="display:inline-block;padding:12px 32px;background:#fff;color:#2d5a27;text-decoration:none;border-radius:4px;font-size:14px;font-weight:600;border:2px solid #2d5a27;">Continue shopping</a>
+                      </td>
+                    </tr>
+                  </table>
+                </td>
+              </tr>
+            </table>
+
+            <!-- Customer Information Section -->
+            <table width="100%" cellpadding="0" cellspacing="0" style="margin-bottom:32px;">
+              <tr>
+                <td colspan="2" style="padding-bottom:16px;font-size:15px;font-weight:600;color:#2d5a27;text-transform:uppercase;letter-spacing:0.5px;">Customer information</td>
+              </tr>
+              <tr>
+                <td style="width:50%;padding-right:20px;vertical-align:top;">
+                  <p style="margin:0 0 12px;font-size:13px;color:#999;text-transform:uppercase;letter-spacing:0.5px;font-weight:600;">Shipping address</p>
+                  <p style="margin:0;font-size:14px;color:#333;line-height:1.6;">
+                    ${fullName}<br>
+                    ${addr.street || ""}<br>
+                    ${addr.city || ""}, ${addr.state || ""} ${addr.zipCode || ""}<br>
+                    ${addr.country || ""}
+                  </p>
+                </td>
+                <td style="width:50%;padding-left:20px;vertical-align:top;border-left:1px solid #eee;">
+                  <p style="margin:0 0 12px;font-size:13px;color:#999;text-transform:uppercase;letter-spacing:0.5px;font-weight:600;">Shipping method</p>
+                  <p style="margin:0 0 20px;font-size:14px;color:#333;">${order.shippingPrice === 0 ? "Free Shipping" : "Standard Shipping"}</p>
+                  <p style="margin:0 0 12px;font-size:13px;color:#999;text-transform:uppercase;letter-spacing:0.5px;font-weight:600;">Payment method</p>
+                  <p style="margin:0;font-size:14px;color:#333;">${order.paymentMethod || "N/A"}</p>
+                </td>
+              </tr>
+            </table>
+
+            <!-- Contact Support -->
+            <p style="margin:32px 0 0;padding-top:24px;border-top:1px solid #eee;font-size:13px;color:#888;line-height:1.6;">In the meantime, if you have any questions, send us an email at <a href="mailto:${process.env.FROM_EMAIL || "support@dotherbs.com"}" style="color:#2d5a27;text-decoration:none;font-weight:600;">${process.env.FROM_EMAIL || "support@dotherbs.com"}</a> and we'll be happy to help.</p>
+
           </td>
         </tr>
+
         <!-- Footer -->
         <tr>
-          <td style="background:#f9f9f9;padding:20px 40px;text-align:center;border-top:1px solid #eee;">
-            <p style="margin:0;font-size:12px;color:#aaa;">© ${new Date().getFullYear()} Dot Herbs. All rights reserved.</p>
+          <td style="background:#f8f9fa;padding:32px 40px;text-align:center;border-top:1px solid #eee;">
+            <p style="margin:0 0 12px;font-size:11px;color:#aaa;text-transform:uppercase;letter-spacing:0.5px;">Dot Herbs</p>
+            <p style="margin:0;font-size:11px;color:#bbb;">© ${new Date().getFullYear()} Dot Herbs. All rights reserved.</p>
           </td>
         </tr>
+
       </table>
     </td></tr>
   </table>
