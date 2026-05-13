@@ -79,6 +79,10 @@ const buildOrderConfirmationEmail = (customerName, order) => {
       .dtherbs-btn-cell { display: block !important; width: 100% !important; padding: 0 0 12px 0 !important; text-align: center !important; }
       .dtherbs-btn-cell:last-child { padding-bottom: 0 !important; }
     }
+    @media only screen and (min-width: 601px) {
+      .dtherbs-btn-row { display: table-row !important; }
+      .dtherbs-btn-cell { display: table-cell !important; width: auto !important; padding: 0 8px !important; text-align: center !important; }
+    }
   </style>
 </head>
 <body style="margin:0;padding:0;background:#f8f9fa;font-family:'Segoe UI',Arial,sans-serif;color:#333;">
@@ -173,9 +177,9 @@ const buildOrderConfirmationEmail = (customerName, order) => {
                 </td>
               </tr>
               <tr>
-                <td colspan="2" style="padding:20px 0 0;vertical-align:top;border-top:1px solid #eee;">
+                <td colspan="2" style="padding:20px 0 20px;vertical-align:top;border-top:1px solid #eee; border-bottom:1px solid #eee;">
                   <p style="margin:0 0 12px;font-size:13px;color:#999;text-transform:uppercase;letter-spacing:0.5px;font-weight:600;">Shipping method</p>
-                  <p style="margin:0;font-size:14px;color:#333;">${order.shippingPrice === 0 ? "Free Shipping" : "Standard Shipping"}</p>
+                  <p style="margin:0 0 12px;font-size:14px;color:#333;">${order.shippingPrice === 0 ? "Free Shipping" : "Standard Shipping"}</p>
                 </td>
               </tr>
               <tr>
