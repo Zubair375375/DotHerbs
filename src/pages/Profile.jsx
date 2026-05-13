@@ -525,6 +525,10 @@ const Profile = () => {
     navigate("/cart");
   };
 
+  const handleViewDetails = (order) => {
+    navigate(`/orders/${order._id}`);
+  };
+
   const getProductImage = (product, fallback = "") => {
     const rawImage =
       product?.image ||
@@ -1044,12 +1048,12 @@ const Profile = () => {
                                 {item.product?.name}
                               </p>
                               <p className="text-sm text-gray-600">
-                                Quantity: {item.quantity} × $
+                                Quantity: {item.quantity} ×{" "}
                                 {item.price?.toFixed(2)}
                               </p>
                             </div>
                             <p className="font-semibold">
-                              ${(item.quantity * item.price).toFixed(2)}
+                              Rs. {(item.quantity * item.price).toFixed(2)}
                             </p>
                           </div>
                         ))}
@@ -1058,7 +1062,7 @@ const Profile = () => {
                       <div className="border-t pt-4 flex justify-between items-center">
                         <div>
                           <p className="text-sm text-gray-600">
-                            Total: ${order.totalPrice?.toFixed(2)}
+                            Total: Rs. {order.totalPrice?.toFixed(2)}
                           </p>
                           <p className="text-sm text-gray-600">
                             Payment:{" "}
@@ -1068,7 +1072,11 @@ const Profile = () => {
                           </p>
                         </div>
                         <div className="flex items-center gap-4">
-                          <button className="text-green-600 hover:text-green-800 text-sm font-medium">
+                          <button
+                            type="button"
+                            onClick={() => handleViewDetails(order)}
+                            className="text-green-600 hover:text-green-800 text-sm font-medium"
+                          >
                             View Details
                           </button>
                           <button
@@ -1671,6 +1679,7 @@ const Profile = () => {
                 </div>
               </div>
             )}
+
           </div>
         </div>
       </div>

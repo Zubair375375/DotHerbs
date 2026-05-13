@@ -52,6 +52,7 @@ function App() {
           <Route path="forgot-password" element={<ForgotPassword />} />
           <Route path="reset-password/:token" element={<ResetPassword />} />
           <Route path="profile" element={<Profile />} />
+          <Route path="orders/:id" element={<OrderDetail />} />
           <Route path="contact" element={<Contact />} />
           <Route path="about" element={<About />} />
           <Route path="admin" element={<AdminDashboard />} />
