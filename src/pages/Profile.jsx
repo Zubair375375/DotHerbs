@@ -1,8 +1,9 @@
 import { useState, useEffect, useMemo } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import {
   selectAuthUser,
+  selectAuthChecked,
   selectIsAuthenticated,
   deleteAccount,
   updateProfile,
@@ -36,7 +37,9 @@ import {
 const Profile = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
+  const location = useLocation();
   const user = useSelector(selectAuthUser);
+  const authChecked = useSelector(selectAuthChecked);
   const isAuthenticated = useSelector(selectIsAuthenticated);
   const isLoading = useSelector(selectAuthIsLoading);
   const authError = useSelector(selectAuthError);
@@ -84,6 +87,7 @@ const Profile = () => {
     confirmation: "",
   });
   const [showDeletePassword, setShowDeletePassword] = useState(false);
+  const [highlightedOrderId, setHighlightedOrderId] = useState("");
   const [formData, setFormData] = useState({
     firstName: "",
     lastName: "",
@@ -98,6 +102,13 @@ const Profile = () => {
     },
   });
 
+  const queryParams = useMemo(
+    () => new URLSearchParams(location.search),
+    [location.search],
+  );
+  const requestedTab = queryParams.get("tab");
+  const requestedOrderId = queryParams.get("orderId");
+
   const getResolvedNameParts = (currentUser) => {
     const fullName = String(currentUser?.name || "").trim();
     const [derivedFirstName = "", ...restNameParts] = fullName.split(" ");
@@ -110,8 +121,56 @@ const Profile = () => {
   };
 
   useEffect(() => {
+    if (requestedTab === "orders") {
+      setActiveTab("orders");
+    }
+  }, [requestedTab]);
+
+  useEffect(() => {
+    if (activeTab !== "orders" || !requestedOrderId || userOrders.length === 0) {
+      return;
+    }
+
+    const matchedOrder = userOrders.find(
+      (order) => String(order._id) === String(requestedOrderId),
+    );
+
+    if (!matchedOrder) {
+      return;
+    }
+
+    const matchedOrderId = String(matchedOrder._id);
+    setHighlightedOrderId(matchedOrderId);
+
+    const targetElement = document.getElementById(`profile-order-${matchedOrderId}`);
+    if (targetElement) {
+      targetElement.scrollIntoView({ behavior: "smooth", block: "center" });
+    }
+
+    const timeoutId = window.setTimeout(() => {
+      setHighlightedOrderId((current) =>
+        current === matchedOrderId ? "" : current,
+      );
+    }, 4000);
+
+    return () => window.clearTimeout(timeoutId);
+  }, [activeTab, requestedOrderId, userOrders]);
+
+  useEffect(() => {
+    if (!authChecked) {
+      return;
+    }
+
     if (!isAuthenticated) {
-      navigate("/login");
+      navigate("/login", {
+        replace: true,
+        state: {
+          from: {
+            pathname: location.pathname,
+            search: location.search,
+          },
+        },
+      });
       return;
     }
 
@@ -155,7 +214,16 @@ const Profile = () => {
     if (activeTab === "orders") {
       dispatch(getMyOrders());
     }
-  }, [isAuthenticated, navigate, user, activeTab, dispatch]);
+  }, [
+    activeTab,
+    authChecked,
+    dispatch,
+    isAuthenticated,
+    location.pathname,
+    location.search,
+    navigate,
+    user,
+  ]);
 
   useEffect(() => {
     try {
@@ -1012,8 +1080,13 @@ const Profile = () => {
                 ) : (
                   userOrders.map((order) => (
                     <div
+                      id={`profile-order-${order._id}`}
                       key={order._id}
-                      className="bg-white rounded-lg shadow-md p-6"
+                      className={`bg-white rounded-lg shadow-md p-6 transition-all duration-300 ${
+                        highlightedOrderId === String(order._id)
+                          ? "ring-2 ring-green-400 shadow-lg"
+                          : ""
+                      }`}
                     >
                       <div className="flex items-center justify-between mb-4">
                         <div>
