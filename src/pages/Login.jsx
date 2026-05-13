@@ -28,7 +28,9 @@ const Login = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [rememberMe, setRememberMe] = useState(false);
 
-  const from = location.state?.from?.pathname || "/";
+  const fromPathname = location.state?.from?.pathname || "/";
+  const fromSearch = location.state?.from?.search || "";
+  const from = `${fromPathname}${fromSearch}`;
 
   useEffect(() => {
     if (isAuthenticated) {
