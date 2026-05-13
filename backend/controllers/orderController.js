@@ -144,15 +144,13 @@ const buildOrderConfirmationEmail = (customerName, order) => {
             <table width="100%" cellpadding="0" cellspacing="0" style="margin-bottom:40px;">
               <tr>
                 <td align="center">
-                  <table cellpadding="0" cellspacing="0" class="dtherbs-btn-row" style="margin:0 auto;">
+                  <table cellpadding="0" cellspacing="0" style="margin:0 auto;">
                     <tr class="dtherbs-btn-row">
-                      <td class="dtherbs-btn-cell" style="padding:0 8px;">
-                        <a href="${process.env.FRONTEND_URL || "https://www.dotherbs.com"}/profile" style="display:inline-block;padding:12px 32px;background:#2d5a27;color:#fff;text-decoration:none;border-radius:4px;font-size:14px;font-weight:600;border:2px solid #2d5a27;width:100%;box-sizing:border-box;">View your order</a>
+                      <td class="dtherbs-btn-cell" style="padding:0 8px; text-align:center;">
+                        <a href="${process.env.FRONTEND_URL || "https://www.dotherbs.com"}/profile" style="display:inline-block;padding:12px 32px;background:#2d5a27;color:#fff;text-decoration:none;border-radius:4px;font-size:14px;font-weight:600;border:2px solid #2d5a27;min-width:160px;">View your order</a>
                       </td>
-                    </tr>
-                    <tr class="dtherbs-btn-row">
-                      <td class="dtherbs-btn-cell" style="padding:0 8px;">
-                        <a href="${process.env.FRONTEND_URL || "https://www.dotherbs.com"}/products" style="display:inline-block;padding:12px 32px;background:#fff;color:#2d5a27;text-decoration:none;border-radius:4px;font-size:14px;font-weight:600;border:2px solid #2d5a27;width:100%;box-sizing:border-box;">Continue shopping</a>
+                      <td class="dtherbs-btn-cell" style="padding:0 8px; text-align:center;">
+                        <a href="${process.env.FRONTEND_URL || "https://www.dotherbs.com"}/products" style="display:inline-block;padding:12px 32px;background:#fff;color:#2d5a27;text-decoration:none;border-radius:4px;font-size:14px;font-weight:600;border:2px solid #2d5a27;min-width:160px;">Continue shopping</a>
                       </td>
                     </tr>
                   </table>
@@ -188,17 +186,13 @@ const buildOrderConfirmationEmail = (customerName, order) => {
                   <p style="margin:0;font-size:14px;color:#333;">${order.paymentMethod || "N/A"}</p>
                 </td>
               </tr>
-            </table>
-
-            <!-- Contact Support -->
-            <p style="margin:32px 0 0;padding-top:24px;border-top:1px solid #eee;font-size:13px;color:#888;line-height:1.6;">In the meantime, if you have any questions, send us an email at <a href="mailto:${process.env.FROM_EMAIL || "support@dotherbs.com"}" style="color:#2d5a27;text-decoration:none;font-weight:600;">${process.env.FROM_EMAIL || "support@dotherbs.com"}</a> and we'll be happy to help.</p>
-
-          </td>
-        </tr>
-
-        <!-- Footer -->
-        <tr>
-          <td style="background:#f8f9fa;padding:32px 40px;text-align:center;border-top:1px solid #eee;">
+            <style>
+              @media only screen and (max-width: 600px) {
+                .dtherbs-btn-row { display: block !important; }
+                .dtherbs-btn-cell { display: block !important; width: 100% !important; padding: 0 0 12px 0 !important; text-align: center !important; }
+                .dtherbs-btn-cell:last-child { padding-bottom: 0 !important; }
+              }
+            </style>
             <p style="margin:0 0 12px;font-size:11px;color:#aaa;text-transform:uppercase;letter-spacing:0.5px;">Dot Herbs</p>
             <p style="margin:0;font-size:11px;color:#bbb;">© ${new Date().getFullYear()} Dot Herbs. All rights reserved.</p>
           </td>
