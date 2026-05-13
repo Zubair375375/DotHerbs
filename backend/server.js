@@ -176,12 +176,33 @@ app.get("/api/health", (req, res) => {
 });
 
 // ---------------------- FRONTEND ----------------------
-app.use(express.static(path.join(__dirname, "../dist")));
+const distDir = path.join(__dirname, "../dist");
+
+app.use(
+  express.static(distDir, {
+    setHeaders(res, filePath) {
+      if (filePath.endsWith(".html")) {
+        res.setHeader("Cache-Control", "no-cache");
+        return;
+      }
+
+      if (filePath.includes(`${path.sep}assets${path.sep}`)) {
+        res.setHeader("Cache-Control", "public, max-age=31536000, immutable");
+      }
+    },
+  }),
+);
 
 app.get("*", (req, res) => {
-  if (!req.path.startsWith("/api")) {
-    res.sendFile(path.join(__dirname, "../dist/index.html"));
+  if (
+    req.path.startsWith("/api") ||
+    req.path.startsWith("/assets/") ||
+    req.path.includes(".")
+  ) {
+    return res.status(404).end();
   }
+
+  res.sendFile(path.join(distDir, "index.html"));
 });
 
 // ---------------------- ERROR ----------------------
