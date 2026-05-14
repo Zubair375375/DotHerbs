@@ -46,14 +46,41 @@ const withCustomerFallback = (order) => {
 
 const buildOrderConfirmationEmail = (customerName, order) => {
   const orderId = order._id.toString().slice(-8).toUpperCase();
+  // Modern card style for bought products
   const itemRows = (order.orderItems || [])
     .map(
-      (item) =>
-        `<tr>
-          <td style="padding:16px 20px;border-bottom:1px solid #eee;font-size:14px;color:#333;"><strong>${item.name}</strong></td>
-          <td style="padding:16px 20px;border-bottom:1px solid #eee;text-align:center;font-size:14px;color:#666;">× ${item.quantity}</td>
-          <td style="padding:16px 20px;border-bottom:1px solid #eee;text-align:right;font-size:14px;color:#333;font-weight:600;">Rs. ${Number(item.price).toFixed(2)}</td>
-        </tr>`,
+      (item) => `
+        <tr>
+          <td style="padding:0 0 24px 0; border:none;">
+            <table width="100%" cellpadding="0" cellspacing="0" style="background:#f5f7fa;border-radius:12px;padding:0;margin:0;box-shadow:0 1px 4px rgba(0,0,0,0.03);">
+              <tr>
+                <!-- Product Image -->
+                <td style="width:90px;padding:16px 0 16px 16px;vertical-align:middle;">
+                  <div style="width:64px;height:64px;background:#fff;border-radius:8px;overflow:hidden;display:flex;align-items:center;justify-content:center;">
+                    <img src="${item.image || ''}" alt="${item.name}" style="max-width:100%;max-height:100%;display:block;object-fit:contain;">
+                  </div>
+                </td>
+                <!-- Product Details -->
+                <td style="padding:16px 12px 16px 20px;vertical-align:middle;">
+                  <div style="font-size:15px;font-weight:600;color:#222;margin-bottom:6px;">${item.name}</div>
+                  <div style="font-size:13px;color:#666;line-height:1.5;">
+                    <span style="margin-right:16px;">Color: <span style="color:#222;">${item.color || '-'}</span></span>
+                    <span>Size: <span style="color:#222;">${item.size || '-'}</span></span>
+                  </div>
+                </td>
+                <!-- Quantity -->
+                <td style="padding:16px 12px 16px 0;text-align:center;vertical-align:middle;min-width:40px;">
+                  <span style="font-size:15px;color:#444;">${item.quantity}</span>
+                </td>
+                <!-- Price -->
+                <td style="padding:16px 20px 16px 0;text-align:right;vertical-align:middle;min-width:80px;">
+                  <span style="font-size:16px;font-weight:700;color:#222;">Rs. ${Number(item.price).toFixed(2)}</span>
+                </td>
+              </tr>
+            </table>
+          </td>
+        </tr>
+      `
     )
     .join("");
 
@@ -90,19 +117,22 @@ const buildOrderConfirmationEmail = (customerName, order) => {
     <tr><td align="center">
       <table width="100%" max-width="600" cellpadding="0" cellspacing="0" style="max-width:600px;background:#fff;box-shadow:0 2px 12px rgba(0,0,0,0.08);">
         
-        <!-- Hero Header -->
+        <!-- Hero Header with Logo -->
         <tr>
-          <td style="background:linear-gradient(135deg, #2d5a27 0%, #3a6f2f 100%);padding:60px 40px;text-align:center;">
-            <h1 style="margin:0;color:#fff;font-size:42px;font-weight:300;letter-spacing:2px;">We're on it.</h1>
+          <td style="background:#0F172A;padding:48px 0 36px 0;text-align:center;">
+            <img src="https://www.dotherbs.com/assets/logos/dot-herbs-logo-white.png" alt="Dot Herbs" style="max-width:220px;width:60%;height:auto;display:block;margin:0 auto 0;">
           </td>
         </tr>
 
         <!-- Main Content -->
         <tr>
           <td style="padding:48px 40px;">
-            <p style="margin:16px 0 0;color:#d4e8d0;font-size:16px;font-weight:300;">Hey ${firstName || "there"},</p>
+            <p style="margin:16px 0 0;color:#0F172A;font-size:18px;font-weight:400;">
+              Hey <span style="font-weight:700; color:#0F172A;">${firstName || "there"}</span>,
+            </p>
             <!-- Message -->
             <p style="margin:0 0 8px;font-size:16px;color:#555;line-height:1.6;">Thank you for your order! We've received it and will process it shortly.</p>
+            <p style="margin:0 0 8px;font-size:16px;color:#555;line-height:1.6;">We will notify you when it's on its way.</p>
             <!-- Order Summary Box -->
             <table width="100%" cellpadding="0" cellspacing="0" style="background:#f8f9fa;border-radius:8px;padding:20px;margin-bottom:32px;border-left:4px solid #2d5a27;">
               <tr>
@@ -112,8 +142,8 @@ const buildOrderConfirmationEmail = (customerName, order) => {
               </tr>
             </table>
 
-            <!-- Order Items Table -->
-            <table width="100%" cellpadding="0" cellspacing="0" style="border-collapse:collapse;margin-bottom:24px;">
+            <!-- Order Items Table (Modern Card Style) -->
+            <table width="100%" cellpadding="0" cellspacing="0" style="border-collapse:separate;border-spacing:0 0;margin-bottom:24px;">
               <tbody>${itemRows}</tbody>
             </table>
 
