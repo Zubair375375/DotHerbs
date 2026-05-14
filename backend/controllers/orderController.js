@@ -57,16 +57,12 @@ const buildOrderConfirmationEmail = (customerName, order) => {
                 <!-- Product Image -->
                 <td style="width:90px;padding:16px 0 16px 16px;vertical-align:middle;">
                   <div style="width:64px;height:64px;background:#fff;border-radius:8px;overflow:hidden;display:flex;align-items:center;justify-content:center;">
-                    <img src="${item.image || ''}" alt="${item.name}" style="max-width:100%;max-height:100%;display:block;object-fit:contain;">
+                    <img src="${item.image || ""}" alt="${item.name}" style="max-width:100%;max-height:100%;display:block;object-fit:contain;">
                   </div>
                 </td>
-                <!-- Product Details -->
+                <!-- Product Details (no color/size) -->
                 <td style="padding:16px 12px 16px 20px;vertical-align:middle;">
-                  <div style="font-size:15px;font-weight:600;color:#222;margin-bottom:6px;">${item.name}</div>
-                  <div style="font-size:13px;color:#666;line-height:1.5;">
-                    <span style="margin-right:16px;">Color: <span style="color:#222;">${item.color || '-'}</span></span>
-                    <span>Size: <span style="color:#222;">${item.size || '-'}</span></span>
-                  </div>
+                  <div style="font-size:15px;font-weight:600;color:#222;">${item.name}</div>
                 </td>
                 <!-- Quantity -->
                 <td style="padding:16px 12px 16px 0;text-align:center;vertical-align:middle;min-width:40px;">
@@ -80,7 +76,7 @@ const buildOrderConfirmationEmail = (customerName, order) => {
             </table>
           </td>
         </tr>
-      `
+      `,
     )
     .join("");
 
@@ -120,7 +116,7 @@ const buildOrderConfirmationEmail = (customerName, order) => {
         <!-- Hero Header with Logo -->
         <tr>
           <td style="background:#0F172A;padding:48px 0 36px 0;text-align:center;">
-            <img src="https://www.dotherbs.com/assets/logos/dot-herbs-logo-white.png" alt="Dot Herbs" style="max-width:220px;width:60%;height:auto;display:block;margin:0 auto 0;">
+            <img src="https://raw.githubusercontent.com/dotherbs/assets/main/logos/dot-herbs-logo-white.png" alt="Dot Herbs" style="max-width:220px;width:60%;height:auto;display:block;margin:0 auto 0;">
           </td>
         </tr>
 
