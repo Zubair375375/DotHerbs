@@ -113,10 +113,10 @@ const buildOrderConfirmationEmail = (customerName, order) => {
     <tr><td align="center">
       <table width="100%" max-width="600" cellpadding="0" cellspacing="0" style="max-width:600px;background:#fff;box-shadow:0 2px 12px rgba(0,0,0,0.08);">
         
-        <!-- Hero Header with Logo -->
+        <!-- Hero Header with Text Branding -->
         <tr>
-          <td style="background:#0F172A;padding:48px 0 36px 0;text-align:center;">
-            <img src="https://cdn.dotherbs.com/logos/dot-herbs-logo-white.png" alt="Dot Herbs" style="max-width:220px;width:60%;height:auto;display:block;margin:0 auto 0;">
+          <td style="background:#68a300;padding:48px 0 36px 0;text-align:center;">
+            <span style="font-family:'Segoe UI',Arial,sans-serif;font-size:2rem;font-weight:700;letter-spacing:2px;color:#fff;">DOT HERBS</span>
           </td>
         </tr>
 
