@@ -94,23 +94,20 @@ const buildOrderConfirmationEmail = (customerName, order) => {
         <tr>
           <td style="background:linear-gradient(135deg, #2d5a27 0%, #3a6f2f 100%);padding:60px 40px;text-align:center;">
             <h1 style="margin:0;color:#fff;font-size:42px;font-weight:300;letter-spacing:2px;">We're on it.</h1>
-            <p style="margin:16px 0 0;color:#d4e8d0;font-size:16px;font-weight:300;">Hey ${firstName || "there"},</p>
           </td>
         </tr>
 
         <!-- Main Content -->
         <tr>
           <td style="padding:48px 40px;">
-            
+            <p style="margin:16px 0 0;color:#d4e8d0;font-size:16px;font-weight:300;">Hey ${firstName || "there"},</p>
             <!-- Message -->
-            <p style="margin:0 0 8px;font-size:16px;color:#555;line-height:1.6;">This is just a quick email to say we've received your order.</p>
-            <p style="margin:0 0 32px;font-size:14px;color:#888;line-height:1.6;">Once everything is confirmed and ready to ship, you'll get another email with tracking details and any other information about your package.</p>
-
+            <p style="margin:0 0 8px;font-size:16px;color:#555;line-height:1.6;">Thank you for your order! We've received it and will process it shortly.</p>
             <!-- Order Summary Box -->
             <table width="100%" cellpadding="0" cellspacing="0" style="background:#f8f9fa;border-radius:8px;padding:20px;margin-bottom:32px;border-left:4px solid #2d5a27;">
               <tr>
                 <td>
-                  <p style="margin:0 0 12px;font-size:13px;color:#999;text-transform:uppercase;letter-spacing:0.5px;">Order #${orderId} summary</p>
+                  <p style="margin:0 0 12px;font-size:13px;color:#999;text-transform:uppercase;letter-spacing:0.5px;">Order ID #${orderId}</p>
                 </td>
               </tr>
             </table>
@@ -147,10 +144,10 @@ const buildOrderConfirmationEmail = (customerName, order) => {
                   <table cellpadding="0" cellspacing="0" style="margin:0 auto;">
                     <tr class="dtherbs-btn-row">
                       <td class="dtherbs-btn-cell" style="padding:0 8px; text-align:center;">
-                        <a href="${process.env.FRONTEND_URL || "https://www.dotherbs.com"}/profile?tab=orders&orderId=${order._id}" style="display:inline-block;padding:12px 32px;background:#2d5a27;color:#fff;text-decoration:none;border-radius:4px;font-size:14px;font-weight:600;border:2px solid #2d5a27;min-width:160px;">View your order</a>
+                        <a href="${process.env.FRONTEND_URL || "https://www.dotherbs.com"}/profile?tab=orders&orderId=${order._id}" style="display:inline-block;padding:12px 32px;background:#68a300;color:#fff;text-decoration:none;border-radius:4px;font-size:14px;font-weight:600;border:2px solid #68a300;min-width:160px;">View your order</a>
                       </td>
                       <td class="dtherbs-btn-cell" style="padding:0 8px; text-align:center;">
-                        <a href="${process.env.FRONTEND_URL || "https://www.dotherbs.com"}/products" style="display:inline-block;padding:12px 32px;background:#fff;color:#2d5a27;text-decoration:none;border-radius:4px;font-size:14px;font-weight:600;border:2px solid #2d5a27;min-width:160px;">Continue shopping</a>
+                        <a href="${process.env.FRONTEND_URL || "https://www.dotherbs.com"}/products" style="display:inline-block;padding:12px 32px;background:#fff;color:#2d5a27;text-decoration:none;border-radius:4px;font-size:14px;font-weight:600;border:2px solid #68a300;min-width:160px;">Continue shopping</a>
                       </td>
                     </tr>
                   </table>
