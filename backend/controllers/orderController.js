@@ -116,7 +116,7 @@ const buildOrderConfirmationEmail = (customerName, order) => {
         <!-- Hero Header with Logo -->
         <tr>
           <td style="background:#0F172A;padding:48px 0 36px 0;text-align:center;">
-            <img src="https://raw.githubusercontent.com/dotherbs/assets/main/logos/dot-herbs-logo-white.png" alt="Dot Herbs" style="max-width:220px;width:60%;height:auto;display:block;margin:0 auto 0;">
+            <img src="https://cdn.dotherbs.com/logos/dot-herbs-logo-white.png" alt="Dot Herbs" style="max-width:220px;width:60%;height:auto;display:block;margin:0 auto 0;">
           </td>
         </tr>
 
@@ -127,8 +127,7 @@ const buildOrderConfirmationEmail = (customerName, order) => {
               Hey <span style="font-weight:700; color:#0F172A;">${firstName || "there"}</span>,
             </p>
             <!-- Message -->
-            <p style="margin:0 0 8px;font-size:16px;color:#555;line-height:1.6;">Thank you for your order! We've received it and will process it shortly.</p>
-            <p style="margin:0 0 8px;font-size:16px;color:#555;line-height:1.6;">We will notify you when it's on its way.</p>
+            <p style="margin:0 0 8px;font-size:16px;color:#555;line-height:1.6;">Thank you for your order! We've received it and will process it shortly. We will notify you when it's on its way.</p>
             <!-- Order Summary Box -->
             <table width="100%" cellpadding="0" cellspacing="0" style="background:#f8f9fa;border-radius:8px;padding:20px;margin-bottom:32px;border-left:4px solid #2d5a27;">
               <tr>
