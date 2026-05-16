@@ -52,12 +52,25 @@
 }
 
 .trending-tab {
+  appearance: none;
+  background: transparent;
+  border: 0;
+  padding: 0;
   color: #111827;
+  cursor: pointer;
+  font: inherit;
 }
 
 .trending-tab-active {
   background: #f3f4f6;
   padding: 0.4rem 0.7rem;
+}
+
+.trending-empty-state {
+  margin: 0 0 2rem;
+  text-align: center;
+  color: #6b7280;
+  font-size: 0.95rem;
 }
 
 .trending-tab-divider {
