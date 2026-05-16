@@ -129,7 +129,7 @@ const buildOrderConfirmationEmail = (customerName, order) => {
             <!-- Message -->
             <p style="margin:0 0 8px;font-size:16px;color:#555;line-height:1.6;">Thank you for your order! We've received it and will process it shortly. We will notify you when it's on its way.</p>
             <!-- Order Summary Box -->
-            <table width="100%" cellpadding="0" cellspacing="0" style="background:#f8f9fa;border-radius:8px;padding:20px;margin-bottom:32px;border-left:4px solid #2d5a27;">
+            <table width="100%" cellpadding="0" cellspacing="0" style="background:#f8f9fa;border-radius:8px;padding:20px;margin-bottom:32px;border-left:4px solid #68a300;">
               <tr>
                 <td>
                   <p style="margin:0 0 12px;font-size:13px;color:#999;text-transform:uppercase;letter-spacing:0.5px;">Order ID #${orderId}</p>

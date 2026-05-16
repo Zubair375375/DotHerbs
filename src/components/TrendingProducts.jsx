@@ -1,7 +1,7 @@
 import { useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { Link } from "react-router-dom";
-import { MdTrendingUp, MdChevronRight } from "react-icons/md";
+import { MdChevronRight } from "react-icons/md";
 import {
   fetchTrendingProducts,
   selectTrendingProducts,
@@ -46,13 +46,18 @@ const TrendingProducts = () => {
       <div className="trending-container">
         {/* Header */}
         <div className="trending-header">
-          <div className="trending-title-group">
-            <MdTrendingUp className="trending-icon" />
-            <h2 className="trending-title">Trending Now</h2>
+          <div className="trending-heading-row">
+            <span className="trending-line" aria-hidden="true" />
+            <h2 className="trending-title">TRENDING NOW</h2>
+            <span className="trending-line" aria-hidden="true" />
           </div>
-          <p className="trending-subtitle">
-            Discover what's popular with our community right now
-          </p>
+          <div className="trending-tabs" aria-label="Trending categories">
+            <span className="trending-tab trending-tab-active">
+              BEST SELLINGS
+            </span>
+            <span className="trending-tab-divider">/</span>
+            <span className="trending-tab">NEW ARRIVALS</span>
+          </div>
         </div>
 
         {/* Products Grid */}
@@ -60,13 +65,6 @@ const TrendingProducts = () => {
           {trendingProducts.map((product) => (
             <div key={product._id} className="trending-product-wrapper">
               <ProductCard product={product} />
-              {product.trendingScore && (
-                <div className="trending-badge">
-                  <span className="trending-score">
-                    🔥 {product.trendingScore.toFixed(1)}
-                  </span>
-                </div>
-              )}
             </div>
           ))}
         </div>
