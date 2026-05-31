@@ -31,6 +31,10 @@ import heroBadgeRoutes from "./routes/heroBadges.js";
 import productBannerRoutes from "./routes/productBanners.js";
 import aboutContentRoutes from "./routes/aboutContent.js";
 import batchRoutes from "./routes/batches.js";
+import {
+  startMetricsRecomputeJob,
+  stopMetricsRecomputeJob,
+} from "./jobs/recomputeProductMetricsJob.js";
 import { errorHandler } from "./middleware/errorHandler.js";
 
 const app = express();
@@ -219,8 +223,16 @@ const startServer = async () => {
       console.log(`Server running on port ${PORT}`);
     });
 
-    process.on("SIGINT", () => server.close(() => process.exit(0)));
-    process.on("SIGTERM", () => server.close(() => process.exit(0)));
+    startMetricsRecomputeJob();
+
+    process.on("SIGINT", () => {
+      stopMetricsRecomputeJob();
+      server.close(() => process.exit(0));
+    });
+    process.on("SIGTERM", () => {
+      stopMetricsRecomputeJob();
+      server.close(() => process.exit(0));
+    });
   } catch (err) {
     console.error("Startup error:", err);
     process.exit(1);

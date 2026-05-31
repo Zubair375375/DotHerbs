@@ -7,7 +7,11 @@ import {
   deductStockFIFO,
   getStockTotalsByProductIds,
 } from "../services/inventoryService.js";
-import { recordProductSale } from "../services/trendingProductService.js";
+import {
+  isCompletionTransition,
+  isRefundOrCancelTransition,
+} from "../services/bestsellerMetricUtils.js";
+import { processOrderMetricEvents } from "../eventHandlers/orderMetricsEventHandler.js";
 import { sendEmail } from "../utils/sendEmail.js";
 
 const getGuestNameFromShipping = (shippingAddress = {}) => {
@@ -333,19 +337,6 @@ export const createOrder = async (req, res) => {
 
     session.endSession();
 
-    // Record product sales for trending algorithm
-    try {
-      for (const item of orderItems) {
-        await recordProductSale(item.product, item.quantity);
-      }
-    } catch (trendingError) {
-      // Fire-and-forget: don't fail order if trending tracking fails
-      console.warn(
-        "[Trending] Failed to record product sales:",
-        trendingError.message,
-      );
-    }
-
     // Send order confirmation email (fire-and-forget)
     const customerEmail = shippingAddress.email || req.user?.email;
     const customerName =
@@ -509,11 +500,22 @@ export const updateOrderToDelivered = async (req, res) => {
       });
     }
 
+    const previousStatus = order.status;
     order.isDelivered = true;
     order.deliveredAt = Date.now();
     order.status = "delivered";
 
     const updatedOrder = await order.save();
+
+    if (isCompletionTransition(previousStatus, updatedOrder.status)) {
+      await processOrderMetricEvents({
+        order: updatedOrder,
+        eventType: "sale",
+        fromStatus: previousStatus,
+        toStatus: updatedOrder.status,
+        occurredAt: updatedOrder.deliveredAt || new Date(),
+      });
+    }
 
     res.json({
       success: true,
@@ -542,11 +544,17 @@ export const updateOrderStatus = async (req, res) => {
     }
 
     const { status } = req.body;
+    const previousStatus = order.status;
 
     if (
-      !["pending", "processing", "shipped", "delivered", "cancelled"].includes(
-        status,
-      )
+      ![
+        "pending",
+        "processing",
+        "shipped",
+        "delivered",
+        "cancelled",
+        "refunded",
+      ].includes(status)
     ) {
       return res.status(400).json({
         success: false,
@@ -561,6 +569,26 @@ export const updateOrderStatus = async (req, res) => {
     }
 
     const updatedOrder = await order.save();
+
+    if (isCompletionTransition(previousStatus, updatedOrder.status)) {
+      await processOrderMetricEvents({
+        order: updatedOrder,
+        eventType: "sale",
+        fromStatus: previousStatus,
+        toStatus: updatedOrder.status,
+        occurredAt: updatedOrder.deliveredAt || new Date(),
+      });
+    }
+
+    if (isRefundOrCancelTransition(previousStatus, updatedOrder.status)) {
+      await processOrderMetricEvents({
+        order: updatedOrder,
+        eventType: "refund",
+        fromStatus: previousStatus,
+        toStatus: updatedOrder.status,
+        occurredAt: new Date(),
+      });
+    }
 
     res.json({
       success: true,

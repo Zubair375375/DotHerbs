@@ -1,10 +1,11 @@
 import {
-  fetchTrendingProducts,
   recordProductView,
   recordAddToCart,
   recordProductSale,
-  clearTrendingCache,
 } from "../services/trendingProductService.js";
+import { getBestsellers } from "../services/bestsellerService.js";
+import { invalidateBestsellerCache } from "../services/bestsellerCacheService.js";
+import { toBestsellerResource } from "../dtos/bestsellerResource.js";
 
 /**
  * @desc    Get trending products
@@ -13,13 +14,22 @@ import {
  */
 export const getTrendingProducts = async (req, res) => {
   try {
-    const useCache = req.query.cache !== "false"; // Allow bypassing cache via ?cache=false
-    const trendingProducts = await fetchTrendingProducts(useCache);
-    
+    const useCache = req.query.cache !== "false";
+    const page = Number(req.query.page) || 1;
+    const limit = Number(req.query.limit) || 8;
+    const category = req.query.category || "all";
+    const result = await getBestsellers({
+      page,
+      limit,
+      category,
+      useCache,
+    });
+
     res.json({
       success: true,
-      data: trendingProducts,
-      count: trendingProducts.length,
+      data: result.data.map(toBestsellerResource),
+      count: result.data.length,
+      pagination: result.pagination,
       timestamp: new Date().toISOString(),
     });
   } catch (error) {
@@ -39,16 +49,16 @@ export const getTrendingProducts = async (req, res) => {
 export const recordView = async (req, res) => {
   try {
     const { id } = req.params;
-    
+
     if (!id) {
       return res.status(400).json({
         success: false,
         error: "Product ID is required",
       });
     }
-    
+
     await recordProductView(id);
-    
+
     res.json({
       success: true,
       message: "View recorded",
@@ -70,16 +80,16 @@ export const recordView = async (req, res) => {
 export const recordCart = async (req, res) => {
   try {
     const { id } = req.params;
-    
+
     if (!id) {
       return res.status(400).json({
         success: false,
         error: "Product ID is required",
       });
     }
-    
+
     await recordAddToCart(id);
-    
+
     res.json({
       success: true,
       message: "Add to cart recorded",
@@ -101,24 +111,24 @@ export const recordCart = async (req, res) => {
 export const recordSale = async (req, res) => {
   try {
     const { id } = req.params;
-    const { quantity = 1 } = req.body;
-    
+    const { quantity = 1, unitPrice = 0 } = req.body;
+
     if (!id) {
       return res.status(400).json({
         success: false,
         error: "Product ID is required",
       });
     }
-    
+
     if (quantity < 1) {
       return res.status(400).json({
         success: false,
         error: "Quantity must be at least 1",
       });
     }
-    
-    await recordProductSale(id, quantity);
-    
+
+    await recordProductSale(id, quantity, unitPrice);
+
     res.json({
       success: true,
       message: "Sale recorded",
@@ -139,11 +149,11 @@ export const recordSale = async (req, res) => {
  */
 export const clearCache = async (req, res) => {
   try {
-    clearTrendingCache();
-    
+    await invalidateBestsellerCache();
+
     res.json({
       success: true,
-      message: "Trending cache cleared",
+      message: "Bestseller cache cleared",
     });
   } catch (error) {
     console.error("[TrendingController] Error clearing cache:", error);
